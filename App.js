@@ -44,14 +44,34 @@ const App = () => {
     });
   };
 
+  const customDrawerContent = props => {
+    return (
+      <View>
+        <Text>hahhsad</Text>
+      </View>
+    );
+  };
+
   const _OrderScreen = () => {
     return (
       <Stack.Navigator
         initialRouteName="TypeOrder"
         screenOptions={{headerShown: false}}>
-        <Stack.Screen name="TypeOrder" component={TypeOrder} />
-        <Stack.Screen name="MenuOrder" component={MenuOrder} />
-        <Stack.Screen name="Checkout" component={Checkout} />
+        <Stack.Screen
+          name="TypeOrder"
+          component={TypeOrder}
+          options={{gestureEnabled: false}}
+        />
+        <Stack.Screen
+          name="MenuOrder"
+          component={MenuOrder}
+          options={{gestureEnabled: false}}
+        />
+        <Stack.Screen
+          name="Checkout"
+          component={Checkout}
+          options={{gestureEnabled: false}}
+        />
       </Stack.Navigator>
     );
   };
@@ -59,7 +79,11 @@ const App = () => {
   const _TransactionScreen = () => {
     return (
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Transactions" component={Transactions} />
+        <Stack.Screen
+          name="Transactions"
+          component={Transactions}
+          options={{gestureEnabled: false}}
+        />
       </Stack.Navigator>
     );
   };
@@ -67,7 +91,11 @@ const App = () => {
   const _ShiftScreen = () => {
     return (
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Shift" component={Shift} />
+        <Stack.Screen
+          name="Shift"
+          component={Shift}
+          options={{gestureEnabled: false}}
+        />
       </Stack.Navigator>
     );
   };
@@ -75,24 +103,28 @@ const App = () => {
   const _OrderPendingScreen = () => {
     return (
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="OrderPending" component={OrderPending} />
+        <Stack.Screen
+          name="OrderPending"
+          component={OrderPending}
+          options={{gestureEnabled: false}}
+        />
       </Stack.Navigator>
     );
   };
 
   const _DrawerScreen = () => {
     return (
-      <Drawer.Navigator screenOptions={{headerShown: false}}>
+      <Drawer.Navigator
+        screenOptions={{headerShown: false}}
+        drawerContentOptions={{
+          activeTintColor: '#e91e63',
+          itemStyle: {marginVertical: 5},
+        }}
+        drawerContent={{customDrawerContent}}>
         <Drawer.Screen name="Order" component={_OrderScreen} />
-        <Drawer.Screen
-          name="Transaction"
-          component={_TransactionScreen}
-        />
+        <Drawer.Screen name="Transaction" component={_TransactionScreen} />
         <Drawer.Screen name="Shift" component={_ShiftScreen} />
-        <Drawer.Screen
-          name="Order Pending"
-          component={_OrderPendingScreen}
-        />
+        <Drawer.Screen name="Order Pending" component={_OrderPendingScreen} />
         <Drawer.Screen name="Logout" component={Login} />
       </Drawer.Navigator>
     );
@@ -103,21 +135,27 @@ const App = () => {
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="LoginPw" component={LoginPw} />
+        <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{gestureEnabled: false}}
+        />
+        <Stack.Screen
+          name="LoginPw"
+          component={LoginPw}
+          options={{gestureEnabled: false}}
+        />
         <Stack.Screen name="_DrawerScreen" component={_DrawerScreen} />
 
-        <Stack.Screen name="QrScan" component={QrScan} />
+        {/* <Stack.Screen name="QrScan" component={QrScan} /> */}
         {/* <Stack.Screen name="TypeOrder" component={TypeOrder} /> */}
 
-        {/* <Stack.Screen name="_OrderPendingScreen" component={_OrderPendingScreen} />
-        <Stack.Screen name="_OrderScreen" component={_OrderScreen} /> */}
+        {/* <Stack.Screen name="_OrderPendingScreen" component={_OrderPendingScreen} /> */}
+        {/* <Stack.Screen name="_OrderScreen" component={_OrderScreen} /> */}
         {/* <Stack.Screen name="MenuOrder" component={MenuOrder} />
         <Stack.Screen name="Checkout" component={Checkout} /> */}
-        {/* <Stack.Screen name="Transactions" component={Transactions} />
-        <Stack.Screen name="Shift" component={Shift} /> */}
-
-
+        {/* <Stack.Screen name="Transactions" component={Transactions} /> */}
+        {/* <Stack.Screen name="Shift" component={Shift} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
