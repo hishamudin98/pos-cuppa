@@ -27,7 +27,7 @@ export const system_configuration = {
   APP_COMPANY: 'MALAYA EMPIRE SDN BHD',
   counterSecretKey: '1234-1234',
   // REACT_APP_DEV_MODE: 'http://localhost:3000',
-  REACT_APP_DEV_MODE: 'http://192.168.0.175:3000',
+  REACT_APP_DEV_MODE: 'http://192.168.0.175:8001',
   REACT_APP_PROD_MODE: 'https://api-prod.application.com',
 };
 
