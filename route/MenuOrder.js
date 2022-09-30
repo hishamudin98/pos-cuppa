@@ -385,10 +385,25 @@ const MenuOrder = ({navigation, route}) => {
     let stgParsed = JSON.parse(fetchOrder);
     const menuExists = stgParsed.find(menu => menu.menu_id === id);
 
+    console.log('variant', variant);
     let menuVariantExists = null;
     if (variant.length > 0) {
       menuVariantExists = stgParsed.filter(menu => {
         if (menu.menu_variant.length > 0) {
+          // console.log('menu.menu_variant', menu.menu_variant);
+
+          // let prevVariant = JSON.stringify(menu.menu_variant);
+          // let newVariant = JSON.stringify(variant);
+
+          // if (prevVariant === newVariant) {
+          //   console.log('prevVariant', prevVariant);
+          //   // return menu;
+
+          //   console.log('checkVariant', checkVariant);
+
+          //   return true;
+          // }
+
           const checkVariant = menu.menu_variant.filter(item =>
             variant.some(variant2 => {
               if (item.type === variant2.type && item.id === variant2.id) {
@@ -399,8 +414,6 @@ const MenuOrder = ({navigation, route}) => {
             }),
           );
 
-          console.log('checkVariant', checkVariant);
-
           if (variant.length == checkVariant.length) {
             return true;
           } else {
@@ -409,7 +422,10 @@ const MenuOrder = ({navigation, route}) => {
         }
       });
 
-      // console.log('menuVariantExists', menuVariantExists);
+      // console.log(
+      //   'menuVariantExists 432344',
+      //   menuVariantExists[0].menu_variant,
+      // );
     }
 
     // return;
@@ -427,11 +443,13 @@ const MenuOrder = ({navigation, route}) => {
       console.log('isEqual', isEqual);
       if (isEqual == true && membershipExists) {
         const newCart = stgParsed.map(menu => {
+          let prevVariant = JSON.stringify(menu.menu_variant);
+          let newVariant = JSON.stringify(variant);
+
           if (
             menu.menu_id === id &&
             menu.membership_no === membership &&
-            menu.menu_variant[0].id === variant[0].id &&
-            menu.menu_variant[0].type === variant[0].type
+            prevVariant === newVariant
           ) {
             // setAmountOrder(amountOrder + menu.menu_price)
             return {
@@ -1402,7 +1420,7 @@ const MenuOrder = ({navigation, route}) => {
             JSON.stringify(resp.data.data),
           );
           await AsyncStorage.setItem('DATA_ORDER', JSON.stringify(data));
-          
+
           _screenCheckout();
         })
         .catch(async function (error) {
