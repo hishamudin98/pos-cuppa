@@ -1446,7 +1446,8 @@ const Checkout = ({navigation, route}) => {
                     flex: 4,
                   }}>
                   <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
-                    {selectOrderType} - {selectTable}
+                    {selectOrderType}{' '}
+                    {selectOrderType == 'Take Away' ? '' : ' - '} {selectTable}
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -1536,7 +1537,7 @@ const Checkout = ({navigation, route}) => {
                                 {data.menu_name}
                               </Text>
                             </View>
-                            <View style={{marginTop: 10}}>
+                            <View style={{marginTop: 10, flexDirection: 'row'}}>
                               {data.menu_variant
                                 ? data.menu_variant.map((variant, key) => {
                                     return (
@@ -1546,8 +1547,9 @@ const Checkout = ({navigation, route}) => {
                                           fontSize: 12,
                                           color: color.textGray,
                                         }}>
-                                        {variant.name.charAt(0).toUpperCase() +
-                                          variant.name.slice(1)}
+                                        {data.menu_variant.length == key + 1
+                                          ? variant.name
+                                          : variant.name + ', '}
                                       </Text>
                                     );
                                   })
@@ -1692,16 +1694,25 @@ const Checkout = ({navigation, route}) => {
                                     {data.menu_name}
                                   </Text>
                                 </View>
-                                {/* <View style={{marginTop: 10}}>
-                                    <Text
-                                      style={{
-                                        fontFamily: fonts.regular,
-                                        fontSize: 10,
-                                        color: color.textGray,
-                                      }}>
-                                      Nasi Putih, Blackpepper,
-                                    </Text>
-                                  </View> */}
+                                <View
+                                  style={{marginTop: 10, flexDirection: 'row'}}>
+                                  {data.menu_variant
+                                    ? data.menu_variant.map((variant, key) => {
+                                        return (
+                                          <Text
+                                            style={{
+                                              fontFamily: fonts.medium,
+                                              fontSize: 12,
+                                              color: color.textGray,
+                                            }}>
+                                            {data.menu_variant.length == key + 1
+                                              ? variant.name
+                                              : variant.name + ', '}
+                                          </Text>
+                                        );
+                                      })
+                                    : null}
+                                </View>
                               </View>
 
                               <View>
@@ -1810,14 +1821,14 @@ const Checkout = ({navigation, route}) => {
                   {taxDisplay !== null ? taxDisplay : (0).toFixed(2)}
                 </Text>
               </View>
-              <View style={styles.textCalculation}>
+              {/* <View style={styles.textCalculation}>
                 <Text style={styles.textCart}>Service Charges 10%</Text>
                 <Text style={styles.textCart}>
                   {serviceChargeDisplay !== null
                     ? serviceChargeDisplay
                     : (0).toFixed(2)}
                 </Text>
-              </View>
+              </View> */}
               <View style={styles.textCalculation}>
                 <Text style={styles.textCart}>Infaq</Text>
                 <Text style={styles.textCart}>0.00</Text>
