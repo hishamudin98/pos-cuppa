@@ -8,7 +8,10 @@ import {
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  Alert,
 } from 'react-native';
+import Modal from 'react-native-modal';
+
 import {Icon} from 'react-native-elements';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {DataTable} from 'react-native-paper';
@@ -18,6 +21,8 @@ import {color, fonts, system_configuration} from '../config/Constant';
 import axios from 'axios';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import {RNCamera} from 'react-native-camera';
 
 const url =
   system_configuration.ENVIRONMENT === 'development'
@@ -30,6 +35,8 @@ const counterPOS = system_configuration.counterSecretKey;
 const OrderPending = ({navigation, route}) => {
   const [orderList, setOrderList] = useState([]);
   const [transactionList, setTransactionList] = useState([]);
+  const [modalQR, setModalQR] = useState(false);
+  const [dataScan, setDataScan] = useState('');
 
   useEffect(() => {
     navigation.addListener('focus', function () {
@@ -61,6 +68,35 @@ const OrderPending = ({navigation, route}) => {
     setOrderList(transSearch);
   };
 
+  const onSuccess = async e => {
+    Alert.alert(
+      'Confirmation',
+      'Are you sure to proceed this order?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: async () => {
+            setModalQR(false);
+            navigation.navigate('Order', {
+              screen: 'Checkout',
+              params: {data: e.data},
+            });
+          },
+        },
+      ],
+      {cancelable: false},
+    );
+
+    // setDataScan(e.data);
+    // console.log(e.data);
+    // alert(e.data);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
@@ -74,12 +110,14 @@ const OrderPending = ({navigation, route}) => {
                 Order Pending
               </Text>
             </View>
+            <View style={{flexDirection: 'row'}}></View>
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
                 paddingLeft: 20,
                 marginTop: 20,
+                justifyContent: 'space-between',
                 // height: 50,
               }}>
               <View style={styles.inputSearch}>
@@ -98,7 +136,97 @@ const OrderPending = ({navigation, route}) => {
                   />
                 </View>
               </View>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: color.primary,
+                  height: 40,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '20%',
+                  borderRadius: 5,
+                  // flex: 0.7,
+                  marginRight: 20,
+                  flexDirection: 'row',
+
+                  // borderWidth: 1,
+                  // borderColor:color.primary
+                }}
+                onPress={() => {
+                  // navigation.navigate('QrScan');
+                  setModalQR(true);
+                }}>
+                <Icon
+                  name={'camera'}
+                  type="feather"
+                  size={24}
+                  color={color.white}
+                  // style={{position: 'absolute', margin: 100}}
+                />
+                <Text
+                  style={{
+                    ...styles.textFamily,
+                    color: color.white,
+                    marginLeft: 5,
+                  }}>
+                  Scan QR Code
+                </Text>
+              </TouchableOpacity>
             </View>
+
+            <Modal
+              animationType="fade"
+              visible={modalQR}
+              style={{...styles.modalView}}>
+              <View
+                style={{
+                  alignItems: 'flex-start',
+                  padding: 20,
+                  paddingBottom: 0,
+                }}>
+                <Icon
+                  name={'x'}
+                  type="feather"
+                  size={24}
+                  onPress={() => {
+                    setModalQR(!modalQR);
+                    setDataScan('');
+                  }}
+                  // style={{position: 'absolute', margin: 100}}
+                />
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  // backgroundColor: 'green',
+                }}>
+                <QRCodeScanner
+                  // reactivate={true}
+                  onRead={read => onSuccess(read)}
+                  flashMode={RNCamera.Constants.FlashMode.off}
+                  // containerStyle={{flex: 1, backgroundColor: color.white, width:20, height:20}}
+                  // topContent={
+                  //   <Text style={styles.centerText}>
+                  //     Go to{' '}
+                  //     <Text style={styles.textBold}>wikipedia.org/wiki/QR_code</Text>{' '}
+                  //     on your computer and scan the QR code.
+                  //   </Text>
+                  // }
+                  cameraContainerStyle={{
+                    flex: 1,
+                    backgroundColor: color.primary,
+                  }}
+                  cameraStyle={{
+                    flex: 1,
+                    backgroundColor: color.white,
+                    width: 700,
+                    height: 500,
+                    alignSelf: 'center',
+                  }}
+                />
+              </View>
+            </Modal>
 
             <View style={{flexDirection: 'row', marginTop: 20}}>
               <View
@@ -349,7 +477,13 @@ const OrderPending = ({navigation, route}) => {
                                     params: {data: item.order_no},
                                   });
                                 }}>
-                                <Text style={{...styles.textFamily, color:color.white}}>Edit</Text>
+                                <Text
+                                  style={{
+                                    ...styles.textFamily,
+                                    color: color.white,
+                                  }}>
+                                  Edit
+                                </Text>
                               </TouchableOpacity>
 
                               <TouchableOpacity
@@ -376,7 +510,13 @@ const OrderPending = ({navigation, route}) => {
                                     params: {data: item.order_no},
                                   });
                                 }}>
-                                <Text style={{...styles.textFamily, color:color.white}}>Pay</Text>
+                                <Text
+                                  style={{
+                                    ...styles.textFamily,
+                                    color: color.white,
+                                  }}>
+                                  Pay
+                                </Text>
                               </TouchableOpacity>
                             </View>
                           </View>
@@ -429,7 +569,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.medium,
     backgroundColor: color.white,
-    flexDirection: 'row',
+    borderRadius: 5,
+    // flexDirection: 'row',
     // width:'100%'
 
     // backgroundColor: 'pink',
@@ -438,6 +579,35 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     flex: 1,
+  },
+
+  modalView: {
+    justifyContent: 'flex-start',
+    flex: 1,
+    // alignContent:'center',
+    // margin: 100,
+    // width: 800,
+    // height:'50%',
+    // marginLeft: 'auto',
+    marginBottom: 100,
+    marginTop: 100,
+    // marginRight: 'auto',
+    // backgroundColor: 'pink',
+    // margin: 50,
+    backgroundColor: color.background,
+    borderRadius: 20,
+    // padding: 35,
+    // alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    // opacity:0.6,
+    // elevation: 5,
+    // justifyContent: 'center',
   },
 });
 
