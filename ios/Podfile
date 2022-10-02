@@ -22,6 +22,8 @@ target 'posHeAndShe' do
   permissions_path = '../node_modules/react-native-permissions/ios'
   pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
 
+  pod 'RNFS', :path => '../node_modules/react-native-fs'
+
 
   target 'posHeAndSheTests' do
     inherit! :complete
