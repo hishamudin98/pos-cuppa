@@ -237,6 +237,7 @@ const TypeOrder = ({navigation, route}) => {
               style={styles.TextInput}
               placeholder="Enter Contact No."
               placeholderTextColor={color.textGray}
+              keyboardType="phone-pad"
 
               // placeholderTextColor={color.placeholder}
               // defaultValue={staffNo}
@@ -521,7 +522,7 @@ const TypeOrder = ({navigation, route}) => {
   ) : null;
 
   const _menuOrder = async () => {
-    if (customerName == '' || customerPhone == '') {
+    if (customerName == '') {
       alert('Please Enter Customer Details');
       return;
     }
