@@ -430,7 +430,7 @@ const Checkout = ({navigation, route}) => {
         console.log('paymentMethod', paymentMethod);
         console.log('Payment', resp);
 
-        // console.log('order no', resp.data.data);
+        console.log('order no', resp.data);
         // _screenCheckout();
         // fetch order no
         if (resp.data.status == 200) {
@@ -442,26 +442,52 @@ const Checkout = ({navigation, route}) => {
           await AsyncStorage.removeItem('CUSTOMER');
           await AsyncStorage.removeItem('ORDER_PENDING');
 
+          console.log('order no 123', orderNoParsed);
+
           Alert.alert('Print Receipt', 'Do you want to print receipt?', [
             {
               text: 'No',
-              onPress: () => {
-                navigation.reset({
+              onPress: async () => {
+                await navigation.reset({
                   index: 0,
                   routes: [{name: 'TypeOrder'}],
                 });
+
+                await axios
+                  .post(url + '/pos/printReceipt', {
+                    order_no: orderNoParsed,
+                    receipt: 'N',
+                    counter: counterPOS,
+                  })
+                  .then(async function (resp) {
+                    // console.log('Print Receipt', resp);
+                  });
+
+                
               },
               style: 'cancel',
             },
             {
               text: 'Yes',
-              onPress: () => {
-                // set loading
-                // print receipt
-                navigation.reset({
+              onPress: async () => {
+                await navigation.reset({
                   index: 0,
                   routes: [{name: 'TypeOrder'}],
                 });
+
+                await axios
+                  .post(url + '/pos/printReceipt', {
+                    order_no: orderNoParsed,
+                    receipt: 'Y',
+                    counter: counterPOS,
+                  })
+                  .then(async function (resp) {
+                    // console.log('Print Receipt', resp);
+                  });
+
+               
+                // set loading
+                // print receipt
               },
             },
           ]);
