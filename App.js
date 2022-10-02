@@ -28,6 +28,7 @@ import OrderPending from './route/OrderPending';
 
 import LinearGradient from 'react-native-linear-gradient';
 import QrScan from './route/qrScan';
+import Logout from './route/Logout';
 // const image = {uri: './img/mg.png'};
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -115,17 +116,12 @@ const App = () => {
   const _DrawerScreen = () => {
     return (
       <Drawer.Navigator
-        screenOptions={{headerShown: false}}
-        drawerContentOptions={{
-          activeTintColor: '#e91e63',
-          itemStyle: {marginVertical: 5},
-        }}
-        drawerContent={{customDrawerContent}}>
+        screenOptions={{headerShown: false}}>
         <Drawer.Screen name="Order" component={_OrderScreen} />
         <Drawer.Screen name="Transaction" component={_TransactionScreen} />
         <Drawer.Screen name="Shift" component={_ShiftScreen} />
         <Drawer.Screen name="Order Pending" component={_OrderPendingScreen} />
-        <Drawer.Screen name="Logout" component={Login} />
+        <Drawer.Screen name="Logout" component={Logout} />
       </Drawer.Navigator>
     );
   };
@@ -133,7 +129,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="_OrderPendingScreen"
         screenOptions={{headerShown: false}}>
         <Stack.Screen
           name="Login"
