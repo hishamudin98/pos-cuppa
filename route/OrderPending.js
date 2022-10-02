@@ -46,7 +46,7 @@ const OrderPending = ({navigation, route}) => {
 
   const _fetchOrderPending = async () => {
     await axios
-      .get(url + '/pos/getOrderPending')
+      .post(url + '/pos/getOrderPending', {counter: counterPOS})
       .then(res => {
         // setOrderList(res.data)
         setOrderList(res.data.data ? res.data.data : []);
@@ -239,7 +239,7 @@ const OrderPending = ({navigation, route}) => {
                   marginBottom: 20,
                 }}>
                 <View style={{flexDirection: 'column', height: 'auto'}}>
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{flexDirection: 'row', backgroundColor:color.primary}}>
                     <View
                       style={{
                         flex: 0.5,
@@ -251,6 +251,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         No.{' '}
                       </Text>
@@ -267,6 +268,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         Order No
                       </Text>
@@ -282,6 +284,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         Datetime
                       </Text>
@@ -297,6 +300,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         Table No
                       </Text>
@@ -312,6 +316,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         Total (RM)
                       </Text>
@@ -327,6 +332,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         Status
                       </Text>
@@ -342,6 +348,7 @@ const OrderPending = ({navigation, route}) => {
                         style={{
                           ...styles.textFamily,
                           fontFamily: fonts.semibold,
+                          color: color.white,
                         }}>
                         Action
                       </Text>
