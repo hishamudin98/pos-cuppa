@@ -390,20 +390,6 @@ const MenuOrder = ({navigation, route}) => {
     if (variant.length > 0) {
       menuVariantExists = stgParsed.filter(menu => {
         if (menu.menu_variant.length > 0) {
-          // console.log('menu.menu_variant', menu.menu_variant);
-
-          // let prevVariant = JSON.stringify(menu.menu_variant);
-          // let newVariant = JSON.stringify(variant);
-
-          // if (prevVariant === newVariant) {
-          //   console.log('prevVariant', prevVariant);
-          //   // return menu;
-
-          //   console.log('checkVariant', checkVariant);
-
-          //   return true;
-          // }
-
           const checkVariant = menu.menu_variant.filter(item =>
             variant.some(variant2 => {
               if (item.type === variant2.type && item.id === variant2.id) {
@@ -533,11 +519,12 @@ const MenuOrder = ({navigation, route}) => {
       console.log('isEqual take away', isEqual);
       if (isEqual == true && membershipExists) {
         const newCart = stgParsed.map(menu => {
+          let prevVariant = JSON.stringify(menu.menu_variant);
+          let newVariant = JSON.stringify(variant);
           if (
             menu.menu_id === id &&
             menu.membership_no === membership &&
-            menu.menu_variant[0].id === variant[0].id &&
-            menu.menu_variant[0].type === variant[0].type
+            prevVariant === newVariant
           ) {
             // setAmountOrder(amountOrder + menu.menu_price)
             return {
@@ -622,35 +609,15 @@ const MenuOrder = ({navigation, route}) => {
             val.type === menuVariantExists[0].menu_variant[i].type,
         );
         console.log('isEqual reduce ', isEqual);
-        if (isEqual == true && membershipExists) {
-          const newCart = stgParsed.map(menu => {
-            if (
-              menu.menu_id === id &&
-              menu.membership_no === membership &&
-              menu.menu_variant[0].id === variant[0].id &&
-              menu.menu_variant[0].type === variant[0].type
-            ) {
-              // setAmountOrder(amountOrder + menu.menu_price)
-              return {
-                ...menu,
-                menu_quantity: menu.menu_quantity + 1,
-              };
-            } else {
-              return menu;
-            }
-          });
-          // return;
-
-          await AsyncStorage.setItem('ORDER', JSON.stringify(newCart));
-        }
 
         if (isEqual == true && membershipExists) {
           const newCart = stgParsed.map(menu => {
+            let prevVariant = JSON.stringify(menu.menu_variant);
+            let newVariant = JSON.stringify(variant);
             if (
               menu.menu_id === id &&
               menu.membership_no === membership &&
-              menu.menu_variant[0].id === variant[0].id &&
-              menu.menu_variant[0].type === variant[0].type
+              prevVariant === newVariant
             ) {
               if (menu.menu_quantity - 1 < 1) {
                 return {
@@ -702,9 +669,11 @@ const MenuOrder = ({navigation, route}) => {
     _confirmDiscount();
   };
 
-  const _reduceMenuCartQuantityTakeaway = async (id, membership) => {
+  const _reduceMenuCartQuantityTakeaway = async (id, membership, variant) => {
     // LOOP ALL CART THEN FIND ID AND REDUCE QUANTITY
     let fetchOrder = await AsyncStorage.getItem('ORDER_TAKEAWAY');
+
+    console.log('variant momo', variant);
 
     if (fetchOrder !== null) {
       let stgParsed = JSON.parse(fetchOrder);
@@ -714,26 +683,88 @@ const MenuOrder = ({navigation, route}) => {
         member => member.membership_no === membership,
       );
 
-      if (menuExists && membershipExists) {
-        const newCart = stgParsed.map(menu => {
-          if (menu.menu_id === id && menu.membership_no === membership) {
-            if (menu.menu_quantity - 1 < 1) {
-              return {
-                ...menu,
-                menu_quantity: 0,
-              };
+      let menuVariantExists = null;
+      if (variant.length > 0) {
+        menuVariantExists = stgParsed.filter(menu => {
+          if (menu.menu_variant.length > 0) {
+            const checkVariant = menu.menu_variant.filter(item =>
+              variant.some(variant2 => {
+                if (item.type === variant2.type && item.id === variant2.id) {
+                  return item;
+                } else {
+                  return null;
+                }
+              }),
+            );
+
+            console.log('checkVariant', checkVariant);
+
+            if (variant.length == checkVariant.length) {
+              return true;
             } else {
-              return {
-                ...menu,
-                menu_quantity: menu.menu_quantity - 1,
-              };
+              return false;
             }
-          } else {
-            return menu;
           }
         });
-        await AsyncStorage.setItem('ORDER_TAKEAWAY', JSON.stringify(newCart));
-        // setOrderCart(newCart);
+
+        // console.log('menuVariantExists', menuVariantExists);
+      }
+
+      if (variant.length > 0) {
+        let isEqual = variant.every(
+          (val, i) =>
+            val.id === menuVariantExists[0].menu_variant[i].id &&
+            val.type === menuVariantExists[0].menu_variant[i].type,
+        );
+        console.log('isEqual reduce ', isEqual);
+
+        if (isEqual == true && membershipExists) {
+          const newCart = stgParsed.map(menu => {
+            let prevVariant = JSON.stringify(menu.menu_variant);
+            let newVariant = JSON.stringify(variant);
+            if (
+              menu.menu_id === id &&
+              menu.membership_no === membership &&
+              prevVariant === newVariant
+            ) {
+              if (menu.menu_quantity - 1 < 1) {
+                return {
+                  ...menu,
+                  menu_quantity: 0,
+                };
+              } else {
+                return {
+                  ...menu,
+                  menu_quantity: menu.menu_quantity - 1,
+                };
+              }
+            } else {
+              return menu;
+            }
+          });
+          await AsyncStorage.setItem('ORDER_TAKEAWAY', JSON.stringify(newCart));
+        }
+      } else {
+        if (menuExists && membershipExists) {
+          const newCart = stgParsed.map(menu => {
+            if (menu.menu_id === id && menu.membership_no === membership) {
+              if (menu.menu_quantity - 1 < 1) {
+                return {
+                  ...menu,
+                  menu_quantity: 0,
+                };
+              } else {
+                return {
+                  ...menu,
+                  menu_quantity: menu.menu_quantity - 1,
+                };
+              }
+            } else {
+              return menu;
+            }
+          });
+          await AsyncStorage.setItem('ORDER_TAKEAWAY', JSON.stringify(newCart));
+        }
       }
     }
 
@@ -1919,6 +1950,16 @@ const MenuOrder = ({navigation, route}) => {
                     setModalVisible(!modalVisible);
                     setMenuQuantity(1);
                     setSelectDineInOrTakeAway(0);
+
+                    setMenuVariantId('');
+                    setMenuVariantPrice2(0);
+                    setMenuVariantType('');
+                    setMenuVariantSelected([]);
+
+                    setMenuVariantId2('');
+                    setMenuVariantPrice2(0);
+                    setMenuVariantType2('');
+                    setMenuVariantSelected2([]);
                   }}
                   // style={{position: 'absolute', margin: 100}}
                 />
@@ -2109,7 +2150,7 @@ const MenuOrder = ({navigation, route}) => {
                                   setMenuVariantId2('');
                                   setMenuVariantPrice2(0);
                                   setMenuVariantType2('');
-                                  setMenuVariantSelected2('');
+                                  setMenuVariantSelected2([]);
 
                                   // setMenuPrice(data.price + menuPrice);
                                 }}>
@@ -2619,11 +2660,22 @@ const MenuOrder = ({navigation, route}) => {
                         _addToCart();
                         setModalVisible(!modalVisible);
                         setMenuQuantity(1);
+                        setSelectDineInOrTakeAway(0);
                       } else {
                         _addToCart();
                         setModalVisible(!modalVisible);
                         setMenuQuantity(1);
                       }
+
+                      setMenuVariantId('');
+                      setMenuVariantType('');
+                      setMenuVariantPrice(0);
+                      setMenuVariantSelected([]);
+
+                      setMenuVariantId2('');
+                      setMenuVariantType2('');
+                      setMenuVariantPrice2(0);
+                      setMenuVariantSelected2([]);
                     }}>
                     <View>
                       <Text
@@ -3090,7 +3142,7 @@ const MenuOrder = ({navigation, route}) => {
               height: '100%',
               // backgroundColor:'green'
             }}>
-            <View style={{height: '60.5%'}}>
+            <View style={{height: '69.6%', marginBottom: 10}}>
               {/* {ROW FIRST} */}
               <View
                 style={{
@@ -3442,7 +3494,12 @@ const MenuOrder = ({navigation, route}) => {
                           // backgroundColor: 'black',
                         }}
                         onPress={() => {
+                          setSelectDineInOrTakeAway(0);
                           setPlusTakeway(false);
+                          setOrderCartTakeAway([]);
+                          AsyncStorage.removeItem('ORDER_TAKEAWAY');
+                          _calculateTotal();
+                          _confirmDiscount();
                         }}>
                         <Icon
                           name={'minus'}
@@ -3694,12 +3751,13 @@ const MenuOrder = ({navigation, route}) => {
 
             <View
               style={{
-                justifyContent: 'flex-end',
+                // marginTop:10,
+                // justifyContent: 'flex-end',
                 flexDirection: 'column',
                 // backgroundColor: 'pink',
                 height: 'auto',
                 // marginTop: 10,
-                flex: 1,
+                // flex: 1,
               }}>
               {/* {calculation section} */}
               <View
@@ -3793,7 +3851,7 @@ const MenuOrder = ({navigation, route}) => {
                     {taxDisplay ? taxDisplay : (0).toFixed(2)}
                   </Text>
                 </View>
-                <View
+                {/* <View
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -3801,7 +3859,7 @@ const MenuOrder = ({navigation, route}) => {
                   }}>
                   <Text style={styles.textCart}>Service Charges 10%</Text>
                   <Text style={styles.textCart}>0.00</Text>
-                </View>
+                </View> */}
 
                 {/* <View
                   style={{
@@ -3878,7 +3936,8 @@ const MenuOrder = ({navigation, route}) => {
                     justifyContent: 'center',
                     borderColor: color.primary,
                     borderWidth: 1,
-                  }}>
+                  }}
+                  onPress={() => navigation.goBack()}>
                   <Text style={{fontFamily: fonts.medium, fontSize: 16}}>
                     Back
                   </Text>
