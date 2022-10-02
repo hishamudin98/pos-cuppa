@@ -6,7 +6,7 @@ import Modal from 'react-native-modal';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import QRCodeScanner from 'react-native-qrcode-scanner';
-import { RNCamera } from 'react-native-camera';
+import {RNCamera} from 'react-native-camera';
 
 import {
   View,
@@ -21,15 +21,21 @@ import {
 
 import {jsonToCSV} from 'react-native-csv';
 import {Icon} from 'react-native-elements';
-import {
-  DocumentDirectoryPath,
-  DownloadDirectoryPath,
-  ExternalDirectoryPath,
-  RNFS,
-  writeFile,
-} from 'react-native-fs';
+// import {
+//   DocumentDirectoryPath,
+//   DownloadDirectoryPath,
+//   ExternalDirectoryPath,
+//   ExternalStorageDirectoryPath,
+//   RNFS,
+//   writeFile,
+//   LibraryDirectoryPath
+// } from 'react-native-fs';
+
+var RNFS = require('react-native-fs');
+import XLSX from 'xlsx';
+
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {utils, write, XLSX} from 'xlsx';
+// import {utils, write, XLSX} from 'xlsx';
 import {color, fonts, system_configuration} from '../config/Constant';
 import Drawer from '../component/Drawer';
 const url =
@@ -49,6 +55,7 @@ const Transactions = ({navigation, route}) => {
   const [orderId, setOrderId] = useState('');
 
   const [orderList, setOrderList] = useState([]);
+  const [reportData, setReportData] = useState([]);
   const [transactionList, setTransactionList] = useState([]);
 
   const [getDetails, setGetDetails] = useState([]);
@@ -86,8 +93,12 @@ const Transactions = ({navigation, route}) => {
   }, []);
 
   const _fetchOrder = async () => {
-    const response = await axios.get(url + '/pos/getOrderList');
+    const response = await axios.post(url + '/pos/getOrderList', {
+      counter: counterPOS,
+    });
+    // console.log('response 123123', response.data);
     setOrderList(response.data.data);
+    setReportData(response.data.dataReport);
     setTransactionList(response.data.data);
     // setOrderId(response.data.data);
     console.log('ORDER LIST', response.data.data);
@@ -162,36 +173,38 @@ const Transactions = ({navigation, route}) => {
   };
 
   const _generateReport = async () => {
-    const csv = jsonToCSV(orderList);
-    // const path = 'file:///storage/emulated/0/Download/report.csv';
-    let path = DocumentDirectoryPath + '/report.csv';
-    let path2 = DownloadDirectoryPath + '/report.csv';
+    console.log('order list', orderList);
+    console.log('report data', reportData);
+    let report = reportData.filter(item => {
+      return orderList.map(data => data.invoice_no).includes(item.invoice_no);
+    });
 
-    // const path = `${RNFS.DocumentDirectoryPath}/report.csv`;
-    // writeFile(path, csv, 'utf8')
-    //   .then(success => {
-    //     console.log('FILE WRITTEN!');
-    //   })
-    //   .catch(err => {
-    //     console.log(err.message);
-    //   });
+    console.log('report', report);
+    // return;
+    let path =
+      RNFS.DocumentDirectoryPath +
+      '/report_' +
+      moment(new Date()).format('DD-MM-YYYY_HHmmss') +
+      '.xlsx';
 
-    // writeFile('file:///storage/emulated/0/Download/transactions.csv', csv, 'utf8')
-    let wb = utils.book_new();
-    let ws = utils.json_to_sheet(orderList);
-    // console.log('ws',ws);
-    utils.book_append_sheet(wb, ws, 'Users');
-    const wbout = write(wb, {bookType: 'xlsx', type: 'binary'});
+    let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.json_to_sheet(orderList);
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Users');
+    const wbout = XLSX.write(wb, {type: 'binary', bookType: 'xlsx'});
     console.log('path', path);
-    console.log('path2', path2);
-    writeFile(path, wbout, 'ascii')
+    // console.log('wbout', wbout);
+    await RNFS.writeFile(path, wbout, 'ascii')
       .then(res => {
+        alert('Report Successfully Generated');
         console.log('res', res);
       })
       .catch(err => {
         console.log('err', err);
         alert(err);
       });
+
+    // console.log('aa', aa);
   };
 
   const _filterPaymentMethod = async id => {
@@ -440,6 +453,7 @@ const Transactions = ({navigation, route}) => {
                 console.log('refund', res);
                 if (res.data.status === 200) {
                   _fetchOrder();
+                  setDetails(false);
                   Alert.alert('Success', 'Refund success');
 
                   _fetchOrder();
