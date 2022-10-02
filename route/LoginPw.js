@@ -30,6 +30,9 @@ const LoginPw = ({navigation, route}) => {
   const [staffNo, setStaffNo] = useState('');
   const [password, setPassword] = useState('');
   const [staffDetails, setStaffDetails] = useState({});
+  const [outlet, setOutlet] = useState([]);
+  const [outletName, setOutletName] = useState('');
+
   const [pw1, setPw1] = useState('');
   const [pw2, setPw2] = useState('');
   const [pw3, setPw3] = useState('');
@@ -40,10 +43,14 @@ const LoginPw = ({navigation, route}) => {
   const ref_input3 = useRef('');
   const ref_input4 = useRef('');
 
+  const [loading, setLoading] = useState(false);
+
   const url =
     system_configuration.ENVIRONMENT === 'development'
       ? system_configuration.REACT_APP_DEV_MODE
       : system_configuration.REACT_APP_PROD_MODE;
+
+  const counterPOS = system_configuration.counterSecretKey;
 
   const _changePassword = async string_password => {
     console.log('PASSWORD : ', string_password);
@@ -91,21 +98,27 @@ const LoginPw = ({navigation, route}) => {
     } else {
       //   setPassword(password.substring(0, password.length - 1));
 
-      console.log(e);
+      // alert('backspace');
+      setPw1('');
+      setPw2('');
+      setPw3('');
+      setPw4('');
+      // console.log('e',e);
 
-      if (pw1 && pw1.length == 1 && ref_input1.current.focus()) {
-        setPw1(pw1.substring(0, pw1.length - 1));
-        ref_input1.current.focus();
-      } else if (pw2 && pw2.length == 1 && ref_input2.current.focus()) {
-        setPw2(pw2.substring(0, pw2.length - 1));
-        ref_input1.current.focus();
-      } else if (pw3 && pw3.length == 1 && ref_input3.current.focus()) {
-        setPw3(pw3.substring(0, pw3.length - 1));
-        ref_input2.current.focus();
-      } else if (pw4 && pw4.length == 1 && ref_input4.current.focus()) {
-        setPw4(pw4.substring(0, pw4.length - 1));
-        ref_input3.current.focus();
-      }
+      // if (pw1 && pw1.length == 1 && ref_input1.current.focus()) {
+      //   setPw1(pw1.substring(0, pw1.length - 1));
+      //   ref_input1.current.focus();
+      // } else if (pw2 && pw2.length == 1 && ref_input2.current.focus()) {
+      //   setPw2(pw2.substring(0, pw2.length - 1));
+      //   ref_input1.current.focus();
+      // } else if (pw3 && pw3.length == 1 && ref_input3.current.focus()) {
+      //   setPw3(pw3.substring(0, pw3.length - 1));
+      //   ref_input2.current.focus();
+      // } else if (pw4 && pw4.length == 1 && ref_input4.current.focus()) {
+      //   alert('4');
+      //   setPw4(pw4.substring(0, pw4.length - 1));
+      //   ref_input3.current.focus();
+      // }
     }
 
     // setStaffNo(e)
@@ -113,10 +126,22 @@ const LoginPw = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    console.log('effect', password);
-
+    // console.log('effect', password);
+    _fetchOutlet();
     _validateLogin();
   }, [password]);
+
+  const _fetchOutlet = async () => {
+    await axios
+      .post(url + '/pos/getOutlet', {
+        counter: counterPOS,
+      })
+      .then(async res => {
+        // console.log(res.data);
+        setOutlet(res.data.data);
+        setOutletName(res.data.data[0].outlet_name);
+      });
+  };
 
   const validatePw = async e => {
     if (
@@ -130,6 +155,7 @@ const LoginPw = ({navigation, route}) => {
       setStaffNo(noStaff.noStaff);
       setPassword(pw1 + pw2 + pw3 + pw4);
 
+      _validateLogin();
       // alert(password);
     }
 
@@ -138,22 +164,42 @@ const LoginPw = ({navigation, route}) => {
 
   const _validateLogin = async () => {
     let response;
+    // alert(password);
+    // alert(counterPOS);
     if (staffNo && password) {
       response = await axios
         .post(url + '/loginStaff', {
           noStaff: staffNo,
           pincodeStaff: password,
+          counter: counterPOS,
         })
         .then(async function (resp) {
           await AsyncStorage.setItem('STAFF', JSON.stringify(resp.data.data));
+          console.log('status', resp.data.status);
+          if (resp.data.status == 200) {
+            _screenOrder();
+            alert('Login Successful');
+          }
           // console.log('status', resp.data.data);
-          _screenOrder();
-          alert('Login Successful');
+          // _screenOrder();
         })
         .catch(async function (error) {
           alert('Unsuccessful Login');
           await AsyncStorage.removeItem('STAFF');
         });
+    }
+  };
+
+  const _loading = async () => {
+    if (loading == true) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+      return (
+        <View>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      );
     }
   };
 
@@ -174,7 +220,15 @@ const LoginPw = ({navigation, route}) => {
             />
           </View>
           <View style={styles.container}>
-          <Text style={{fontFamily: fonts.semibold, color:color.white, fontSize:16, marginTop : 20}}>Password</Text>
+            <Text
+              style={{
+                fontFamily: fonts.semibold,
+                color: color.white,
+                fontSize: 16,
+                marginTop: 20,
+              }}>
+              Password
+            </Text>
 
             <View style={{flexDirection: 'row'}}>
               <View style={{padding: 10}}>
@@ -436,6 +490,19 @@ const LoginPw = ({navigation, route}) => {
                   </TouchableOpacity>
                 </View>
               </View>
+            </View>
+
+            <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
+              <Text
+                style={{
+                  fontFamily: fonts.semibold,
+                  color: color.white,
+                  fontSize: 21,
+                  marginBottom: 10,
+                  marginTop: 20,
+                }}>
+                {outletName}
+              </Text>
             </View>
 
             {/* <TouchableOpacity>

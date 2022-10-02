@@ -1,5 +1,6 @@
 // import { StatusBar } from "expo-status-bar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -17,7 +18,15 @@ import {Icon} from 'react-native-elements';
 
 import LinearGradient from 'react-native-linear-gradient';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import { color, fonts } from '../config/Constant';
+import {color, fonts, system_configuration} from '../config/Constant';
+
+const url =
+  system_configuration.ENVIRONMENT === 'development'
+    ? system_configuration.REACT_APP_DEV_MODE
+    : system_configuration.REACT_APP_PROD_MODE;
+
+const counterPOS = system_configuration.counterSecretKey;
+
 // const image = {uri: './img/mg.png'};
 const image = require('../img/mg.png');
 const imagelogo = require('../img/logomg.jpeg');
@@ -27,11 +36,24 @@ const numbers = [
   [7, 8, 9],
 ];
 
-
 // create a component
 const Login = ({navigation, route}) => {
+  const [staffNo, setStaffNo] = useState('');
+  const [outlet, setOutlet] = useState([]);
+
+  const [outletName, setOutletName] = useState('');
+
   useEffect(() => {
-    _requestAppTrackingTransparency();
+    // _requestAppTrackingTransparency();
+    _fetchOutlet();
+
+    AsyncStorage.removeItem('ORDER');
+    AsyncStorage.removeItem('ORDER_NO');
+    AsyncStorage.removeItem('DATA_ORDER');
+    AsyncStorage.removeItem('ORDER_TAKEAWAY');
+    AsyncStorage.removeItem('DISCOUNT_ORDER');
+    AsyncStorage.removeItem('CUSTOMER');
+    AsyncStorage.removeItem('ORDER_PENDING');
   }, []);
 
   const _requestAppTrackingTransparency = async () => {
@@ -40,7 +62,18 @@ const Login = ({navigation, route}) => {
     });
   };
 
-  const [staffNo, setStaffNo] = useState('');
+  const _fetchOutlet = async () => {
+    await axios
+      .post(url + '/pos/getOutlet', {
+        counter: counterPOS,
+      })
+      .then(async res => {
+        console.log(res.data);
+        setOutlet(res.data.data);
+        setOutletName(res.data.data[0].outlet_name);
+      });
+  };
+
   const _changeStaffNo = async string_staffno => {
     console.log('STAFFNO : ', string_staffno);
   };
@@ -60,36 +93,60 @@ const Login = ({navigation, route}) => {
     console.log(staffNo);
   };
 
-  const validateLogin = async() => {
-   
+  const validateLogin = async () => {
     if (staffNo == '') {
       Alert.alert('Login', 'Please Enter Staff No', [
         {text: 'OK', onPress: () => console.log('OK Pressed')},
       ]);
     } else {
-
       // alert(staffNo);
-      await AsyncStorage.setItem('staffno', JSON.stringify({noStaff:staffNo}));
+      await AsyncStorage.setItem('staffno', JSON.stringify({noStaff: staffNo}));
 
       _loginPw();
     }
   };
 
   return (
-    <ImageBackground source={{uri:'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg'}} style={styles.image}>
+    <ImageBackground
+      source={{
+        uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg',
+      }}
+      style={styles.image}>
       <LinearGradient colors={['#000000', '#00000000']} style={styles.lg}>
         <SafeAreaView style={{flex: 1}}>
           <View style={styles.containerLogo}>
-            <Image style={styles.stretch} source={{uri:'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png'}} />
+            <Image
+              style={styles.stretch}
+              source={{
+                uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png',
+              }}
+            />
           </View>
 
           <View style={styles.container}>
-            <Text style={{fontFamily: fonts.semibold, color:color.white, fontSize:16, marginBottom:10, marginTop : 20}}>Staff No</Text>
+            <Text
+              style={{
+                fontFamily: fonts.semibold,
+                color: color.white,
+                fontSize: 16,
+                marginBottom: 10,
+                marginTop: 20,
+              }}>
+              Staff No
+            </Text>
             <View style={styles.inputView}>
               <TextInput
-                style={[styles.TextInput, styles.textFamily , {justifyContent: 'center', alignSelf: 'center', marginLeft:0}]}
+                style={[
+                  styles.TextInput,
+                  styles.textFamily,
+                  {
+                    justifyContent: 'center',
+                    alignSelf: 'center',
+                    marginLeft: 0,
+                  },
+                ]}
                 placeholder="Staff No."
-                // placeholderTextColor="#000000"
+                placeholderTextColor={color.primary}
                 defaultValue={staffNo}
                 onChangeText={text => _changeStaffNo(text)}
               />
@@ -264,6 +321,19 @@ const Login = ({navigation, route}) => {
               </View>
             </View>
 
+            <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
+              <Text
+                style={{
+                  fontFamily: fonts.semibold,
+                  color: color.white,
+                  fontSize: 21,
+                  marginBottom: 10,
+                  marginTop: 20,
+                }}>
+                {outletName}
+              </Text>
+            </View>
+
             {/* <TouchableOpacity>
               <Text style={styles.forgot_button}>Forgot Password?</Text>
             </TouchableOpacity>
@@ -326,7 +396,7 @@ const styles = StyleSheet.create({
     // justifyContent: 'center',
     // alignItems: 'center',
   },
-  
+
   textFamily: {
     fontFamily: fonts.medium,
     fontSize: 16,
@@ -338,7 +408,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginLeft: 20,
     fontSize: 16,
-    fontFamily:fonts.medium
+    fontFamily: fonts.medium,
   },
 
   forgot_button: {
