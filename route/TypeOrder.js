@@ -10,6 +10,7 @@ import {
   ImageBackground,
   Alert,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 
 import {Icon} from 'react-native-elements';
@@ -28,51 +29,12 @@ const url =
     ? system_configuration.REACT_APP_DEV_MODE
     : system_configuration.REACT_APP_PROD_MODE;
 
-const dataTableOrder = [
-  {
-    id: 1,
-    orderTableName: 'Table 1',
-  },
-  {
-    id: 2,
-    orderTableName: 'Table 2',
-  },
-  {
-    id: 3,
-    orderTableName: 'Table 3',
-  },
-  {
-    id: 4,
-    orderTableName: 'Table 4',
-  },
-  {
-    id: 5,
-    orderTableName: 'Table 5',
-  },
-  {
-    id: 6,
-    orderTableName: 'Table 6',
-  },
-  {
-    id: 6,
-    orderTableName: 'Table 7',
-  },
-  {
-    id: 6,
-    orderTableName: 'Table 8',
-  },
-  {
-    id: 6,
-    orderTableName: 'Table 9',
-  },
-  {
-    id: 6,
-    orderTableName: 'Table 10',
-  },
-];
+const counterPOS = system_configuration.counterSecretKey;
 
 // create a component
 const TypeOrder = ({navigation, route}) => {
+  const [loading, setLoading] = useState(false);
+
   const [dineIn, setDineIn] = useState(false);
   const [takeAway, setTakeAway] = useState(false);
   const [pickup, setPickup] = useState(false);
@@ -96,6 +58,8 @@ const TypeOrder = ({navigation, route}) => {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
 
+  const [dataTableOrder, setDataTableOrder] = useState([]);
+
   // const [orderType, setOrderType] = useState({
   //   backgroundColor: 'white',
   //   backgroundColor2: 'orange',
@@ -106,8 +70,12 @@ const TypeOrder = ({navigation, route}) => {
 
   useEffect(() => {
     navigation.addListener('focus', function () {
+      _startLoading();
+
       _getStaff();
+      _getCustomer();
       _getOrderType();
+      // _getTable();
 
       // setCustomerDetails([
       //   {
@@ -117,6 +85,33 @@ const TypeOrder = ({navigation, route}) => {
       // ]);
     });
   }, []);
+
+  const _startLoading = async () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
+
+  const _getTable = async (id) => {
+    console.log('selectOrderTypeId : ', id);
+    console.log('counterPOS : ', counterPOS);
+    await axios
+      .post(url + '/pos/getTable', {
+        counter: counterPOS,
+        orderType: id,
+      })
+      .then(res => {
+        setDataTableOrder(res.data.data);
+        console.log('res12', res.data.data);
+      })
+      .catch(err => {
+        console.log('err', err);
+        Alert.alert('Error', 'Something went wrong');
+      });
+
+    // console.log('orderType', orderType);
+  };
 
   const _getOrderType = async () => {
     // console.log('_getOrderType');
@@ -143,8 +138,20 @@ const TypeOrder = ({navigation, route}) => {
       .catch(e => {});
   };
 
+  const _getCustomer = async () => {
+    AsyncStorage.getItem('CUSTOMER')
+      .then(function (resp) {
+        let stgParsed = JSON.parse(resp);
+
+        setCustomerName(stgParsed.customer[0].customer_name);
+        setCustomerPhone(stgParsed.customer[0].customer_phone);
+      })
+      .catch(e => {});
+  };
+
   const changeState = (id, type) => {
     if (id == 1) {
+      _getTable(id);
       // Dine In
       setSelectOrderType(type);
       setSelectOrderTypeId(id);
@@ -385,16 +392,16 @@ const TypeOrder = ({navigation, route}) => {
           // flex: 1,
         }}>
         {dataTableOrder.map(data => {
-          if (data.orderTableName == selectTable) {
+          if (data.td_id == selectTableId) {
             return (
               <TouchableOpacity
                 style={{...styles.BoxTable, backgroundColor: color.primary}}
                 onPress={() => {
-                  setSelectTable(data.orderTableName);
-                  setSelectTableId(data.id);
+                  setSelectTable(data.td_name);
+                  setSelectTableId(data.td_id);
                 }}>
                 <Text style={{...styles.TextFamily, color: color.white}}>
-                  {data.orderTableName}
+                  {data.td_name}
                 </Text>
               </TouchableOpacity>
             );
@@ -403,10 +410,10 @@ const TypeOrder = ({navigation, route}) => {
               <TouchableOpacity
                 style={{...styles.BoxTable, backgroundColor: color.white}}
                 onPress={() => {
-                  setSelectTable(data.orderTableName);
-                  setSelectTableId(data.id);
+                  setSelectTable(data.td_name);
+                  setSelectTableId(data.td_id);
                 }}>
-                <Text style={styles.TextFamily}>{data.orderTableName}</Text>
+                <Text style={styles.TextFamily}>{data.td_name}</Text>
               </TouchableOpacity>
             );
           }
@@ -587,272 +594,295 @@ const TypeOrder = ({navigation, route}) => {
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar hidden />
-      <View style={{flexDirection: 'row', flex: 1}}>
-        <Drawer navigation={navigation} />
-        <View style={{flex: 1}}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
-            <View style={{flex: 1, backgroundColor: color.background}}>
-              <View style={{flex: 1, flexDirection: 'column', padding: 20}}>
-                <View>
-                  <Text style={{fontSize: 20, fontFamily: fonts.semibold}}>
-                    Welcome, {staffName}
-                  </Text>
-                </View>
+      {loading == true ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            // backgroundColor: 'red',
+          }}>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <>
+          <StatusBar hidden />
+          <View
+            style={{
+              flexDirection: 'row',
+              flex: 1,
+              // backgroundColor: 'pink',
+              justifyContent: 'center',
+            }}>
+            <Drawer navigation={navigation} />
 
-                <View style={{paddingTop: 5}}>
-                  <Text style={{fontSize: 12, fontFamily: fonts.regular}}>
-                    Discover whatever you need easily
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={{flex: 2, backgroundColor: color.background}}>
-              <ScrollView>
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'column',
-                    // justifyContent: 'center',
-                    // padding: 20,
-                    // backgroundColor:'blue',
-                    alignItems: 'center',
-                  }}>
-                  <View
-                    style={{
-                      // flex: 1,
-                      flexDirection: 'row',
-                      // padding: 20,
-                      // paddingLeft: '15%',
-                      // justifyContent: 'space-around',
-                      marginTop: 20,
-                      // marginLeft: '15%',
-                      width: '70%',
-                      // backgroundColor: color.background,
-                    }}>
-                    <View
-                      style={[
-                        styles.Icon,
-                        {marginRight: 10, padding: 10, opacity: 0, height: 0},
-                      ]}>
-                      <Icon
-                        name={'plus-minus'}
-                        type="feather"
-                        size={30}
-                        // style={{paddingLeft:}}
-                      />
-                    </View>
-
-                    <View
-                      style={[
-                        styles.inputView,
-                        {
-                          flex: 1,
-                          borderWidth: 1,
-                          borderColor: color.danger,
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                        },
-                      ]}>
-                      <TextInput
-                        style={[styles.TextInput]}
-                        placeholder="Enter Customer Name"
-                        placeholderTextColor={color.textGray}
-                        onChangeText={text => setCustomerName(text)}
-                        defaultValue={''}
-
-                        // defaultValue={staffNo}
-                      />
-                      {/* <View style={{marginRight: 10}}>
-                        <Icon
-                          name={'alert-circle'}
-                          type="feather"
-                          size={24}
-                          color={color.textGray}
-                        />
-                      </View> */}
-                    </View>
-
-                    {/* <View style={{flex: 0.1}} /> */}
-                    <View style={[styles.inputView, {flex: 1}]}>
-                      <TextInput
-                        style={styles.TextInput}
-                        placeholder="Enter Contact No."
-                        placeholderTextColor={color.textGray}
-                        onChangeText={text => setCustomerPhone(text)}
-                        defaultValue={''}
-                        // placeholderTextColor={color.placeholder}
-                        // defaultValue={staffNo}
-                      />
-                    </View>
-                    {/* <View style={{flex:0.1}}/> */}
-
-                    {/* {count == 0 ? (
-                  <TouchableOpacity
-                    style={styles.Icon}
-                    onPress={() => {
-                      _addBtn();
-                    }}>
-                    <View>
-                      <Icon
-                        name={'plus-square'}
-                        type="feather"
-                        size={30}
-                        // style={{paddingLeft:}}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    style={{...styles.Icon, height: 0, opacity: 0}}
-                    onPress={() => {
-                      // _addBtn();
-                    }}>
-                    <View>
-                      <Icon
-                        name={'plus-square'}
-                        type="feather"
-                        size={30}
-                        // style={{paddingLeft:}}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                )} */}
-                  </View>
-
-                  {_renderAdd() ? _renderAdd() : _renderMinus()}
-                </View>
-              </ScrollView>
-            </View>
-
-            <View style={{flex: 9, backgroundColor: color.background}}>
-              <View
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  // padding: 20,
-                  // paddingLeft: 50,
-                  justifyContent: 'space-evenly',
-                  // backgroundColor:'black'
-                }}>
+            <View style={{flex: 1}}>
+              <View style={{flex: 1, flexDirection: 'column'}}>
                 <View style={{flex: 1}}>
+                  <View style={{flex: 1, flexDirection: 'column', padding: 20}}>
+                    <View>
+                      <Text style={{fontSize: 20, fontFamily: fonts.semibold}}>
+                        Welcome, {staffName}
+                      </Text>
+                    </View>
+
+                    <View style={{paddingTop: 5}}>
+                      <Text style={{fontSize: 12, fontFamily: fonts.regular}}>
+                        Discover whatever you need easily
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={{flex: 2}}>
                   <ScrollView>
                     <View
                       style={{
-                        // height: '100%',
-                        // width: '50%',
-                        // flex: 0.3,
+                        flex: 1,
                         flexDirection: 'column',
-                        // justifyContent: 'flex-end',
+                        // justifyContent: 'center',
+                        // padding: 20,
+                        // backgroundColor:'blue',
                         alignItems: 'center',
-                        // backgroundColor: 'pink',
-                        // right:0,
                       }}>
-                      {orderType.map((data, key) => {
-                        if (data.status == 1) {
-                          return (
-                            <TouchableOpacity
-                              key={key}
-                              style={{
-                                ...styles.Box,
-                                backgroundColor:
-                                  selectOrderType == data.title
-                                    ? color.primary
-                                    : color.white,
-                              }}
-                              onPress={() => {
-                                changeState(data.id, data.title);
-                              }}>
-                              <View>
-                                <Text
-                                  style={{
-                                    ...styles.TextFamily,
-                                    color:
-                                      selectOrderType == data.title
-                                        ? color.white
-                                        : null,
-                                  }}>
-                                  {data.title}
-                                </Text>
-                              </View>
-                            </TouchableOpacity>
-                          );
-                        } else {
-                          return (
-                            <View
-                              key={key}
-                              style={{
-                                ...styles.Box,
-                                backgroundColor:
-                                  selectOrderType == data.title
-                                    ? color.primary
-                                    : color.white,
-                              }}
-                              onPress={() => {
-                                changeState(data.id, data.title);
-                              }}>
-                              <View>
-                                <Text
-                                  style={{
-                                    ...styles.TextFamily,
-                                    color: color.textGray,
-                                  }}>
-                                  {data.title}
-                                </Text>
-                              </View>
-                            </View>
-                          );
-                        }
-                      })}
+                      <View
+                        style={{
+                          // flex: 1,
+                          flexDirection: 'row',
+                          // padding: 20,
+                          // paddingLeft: '15%',
+                          // justifyContent: 'space-around',
+                          marginTop: 20,
+                          // marginLeft: '15%',
+                          width: '70%',
+                          // backgroundColor: color.background,
+                        }}>
+                        <View
+                          style={[
+                            styles.Icon,
+                            {
+                              marginRight: 10,
+                              padding: 10,
+                              opacity: 0,
+                              height: 0,
+                            },
+                          ]}>
+                          <Icon name={'plus-minus'} type="feather" size={30} />
+                        </View>
+
+                        <View
+                          style={[
+                            styles.inputView,
+                            {
+                              flex: 1,
+                              borderWidth: 1,
+                              borderColor: color.danger,
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                            },
+                          ]}>
+                          <TextInput
+                            style={[styles.TextInput]}
+                            placeholder="Enter Customer Name"
+                            placeholderTextColor={color.textGray}
+                            onChangeText={text => setCustomerName(text)}
+                            defaultValue={customerName}
+                          />
+                          {/* <View style={{marginRight: 10}}>
+      <Icon
+        name={'alert-circle'}
+        type="feather"
+        size={24}
+        color={color.textGray}
+      />
+    </View> */}
+                        </View>
+
+                        {/* <View style={{flex: 0.1}} /> */}
+                        <View style={[styles.inputView, {flex: 1}]}>
+                          <TextInput
+                            style={styles.TextInput}
+                            placeholder="Enter Contact No."
+                            placeholderTextColor={color.textGray}
+                            onChangeText={text => setCustomerPhone(text)}
+                            defaultValue={customerPhone}
+                          />
+                        </View>
+                        {/* <View style={{flex:0.1}}/> */}
+
+                        {/* {count == 0 ? (
+  <TouchableOpacity
+    style={styles.Icon}
+    onPress={() => {
+      _addBtn();
+    }}>
+    <View>
+      <Icon
+        name={'plus-square'}
+        type="feather"
+        size={30}
+        // style={{paddingLeft:}}
+      />
+    </View>
+  </TouchableOpacity>
+) : (
+  <TouchableOpacity
+    style={{...styles.Icon, height: 0, opacity: 0}}
+    onPress={() => {
+      // _addBtn();
+    }}>
+    <View>
+      <Icon
+        name={'plus-square'}
+        type="feather"
+        size={30}
+        // style={{paddingLeft:}}
+      />
+    </View>
+  </TouchableOpacity>
+)} */}
+                      </View>
+
+                      {_renderAdd() ? _renderAdd() : _renderMinus()}
                     </View>
                   </ScrollView>
                 </View>
 
-                <View
-                  style={{
-                    flex: 1,
-                    // height: 525,
-                    width: '50%',
-                    flexDirection: 'column',
-                    // backgroundColor: 'orange',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginBottom: 20,
-                    marginRight: 20,
-                  }}>
+                <View style={{flex: 9}}>
                   <View
                     style={{
-                      flexDirection: 'column',
-                      // height: 400,
-                      flex: 10,
-                      width: '100%',
-                      marginBottom: 20,
+                      flex: 1,
+                      flexDirection: 'row',
+                      // padding: 20,
+                      // paddingLeft: 50,
+                      justifyContent: 'space-evenly',
+                      // backgroundColor:'black'
                     }}>
-                    {dineIn == true ? <ScrollView>{_dinein}</ScrollView> : null}
+                    <View style={{flex: 1}}>
+                      <ScrollView>
+                        <View
+                          style={{
+                            // height: '100%',
+                            // width: '50%',
+                            // flex: 0.3,
+                            flexDirection: 'column',
+                            // justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            // backgroundColor: 'pink',
+                            // right:0,
+                          }}>
+                          {orderType.map((data, key) => {
+                            if (data.status == 1) {
+                              return (
+                                <TouchableOpacity
+                                  key={key}
+                                  style={{
+                                    ...styles.Box,
+                                    backgroundColor:
+                                      selectOrderType == data.title
+                                        ? color.primary
+                                        : color.white,
+                                  }}
+                                  onPress={() => {
+                                    changeState(data.id, data.title);
+                                  }}>
+                                  <View>
+                                    <Text
+                                      style={{
+                                        ...styles.TextFamily,
+                                        color:
+                                          selectOrderType == data.title
+                                            ? color.white
+                                            : null,
+                                      }}>
+                                      {data.title}
+                                    </Text>
+                                  </View>
+                                </TouchableOpacity>
+                              );
+                            } else {
+                              return (
+                                <View
+                                  key={key}
+                                  style={{
+                                    ...styles.Box,
+                                    backgroundColor:
+                                      selectOrderType == data.title
+                                        ? color.primary
+                                        : color.white,
+                                  }}
+                                  onPress={() => {
+                                    changeState(data.id, data.title);
+                                  }}>
+                                  <View>
+                                    <Text
+                                      style={{
+                                        ...styles.TextFamily,
+                                        color: color.textGray,
+                                      }}>
+                                      {data.title}
+                                    </Text>
+                                  </View>
+                                </View>
+                              );
+                            }
+                          })}
+                        </View>
+                      </ScrollView>
+                    </View>
 
-                    {_takeaway}
-                    {_pickup}
-                    {_preorder}
-                  </View>
-
-                  <View style={{flex: 0.8, width: '100%'}}>
-                    <TouchableOpacity
-                      style={{...styles.BtnConfirm, marginLeft: 0}}
-                      onPress={() => {
-                        _menuOrder();
+                    <View
+                      style={{
+                        flex: 1,
+                        // height: 525,
+                        width: '50%',
+                        flexDirection: 'column',
+                        // backgroundColor: 'orange',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginBottom: 20,
+                        marginRight: 20,
                       }}>
-                      <Text style={{...styles.TextFamily, color: color.white}}>
-                        Confirm
-                      </Text>
-                    </TouchableOpacity>
+                      <View
+                        style={{
+                          flexDirection: 'column',
+                          // height: 400,
+                          flex: 10,
+                          width: '100%',
+                          marginBottom: 20,
+                        }}>
+                        {dineIn == true ? (
+                          <ScrollView>{_dinein}</ScrollView>
+                        ) : null}
+
+                        {_takeaway}
+                        {_pickup}
+                        {_preorder}
+                      </View>
+
+                      <View style={{flex: 0.8, width: '100%'}}>
+                        <TouchableOpacity
+                          style={{...styles.BtnConfirm, marginLeft: 0}}
+                          onPress={() => {
+                            _menuOrder();
+                          }}>
+                          <Text
+                            style={{...styles.TextFamily, color: color.white}}>
+                            Confirm
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>
             </View>
           </View>
-        </View>
-      </View>
+        </>
+      )}
     </SafeAreaView>
   );
 };
