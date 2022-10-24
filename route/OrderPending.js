@@ -154,6 +154,35 @@ const OrderPending = ({navigation, route}) => {
                 }}
                 onPress={() => {
                   // navigation.navigate('QrScan');
+                  _fetchOrderPending();
+                }}>
+                <Text
+                  style={{
+                    ...styles.textFamily,
+                    color: color.white,
+                    marginLeft: 5,
+                  }}>
+                  Refresh
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: color.primary,
+                  height: 40,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: '20%',
+                  borderRadius: 5,
+                  // flex: 0.7,
+                  marginRight: 20,
+                  flexDirection: 'row',
+
+                  // borderWidth: 1,
+                  // borderColor:color.primary
+                }}
+                onPress={() => {
+                  // navigation.navigate('QrScan');
                   setModalQR(true);
                 }}>
                 <Icon
