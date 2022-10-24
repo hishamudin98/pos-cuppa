@@ -12,6 +12,7 @@ import {
   Button,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
@@ -35,6 +36,7 @@ const Checkout = ({navigation, route}) => {
   const [dataOrder, setDataOrder] = useState([]);
   const [orderCart, setOrderCart] = useState([]);
   const [selectTable, setSelectTable] = useState('');
+  const [selectTableId, setSelectTableId] = useState(0);
   const [selectOrderType, setSelectOrderType] = useState('');
   const [selectOrderTypeId, setSelectOrderTypeId] = useState(0);
 
@@ -62,6 +64,8 @@ const Checkout = ({navigation, route}) => {
   const [membershipDiscount, setMembershipDiscount] = useState(0);
   const [outletDiscount, setOutletDiscount] = useState(0);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     navigation.addListener('focus', function () {
       _getStaff();
@@ -69,10 +73,18 @@ const Checkout = ({navigation, route}) => {
       _getCustomer();
       _fetchOrder();
       _fetchOrderNo();
+      _startLoading();
       // _calculateTotal();
       // calculate_total_price_in_cart();
     });
   }, []);
+
+  const _startLoading = async () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
 
   const _getStaff = async () => {
     AsyncStorage.getItem('STAFF')
@@ -91,6 +103,7 @@ const Checkout = ({navigation, route}) => {
     console.log('Customerrrrr', custParsed);
     setSelectOrderType(custParsed.order_type);
     setSelectTable(custParsed.table_name);
+    setSelectTableId(custParsed.table_id);
     setSelectOrderTypeId(custParsed.order_typeId);
   };
 
@@ -462,8 +475,6 @@ const Checkout = ({navigation, route}) => {
                   .then(async function (resp) {
                     // console.log('Print Receipt', resp);
                   });
-
-                
               },
               style: 'cancel',
             },
@@ -485,7 +496,6 @@ const Checkout = ({navigation, route}) => {
                     // console.log('Print Receipt', resp);
                   });
 
-               
                 // set loading
                 // print receipt
               },
@@ -1450,372 +1460,412 @@ const Checkout = ({navigation, route}) => {
   // console.log('route', route.params.data);
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{flexDirection: 'row', flex: 1}}>
-        <View style={styles.box1}>
-          {/* {LEFT SECTION TOP} */}
-          <View
-            style={{
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              height: '100%',
-            }}>
-            <View style={{flexDirection: 'column', flex: 1}}>
-              <View
-                style={{padding: 20, flexDirection: 'row', paddingBottom: 10}}>
+      {loading == true ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            // backgroundColor: 'red',
+          }}>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <View style={{flexDirection: 'row', flex: 1}}>
+          <View style={styles.box1}>
+            {/* {LEFT SECTION TOP} */}
+            <View
+              style={{
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                height: '100%',
+              }}>
+              <View style={{flexDirection: 'column', flex: 1}}>
                 <View
                   style={{
-                    backgroundColor: color.background,
-                    height: 40,
-                    borderRadius: 5,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flex: 4,
-                  }}>
-                  <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
-                    {selectOrderType}{' '}
-                    {selectOrderType == 'Take Away' ? '' : ' - '} {selectTable}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: color.primary,
-                    height: 40,
-                    borderRadius: 5,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 100,
-                    marginLeft: 10,
-                    // padding: 20,
-                  }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontFamily: fonts.medium,
-                      color: color.white,
-                    }}>
-                    Split Bill
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* {ORDER CART} */}
-              <View
-                style={{
-                  height: '50%',
-                  flex: 1,
-                  flexDirection: 'column',
-                  // backgroundColor: 'white',
-                }}>
-                <ScrollView
-                  contentContainerStyle={{
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                    height: 'auto',
-                    // backgroundColor: 'green',
-                  }}
-                  style={{
-                    marginTop: 5,
-
-                    marginLeft: 20,
-                    marginRight: 20,
-                  }}>
-                  {orderCart.map((data, index) => {
-                    return (
-                      <View style={{flexDirection: 'row'}}>
-                        <View
-                          style={{
-                            ...styles.inputBox2,
-                            paddingLeft: 0,
-                            marginLeft: 10,
-                            marginTop: 5,
-                            marginBottom: 5,
-                            flex: 0.3,
-                            // width:'1%',
-                            height: 70,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: color.background,
-                          }}>
-                          <Image
-                            style={{
-                              width: '100%',
-                              height: '80%',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              // backgroundColor:'black'
-                            }}
-                            source={{uri: data.menu_image}}
-                          />
-                        </View>
-                        <View
-                          style={{
-                            flex: 1,
-                            flexDirection: 'column',
-                            height: 70,
-                            justifyContent: 'space-between',
-                            // backgroundColor: 'black',
-                            marginLeft: 5,
-                            marginTop: 5,
-                          }}>
-                          <View>
-                            <View>
-                              <Text style={styles.textInputAddToCart}>
-                                {data.menu_name}
-                              </Text>
-                            </View>
-                            <View style={{marginTop: 10, flexDirection: 'row'}}>
-                              {data.menu_variant
-                                ? data.menu_variant.map((variant, key) => {
-                                    return (
-                                      <Text
-                                        style={{
-                                          fontFamily: fonts.medium,
-                                          fontSize: 12,
-                                          color: color.textGray,
-                                        }}>
-                                        {data.menu_variant.length == key + 1
-                                          ? variant.name
-                                          : variant.name + ', '}
-                                      </Text>
-                                    );
-                                  })
-                                : null}
-                            </View>
-                          </View>
-
-                          <View>
-                            <Text style={styles.textInputPriceAddToCart}>
-                              RM {data.menu_price.toFixed(2)}
-                            </Text>
-                          </View>
-                        </View>
-                        <View
-                          style={{
-                            flex: 0.6,
-                            height: 70,
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            // backgroundColor: 'red',
-                            marginRight: 10,
-                          }}>
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              justifyContent: 'flex-end',
-                              alignItems: 'center',
-                            }}>
-                            <Text
-                              style={{
-                                fontFamily: fonts.regular,
-                                fontSize: 12,
-                                color: color.textGray,
-                              }}>
-                              {data.membership_no}
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                              height: 50,
-                              justifyContent: 'flex-end',
-                              // backgroundColor:'blue'
-                            }}>
-                            <Text> X {data.menu_quantity}</Text>
-                          </View>
-                        </View>
-                      </View>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-
-              {orderCartTakeAway.length > 0 ? (
-                <View
-                  style={{
+                    padding: 20,
                     flexDirection: 'row',
-                    flex: 1,
-                    // backgroundColor: 'red',
-                    height: '100%',
+                    paddingBottom: 10,
                   }}>
                   <View
                     style={{
+                      backgroundColor: color.background,
+                      height: 40,
+                      borderRadius: 5,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 4,
+                    }}>
+                    <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
+                      {selectOrderType}{' '}
+                      {selectOrderType == 'Take Away' ? '' : ' - '}{' '}
+                      {selectTable}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: color.primary,
+                      height: 40,
+                      borderRadius: 5,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 100,
+                      marginLeft: 10,
+                      // padding: 20,
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontFamily: fonts.medium,
+                        color: color.white,
+                      }}>
+                      Split Bill
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* {ORDER CART} */}
+                <View
+                  style={{
+                    height: '50%',
+                    flex: 1,
+                    flexDirection: 'column',
+                    // backgroundColor: 'white',
+                  }}>
+                  <ScrollView
+                    contentContainerStyle={{
+                      alignItems: 'center',
                       flexDirection: 'column',
+                      height: 'auto',
+                      // backgroundColor: 'green',
+                    }}
+                    style={{
+                      marginTop: 5,
+
+                      marginLeft: 20,
+                      marginRight: 20,
+                    }}>
+                    {orderCart.map((data, index) => {
+                      return (
+                        <View style={{flexDirection: 'row'}}>
+                          <View
+                            style={{
+                              ...styles.inputBox2,
+                              paddingLeft: 0,
+                              marginLeft: 10,
+                              marginTop: 5,
+                              marginBottom: 5,
+                              flex: 0.3,
+                              // width:'1%',
+                              height: 70,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              backgroundColor: color.background,
+                            }}>
+                            <Image
+                              style={{
+                                width: '100%',
+                                height: '80%',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                // backgroundColor:'black'
+                              }}
+                              source={{uri: data.menu_image}}
+                            />
+                          </View>
+                          <View
+                            style={{
+                              flex: 1,
+                              flexDirection: 'column',
+                              height: 70,
+                              justifyContent: 'space-between',
+                              // backgroundColor: 'black',
+                              marginLeft: 5,
+                              marginTop: 5,
+                            }}>
+                            <View>
+                              <View>
+                                <Text style={styles.textInputAddToCart}>
+                                  {data.menu_name}
+                                </Text>
+                              </View>
+                              <View
+                                style={{marginTop: 10, flexDirection: 'row'}}>
+                                {data.menu_variant
+                                  ? data.menu_variant.map((variant, key) => {
+                                      return (
+                                        <Text
+                                          style={{
+                                            fontFamily: fonts.medium,
+                                            fontSize: 12,
+                                            color: color.textGray,
+                                          }}>
+                                          {data.menu_variant.length == key + 1
+                                            ? variant.name
+                                            : variant.name + ', '}
+                                        </Text>
+                                      );
+                                    })
+                                  : null}
+                              </View>
+
+                              <View style={{flexDirection: 'row'}}>
+                                {data.menu_remark ? (
+                                  <Text
+                                    style={{
+                                      fontFamily: fonts.medium,
+                                      fontSize: 12,
+                                      color: color.textGray,
+                                    }}>
+                                    - {data.menu_remark}
+                                  </Text>
+                                ) : null}
+                              </View>
+                            </View>
+
+                            <View>
+                              <Text style={styles.textInputPriceAddToCart}>
+                                RM {data.menu_price.toFixed(2)}
+                              </Text>
+                            </View>
+                          </View>
+                          <View
+                            style={{
+                              flex: 0.6,
+                              height: 70,
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              // backgroundColor: 'red',
+                              marginRight: 10,
+                            }}>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                justifyContent: 'flex-end',
+                                alignItems: 'center',
+                              }}>
+                              <Text
+                                style={{
+                                  fontFamily: fonts.regular,
+                                  fontSize: 12,
+                                  color: color.textGray,
+                                }}>
+                                {data.membership_no}
+                              </Text>
+                            </View>
+
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                height: 50,
+                                justifyContent: 'flex-end',
+                                // backgroundColor:'blue'
+                              }}>
+                              <Text> X {data.menu_quantity}</Text>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+
+                {orderCartTakeAway.length > 0 ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
                       flex: 1,
+                      // backgroundColor: 'red',
+                      height: '100%',
                     }}>
                     <View
                       style={{
-                        padding: 20,
-                        flexDirection: 'row',
-                        paddingBottom: 10,
+                        flexDirection: 'column',
+                        flex: 1,
                       }}>
                       <View
                         style={{
-                          backgroundColor: color.background,
-                          height: 40,
-                          borderRadius: 5,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flex: 1,
+                          padding: 20,
+                          flexDirection: 'row',
+                          paddingBottom: 10,
                         }}>
-                        <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
-                          Take Away
-                        </Text>
+                        <View
+                          style={{
+                            backgroundColor: color.background,
+                            height: 40,
+                            borderRadius: 5,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flex: 1,
+                          }}>
+                          <Text
+                            style={{fontSize: 16, fontFamily: fonts.medium}}>
+                            Take Away
+                          </Text>
+                        </View>
                       </View>
-                    </View>
 
-                    <ScrollView
-                      contentContainerStyle={{
-                        alignItems: 'center',
-                        flexDirection: 'column',
-                        height: 'auto',
-                      }}
-                      style={{
-                        marginTop: 5,
-                        marginLeft: 20,
-                        marginRight: 20,
-                      }}>
-                      {orderCartTakeAway.map((data, index) => {
-                        return (
-                          <View style={{flexDirection: 'row'}}>
-                            <View
-                              style={{
-                                ...styles.inputBox2,
-                                paddingLeft: 0,
-                                marginLeft: 10,
-                                marginTop: 5,
-                                marginBottom: 5,
-                                flex: 0.3,
-                                // width:'1%',
-                                height: 70,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: color.background,
-                              }}>
-                              <Image
+                      <ScrollView
+                        contentContainerStyle={{
+                          alignItems: 'center',
+                          flexDirection: 'column',
+                          height: 'auto',
+                        }}
+                        style={{
+                          marginTop: 5,
+                          marginLeft: 20,
+                          marginRight: 20,
+                        }}>
+                        {orderCartTakeAway.map((data, index) => {
+                          return (
+                            <View style={{flexDirection: 'row'}}>
+                              <View
                                 style={{
-                                  width: '100%',
-                                  height: '80%',
+                                  ...styles.inputBox2,
+                                  paddingLeft: 0,
+                                  marginLeft: 10,
+                                  marginTop: 5,
+                                  marginBottom: 5,
+                                  flex: 0.3,
+                                  // width:'1%',
+                                  height: 70,
                                   justifyContent: 'center',
                                   alignItems: 'center',
-                                  // backgroundColor:'black'
-                                }}
-                                source={{uri: data.menu_image}}
-                              />
-                            </View>
-                            <View
-                              style={{
-                                flex: 1,
-                                flexDirection: 'column',
-                                height: 70,
-                                justifyContent: 'space-between',
-                                // backgroundColor: 'black',
-                                marginLeft: 5,
-                                marginTop: 5,
-                              }}>
-                              <View>
+                                  backgroundColor: color.background,
+                                }}>
+                                <Image
+                                  style={{
+                                    width: '100%',
+                                    height: '80%',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    // backgroundColor:'black'
+                                  }}
+                                  source={{uri: data.menu_image}}
+                                />
+                              </View>
+                              <View
+                                style={{
+                                  flex: 1,
+                                  flexDirection: 'column',
+                                  height: 70,
+                                  justifyContent: 'space-between',
+                                  // backgroundColor: 'black',
+                                  marginLeft: 5,
+                                  marginTop: 5,
+                                }}>
                                 <View>
-                                  <Text style={styles.textInputAddToCart}>
-                                    {data.menu_name}
+                                  <View>
+                                    <Text style={styles.textInputAddToCart}>
+                                      {data.menu_name}
+                                    </Text>
+                                  </View>
+                                  <View
+                                    style={{
+                                      marginTop: 10,
+                                      flexDirection: 'row',
+                                    }}>
+                                    {data.menu_variant
+                                      ? data.menu_variant.map(
+                                          (variant, key) => {
+                                            return (
+                                              <Text
+                                                style={{
+                                                  fontFamily: fonts.medium,
+                                                  fontSize: 12,
+                                                  color: color.textGray,
+                                                }}>
+                                                {data.menu_variant.length ==
+                                                key + 1
+                                                  ? variant.name
+                                                  : variant.name + ', '}
+                                              </Text>
+                                            );
+                                          },
+                                        )
+                                      : null}
+                                  </View>
+                                </View>
+
+                                <View>
+                                  <Text style={styles.textInputPriceAddToCart}>
+                                    RM {data.menu_price.toFixed(2)}
                                   </Text>
                                 </View>
+                              </View>
+                              <View
+                                style={{
+                                  flex: 0.6,
+                                  height: 70,
+                                  flexDirection: 'column',
+                                  justifyContent: 'center',
+                                  // backgroundColor: 'red',
+                                  marginRight: 10,
+                                }}>
                                 <View
-                                  style={{marginTop: 10, flexDirection: 'row'}}>
-                                  {data.menu_variant
-                                    ? data.menu_variant.map((variant, key) => {
-                                        return (
-                                          <Text
-                                            style={{
-                                              fontFamily: fonts.medium,
-                                              fontSize: 12,
-                                              color: color.textGray,
-                                            }}>
-                                            {data.menu_variant.length == key + 1
-                                              ? variant.name
-                                              : variant.name + ', '}
-                                          </Text>
-                                        );
-                                      })
-                                    : null}
+                                  style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-end',
+                                    alignItems: 'center',
+                                  }}>
+                                  <Text
+                                    style={{
+                                      fontFamily: fonts.regular,
+                                      fontSize: 12,
+                                      color: color.textGray,
+                                    }}>
+                                    {data.membership_no}
+                                  </Text>
+                                </View>
+
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    height: 50,
+                                    justifyContent: 'flex-end',
+                                    // backgroundColor:'blue'
+                                  }}>
+                                  <Text> X {data.menu_quantity}</Text>
                                 </View>
                               </View>
-
-                              <View>
-                                <Text style={styles.textInputPriceAddToCart}>
-                                  RM {data.menu_price.toFixed(2)}
-                                </Text>
-                              </View>
                             </View>
-                            <View
-                              style={{
-                                flex: 0.6,
-                                height: 70,
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                // backgroundColor: 'red',
-                                marginRight: 10,
-                              }}>
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  justifyContent: 'flex-end',
-                                  alignItems: 'center',
-                                }}>
-                                <Text
-                                  style={{
-                                    fontFamily: fonts.regular,
-                                    fontSize: 12,
-                                    color: color.textGray,
-                                  }}>
-                                  {data.membership_no}
-                                </Text>
-                              </View>
-
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  alignItems: 'center',
-                                  height: 50,
-                                  justifyContent: 'flex-end',
-                                  // backgroundColor:'blue'
-                                }}>
-                                <Text> X {data.menu_quantity}</Text>
-                              </View>
-                            </View>
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
                   </View>
+                ) : null}
+              </View>
+
+              {/* {calculation section} */}
+              <View
+                style={{
+                  margin: 20,
+                  backgroundColor: '#F8F8F8',
+                }}>
+                <View style={styles.textCalculation}>
+                  <Text style={styles.textCart}>Subtotal</Text>
+                  <Text style={styles.textCart}>
+                    {amountOrderDisplay !== null
+                      ? amountOrderDisplay
+                      : (0).toFixed(2)}
+                  </Text>
                 </View>
-              ) : null}
-            </View>
+                <View style={styles.textCalculation}>
+                  <Text style={styles.textCart}>Discount</Text>
+                  <Text style={styles.textCart}>
+                    {amountDiscountDisplay !== null
+                      ? amountDiscountDisplay
+                      : (0).toFixed(2)}
+                  </Text>
+                </View>
 
-            {/* {calculation section} */}
-            <View
-              style={{
-                margin: 20,
-                backgroundColor: '#F8F8F8',
-              }}>
-              <View style={styles.textCalculation}>
-                <Text style={styles.textCart}>Subtotal</Text>
-                <Text style={styles.textCart}>
-                  {amountOrderDisplay !== null
-                    ? amountOrderDisplay
-                    : (0).toFixed(2)}
-                </Text>
-              </View>
-              <View style={styles.textCalculation}>
-                <Text style={styles.textCart}>Discount</Text>
-                <Text style={styles.textCart}>
-                  {amountDiscountDisplay !== null
-                    ? amountDiscountDisplay
-                    : (0).toFixed(2)}
-                </Text>
-              </View>
-
-              {/* {membershipDiscount > 0 ? (
+                {/* {membershipDiscount > 0 ? (
                 <View style={styles.textCalculation}>
                   <Text style={styles.textCart}>Membership Discount 7%</Text>
                   <Text style={styles.textCart}>
@@ -1827,7 +1877,7 @@ const Checkout = ({navigation, route}) => {
                   </Text>
                 </View>
               ) : null} */}
-              {/* 
+                {/* 
               {outletDiscount > 0 ? (
                 <View style={styles.textCalculation}>
                   <Text style={styles.textCart}>Outlet Discount 10%</Text>
@@ -1841,13 +1891,13 @@ const Checkout = ({navigation, route}) => {
                 </View>
               ) : null} */}
 
-              <View style={styles.textCalculation}>
-                <Text style={styles.textCart}>Tax 6%</Text>
-                <Text style={styles.textCart}>
-                  {taxDisplay !== null ? taxDisplay : (0).toFixed(2)}
-                </Text>
-              </View>
-              {/* <View style={styles.textCalculation}>
+                <View style={styles.textCalculation}>
+                  <Text style={styles.textCart}>Tax 6%</Text>
+                  <Text style={styles.textCart}>
+                    {taxDisplay !== null ? taxDisplay : (0).toFixed(2)}
+                  </Text>
+                </View>
+                {/* <View style={styles.textCalculation}>
                 <Text style={styles.textCart}>Service Charges 10%</Text>
                 <Text style={styles.textCart}>
                   {serviceChargeDisplay !== null
@@ -1855,346 +1905,346 @@ const Checkout = ({navigation, route}) => {
                     : (0).toFixed(2)}
                 </Text>
               </View> */}
-              <View style={styles.textCalculation}>
-                <Text style={styles.textCart}>Infaq</Text>
-                <Text style={styles.textCart}>0.00</Text>
+                <View style={styles.textCalculation}>
+                  <Text style={styles.textCart}>Infaq</Text>
+                  <Text style={styles.textCart}>0.00</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-        <View style={styles.box2}>
-          {/* {RIGHT SECTION FIRST TOP} */}
-          <View
-            style={{
-              flexDirection: 'column',
-              flex: 2.4,
-            }}>
+          <View style={styles.box2}>
+            {/* {RIGHT SECTION FIRST TOP} */}
             <View
               style={{
                 flexDirection: 'column',
-                // backgroundColor: 'red',
-                // justifyContent: 'space-between',
-                height: '100%',
+                flex: 2.4,
               }}>
               <View
                 style={{
-                  flexDirection: 'row',
-                  //   backgroundColor: 'green',
-                  //   height: '90%',
-                  // alignItems: 'center',
-                  //   justifyContent:'space-between'
+                  flexDirection: 'column',
+                  // backgroundColor: 'red',
+                  // justifyContent: 'space-between',
+                  height: '100%',
                 }}>
                 <View
                   style={{
-                    // justifyContent: 'center',
+                    flexDirection: 'row',
+                    //   backgroundColor: 'green',
+                    //   height: '90%',
                     // alignItems: 'center',
-                    flex: 1,
-                    margin: 20,
-                    // backgroundColor: 'pink',
-                    // height: '100%',
+                    //   justifyContent:'space-between'
                   }}>
-                  <View style={{alignItems: 'center', paddingTop: 50}}>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 16}}>
-                      Total Amount
-                    </Text>
+                  <View
+                    style={{
+                      // justifyContent: 'center',
+                      // alignItems: 'center',
+                      flex: 1,
+                      margin: 20,
+                      // backgroundColor: 'pink',
+                      // height: '100%',
+                    }}>
+                    <View style={{alignItems: 'center', paddingTop: 50}}>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 16}}>
+                        Total Amount
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        justifyContent: 'center',
+                        // alignItems: 'center',
+                        flex: 1,
+                        flexDirection: 'row',
+                        // marginBottom : 40
+                      }}>
+                      <Text style={{fontFamily: fonts.bold, fontSize: 35}}>
+                        RM{' '}
+                        {totalAmountOrderDisplay !== null
+                          ? totalAmountOrderDisplay
+                          : (0).toFixed(2)}
+                      </Text>
+                    </View>
                   </View>
                   <View
                     style={{
+                      height: '80%',
+                      width: 1,
+                      backgroundColor: color.textGray,
                       justifyContent: 'center',
-                      // alignItems: 'center',
+                      alignItems: 'center',
+                      marginTop: 20,
+                    }}></View>
+                  <View
+                    style={{
+                      flexDirection: 'column',
                       flex: 1,
-                      flexDirection: 'row',
-                      // marginBottom : 40
+                      margin: 20,
+                      alignItems: 'center',
+                      // backgroundColor: 'pink',
+                      // justifyContent: 'center',
+                      // height: '100%',
                     }}>
-                    <Text style={{fontFamily: fonts.bold, fontSize: 35}}>
-                      RM{' '}
-                      {totalAmountOrderDisplay !== null
-                        ? totalAmountOrderDisplay
-                        : (0).toFixed(2)}
-                    </Text>
+                    <View>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 16}}>
+                        Suggested Infaq
+                      </Text>
+                    </View>
+
+                    <View style={{flexDirection: 'row'}}>
+                      <TouchableHighlight
+                        style={styles.inputBoxInfaq}
+                        onPress={() => {
+                          alert('derma');
+                        }}>
+                        <Text style={styles.textFamily}>0.00</Text>
+                      </TouchableHighlight>
+                      <View style={styles.inputBoxInfaq}>
+                        <Text style={styles.textFamily}>
+                          {(
+                            Math.round(totalAmountOrder) - totalAmountOrder
+                          ).toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={styles.inputBoxInfaq}>
+                        <Text style={styles.textFamily}>
+                          {(
+                            Math.round(totalAmountOrder / 100) * 100 +
+                            40 -
+                            totalAmountOrder
+                          ).toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={styles.inputBoxInfaq}>
+                        <Text style={styles.textFamily}>
+                          {(
+                            Math.round(totalAmountOrder / 100) * 100 +
+                            50 -
+                            totalAmountOrder
+                          ).toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={styles.inputCustomAmt}>
+                        <Text style={styles.textFamily}>Custom Amount</Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
                 <View
                   style={{
-                    height: '80%',
-                    width: 1,
-                    backgroundColor: color.textGray,
+                    //   flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    marginTop: 20,
-                  }}></View>
+                    // backgroundColor: 'black',
+                    height: '2%',
+                    // marginBottom: 20,
+                  }}>
+                  <View
+                    style={{
+                      backgroundColor: color.textGray,
+                      height: 1,
+                      width: '94%',
+                    }}></View>
+                </View>
+              </View>
+            </View>
+
+            {/* {RIGHT SECTION SECOND TOP} */}
+            {/* {LIST PAYMENT METHOD} */}
+
+            {viewPaymentMethod === false ? null : (
+              <View
+                style={{
+                  flexDirection: 'column',
+                  flex: 6,
+                  // backgroundColor: 'pink',
+                  // margin:20,
+                  // marginTop: 20,
+
+                  //   justifyContent: 'center',
+                }}>
                 <View
                   style={{
-                    flexDirection: 'column',
-                    flex: 1,
-                    margin: 20,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
                     alignItems: 'center',
-                    // backgroundColor: 'pink',
-                    // justifyContent: 'center',
-                    // height: '100%',
+                    height: '33%',
+                    // backgroundColor: 'red',
                   }}>
-                  <View>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 16}}>
-                      Suggested Infaq
+                  <TouchableOpacity
+                    style={styles.boxPayment}
+                    onPress={() => _clickPayment('cash')}>
+                    <View>
+                      <View style={{marginBottom: 15}}>
+                        <Icon name={'cash-outline'} type="ionicon" size={28} />
+                      </View>
+                      <Text style={styles.textFamily}>Cash</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={{
+                      ...styles.boxPayment,
+                      // backgroundColor: 'pink',
+                      //   flexDirection: 'column',
+                      //   flex: 1,
+                      // width:200
+                    }}
+                    onPress={() => _clickPayment('card')}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon name={'card-outline'} type="ionicon" size={28} />
+                    </View>
+                    <Text style={styles.textFamily}>Credit/Debit Card</Text>
+                  </TouchableOpacity>
+
+                  <View
+                    style={{
+                      ...styles.boxPayment,
+                      // backgroundColor: 'pink',
+                      //   flexDirection: 'column',
+                      //   flex: 1,
+                      // width:200
+                    }}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon
+                        name={'qrcode-scan'}
+                        type="material-community"
+                        size={28}
+                        color={color.textGray}
+                      />
+                    </View>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      QR Payment
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '33%',
+                    // backgroundColor: 'red',
+                  }}>
+                  <View style={styles.boxPayment}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon
+                        name={'cash-outline'}
+                        type="ionicon"
+                        size={28}
+                        color={color.textGray}
+                      />
+                    </View>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      e-Wallet
                     </Text>
                   </View>
 
-                  <View style={{flexDirection: 'row'}}>
-                    <TouchableHighlight
-                      style={styles.inputBoxInfaq}
-                      onPress={() => {
-                        alert('derma');
-                      }}>
-                      <Text style={styles.textFamily}>0.00</Text>
-                    </TouchableHighlight>
-                    <View style={styles.inputBoxInfaq}>
-                      <Text style={styles.textFamily}>
-                        {(
-                          Math.round(totalAmountOrder) - totalAmountOrder
-                        ).toFixed(2)}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={styles.inputBoxInfaq}>
-                      <Text style={styles.textFamily}>
-                        {(
-                          Math.round(totalAmountOrder / 100) * 100 +
-                          40 -
-                          totalAmountOrder
-                        ).toFixed(2)}
-                      </Text>
-                    </View>
-                    <View style={styles.inputBoxInfaq}>
-                      <Text style={styles.textFamily}>
-                        {(
-                          Math.round(totalAmountOrder / 100) * 100 +
-                          50 -
-                          totalAmountOrder
-                        ).toFixed(2)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={styles.inputCustomAmt}>
-                      <Text style={styles.textFamily}>Custom Amount</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <View
-                style={{
-                  //   flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  // backgroundColor: 'black',
-                  height: '2%',
-                  // marginBottom: 20,
-                }}>
-                <View
-                  style={{
-                    backgroundColor: color.textGray,
-                    height: 1,
-                    width: '94%',
-                  }}></View>
-              </View>
-            </View>
-          </View>
-
-          {/* {RIGHT SECTION SECOND TOP} */}
-          {/* {LIST PAYMENT METHOD} */}
-
-          {viewPaymentMethod === false ? null : (
-            <View
-              style={{
-                flexDirection: 'column',
-                flex: 6,
-                // backgroundColor: 'pink',
-                // margin:20,
-                // marginTop: 20,
-
-                //   justifyContent: 'center',
-              }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '33%',
-                  // backgroundColor: 'red',
-                }}>
-                <TouchableOpacity
-                  style={styles.boxPayment}
-                  onPress={() => _clickPayment('cash')}>
-                  <View>
+                  <View style={styles.boxPayment}>
                     <View style={{marginBottom: 15}}>
-                      <Icon name={'cash-outline'} type="ionicon" size={28} />
+                      <Icon
+                        name={'chatbox-ellipses-outline'}
+                        type="ionicon"
+                        size={28}
+                        color={color.textGray}
+                      />
                     </View>
-                    <Text style={styles.textFamily}>Cash</Text>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      Payment Link
+                    </Text>
                   </View>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={{
-                    ...styles.boxPayment,
-                    // backgroundColor: 'pink',
-                    //   flexDirection: 'column',
-                    //   flex: 1,
-                    // width:200
-                  }}
-                  onPress={() => _clickPayment('card')}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon name={'card-outline'} type="ionicon" size={28} />
+                  <View style={styles.boxPayment}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon
+                        name={'wallet-outline'}
+                        type="ionicon"
+                        size={28}
+                        color={color.textGray}
+                      />
+                    </View>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      Credit Wallet
+                    </Text>
                   </View>
-                  <Text style={styles.textFamily}>Credit/Debit Card</Text>
-                </TouchableOpacity>
-
+                </View>
                 <View
                   style={{
-                    ...styles.boxPayment,
-                    // backgroundColor: 'pink',
-                    //   flexDirection: 'column',
-                    //   flex: 1,
-                    // width:200
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '33%',
+                    // backgroundColor: 'red',
                   }}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'qrcode-scan'}
-                      type="material-community"
-                      size={28}
-                      color={color.textGray}
-                    />
+                  <View style={styles.boxPayment}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon
+                        name={'star-outline'}
+                        type="ionicon"
+                        size={28}
+                        color={color.textGray}
+                      />
+                    </View>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      Reward Points
+                    </Text>
                   </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    QR Payment
-                  </Text>
+
+                  <View style={styles.boxPayment}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon
+                        name={'GoldOutlined'}
+                        type="ant"
+                        size={28}
+                        color={color.textGray}
+                      />
+                    </View>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      Gold
+                    </Text>
+                  </View>
+
+                  <View style={{...styles.boxPayment, opacity: 0, height: 0}}>
+                    <View style={{marginBottom: 15}}>
+                      <Icon
+                        name={'wallet-outline'}
+                        type="ionicon"
+                        size={24}
+                        color={color.textGray}
+                      />
+                    </View>
+                    <Text style={{...styles.textFamily, color: color.textGray}}>
+                      Credit Wallet
+                    </Text>
+                  </View>
                 </View>
               </View>
+            )}
+
+            {/* { FOR VIEW CASH } */}
+
+            {paymentMethod === 'cash'
+              ? _viewCash()
+              : paymentMethod === 'card'
+              ? _viewCard()
+              : null}
+
+            {/* {RIGHT SECTION THIRD TOP} */}
+
+            {/* {button confirm / change order} */}
+
+            {paymentMethod === '' ? (
               <View
                 style={{
                   flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '33%',
-                  // backgroundColor: 'red',
+                  flex: 0.7,
+                  // backgroundColor: 'black',
+                  // justifyContent:'center'
                 }}>
-                <View style={styles.boxPayment}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'cash-outline'}
-                      type="ionicon"
-                      size={28}
-                      color={color.textGray}
-                    />
-                  </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    e-Wallet
-                  </Text>
-                </View>
-
-                <View style={styles.boxPayment}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'chatbox-ellipses-outline'}
-                      type="ionicon"
-                      size={28}
-                      color={color.textGray}
-                    />
-                  </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    Payment Link
-                  </Text>
-                </View>
-
-                <View style={styles.boxPayment}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'wallet-outline'}
-                      type="ionicon"
-                      size={28}
-                      color={color.textGray}
-                    />
-                  </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    Credit Wallet
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: '33%',
-                  // backgroundColor: 'red',
-                }}>
-                <View style={styles.boxPayment}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'star-outline'}
-                      type="ionicon"
-                      size={28}
-                      color={color.textGray}
-                    />
-                  </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    Reward Points
-                  </Text>
-                </View>
-
-                <View style={styles.boxPayment}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'GoldOutlined'}
-                      type="ant"
-                      size={28}
-                      color={color.textGray}
-                    />
-                  </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    Gold
-                  </Text>
-                </View>
-
-                <View style={{...styles.boxPayment, opacity: 0, height: 0}}>
-                  <View style={{marginBottom: 15}}>
-                    <Icon
-                      name={'wallet-outline'}
-                      type="ionicon"
-                      size={24}
-                      color={color.textGray}
-                    />
-                  </View>
-                  <Text style={{...styles.textFamily, color: color.textGray}}>
-                    Credit Wallet
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* { FOR VIEW CASH } */}
-
-          {paymentMethod === 'cash'
-            ? _viewCash()
-            : paymentMethod === 'card'
-            ? _viewCard()
-            : null}
-
-          {/* {RIGHT SECTION THIRD TOP} */}
-
-          {/* {button confirm / change order} */}
-
-          {paymentMethod === '' ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                flex: 0.7,
-                // backgroundColor: 'black',
-                // justifyContent:'center'
-              }}>
-              {/* <TouchableOpacity
+                {/* <TouchableOpacity
                 style={{
                   flexDirection: 'row',
                   // justifyContent: 'center',
@@ -2220,128 +2270,129 @@ const Checkout = ({navigation, route}) => {
                 </View>
               </TouchableOpacity> */}
 
-              <View style={{flex: 1}}>
+                <View style={{flex: 1}}>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      // alignItems: 'center',
+                      backgroundColor: 'black',
+                      width: 'auto',
+                      // flex: 1,
+                      backgroundColor: color.white,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: color.primary,
+                      borderRadius: 5,
+                      marginLeft: 20,
+                    }}
+                    onPress={() => {
+                      Alert.alert(
+                        'Cancel Order',
+                        'Are you sure you want to cancel your order?',
+                        [
+                          {
+                            text: 'Cancel',
+                            // onPress: () => console.log('Cancel Pressed'),
+                            style: 'cancel',
+                          },
+                          {
+                            text: 'Confirm',
+                            onPress: () => {
+                              _cancelOrder();
+                            },
+                          },
+                        ],
+                        {cancelable: false},
+                      );
+                    }}>
+                    <View
+                      style={
+                        {
+                          // flex: 1,
+                          // width: '100%',
+                          //   margin: 5,
+                          // marginLeft: 20,
+                          // marginRight: 20,
+                          // marginTop: 73,
+                        }
+                      }>
+                      <Text style={styles.textFamily}>Cancel</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={{flex: 1}}>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      // alignItems: 'center',
+                      backgroundColor: 'black',
+                      width: 'auto',
+                      // flex: 1,
+                      backgroundColor: color.white,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: 1,
+                      borderColor: color.primary,
+                      borderRadius: 5,
+                      marginLeft: 20,
+                      marginRight: 20,
+                    }}
+                    onPress={() => {
+                      _changeOrder();
+                    }}>
+                    <View style={{}}>
+                      <Text style={styles.textFamily}>Change Order</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'column',
+                  flex: 0.7,
+                  // backgroundColor: 'black',
+                }}>
                 <TouchableOpacity
                   style={{
                     flexDirection: 'row',
-                    justifyContent: 'center',
+                    // justifyContent: 'center',
                     // alignItems: 'center',
-                    backgroundColor: 'black',
-                    width: 'auto',
-                    // flex: 1,
-                    backgroundColor: color.white,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: color.primary,
-                    borderRadius: 5,
-                    marginLeft: 20,
+                    // backgroundColor:'black'
                   }}
                   onPress={() => {
-                    Alert.alert(
-                      'Cancel Order',
-                      'Are you sure you want to cancel your order?',
-                      [
-                        {
-                          text: 'Cancel',
-                          // onPress: () => console.log('Cancel Pressed'),
-                          style: 'cancel',
-                        },
-                        {
-                          text: 'Confirm',
-                          onPress: () => {
-                            _cancelOrder();
-                          },
-                        },
-                      ],
-                      {cancelable: false},
-                    );
+                    _confirmPayment();
                   }}>
                   <View
-                    style={
-                      {
-                        // flex: 1,
-                        // width: '100%',
-                        //   margin: 5,
-                        // marginLeft: 20,
-                        // marginRight: 20,
-                        // marginTop: 73,
-                      }
-                    }>
-                    <Text style={styles.textFamily}>Cancel</Text>
+                    style={{
+                      // flex: 1,
+                      width: 583,
+                      backgroundColor: color.primary,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      //   margin: 5,
+                      marginLeft: 'auto',
+                      marginRight: 'auto',
+                      // marginTop: 73,
+                      borderRadius: 5,
+                    }}>
+                    <Text style={{...styles.textFamily, color: color.white}}>
+                      Confirm
+                    </Text>
                   </View>
                 </TouchableOpacity>
               </View>
-
-              <View style={{flex: 1}}>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    // alignItems: 'center',
-                    backgroundColor: 'black',
-                    width: 'auto',
-                    // flex: 1,
-                    backgroundColor: color.white,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: color.primary,
-                    borderRadius: 5,
-                    marginLeft: 20,
-                    marginRight: 20,
-                  }}
-                  onPress={() => {
-                    _changeOrder();
-                  }}>
-                  <View style={{}}>
-                    <Text style={styles.textFamily}>Change Order</Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View
-              style={{
-                flexDirection: 'column',
-                flex: 0.7,
-                // backgroundColor: 'black',
-              }}>
-              <TouchableOpacity
-                style={{
-                  flexDirection: 'row',
-                  // justifyContent: 'center',
-                  // alignItems: 'center',
-                  // backgroundColor:'black'
-                }}
-                onPress={() => {
-                  _confirmPayment();
-                }}>
-                <View
-                  style={{
-                    // flex: 1,
-                    width: 583,
-                    backgroundColor: color.primary,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    //   margin: 5,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    // marginTop: 73,
-                    borderRadius: 5,
-                  }}>
-                  <Text style={{...styles.textFamily, color: color.white}}>
-                    Confirm
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          )}
+            )}
+          </View>
         </View>
-      </View>
+      )}
     </SafeAreaView>
   );
 };
