@@ -12,6 +12,7 @@ import {
   ImageBackground,
   TouchableNativeFeedback,
   Keyboard,
+  StatusBar,
 } from 'react-native';
 
 import {Icon} from 'react-native-elements';
@@ -27,6 +28,7 @@ const imagelogo = require('../img/logomg.jpeg');
 const LoginPw = ({navigation, route}) => {
   // const [loading, set_loading]                = useState(false);
   // const [show_password, set_show_password]    = useState(false);
+  
   const [staffNo, setStaffNo] = useState('');
   const [password, setPassword] = useState('');
   const [staffDetails, setStaffDetails] = useState({});
@@ -178,7 +180,7 @@ const LoginPw = ({navigation, route}) => {
           console.log('status', resp.data.status);
           if (resp.data.status == 200) {
             _screenOrder();
-            alert('Login Successful');
+            // alert('Login Successful');
           }
           // console.log('status', resp.data.data);
           // _screenOrder();
@@ -204,244 +206,164 @@ const LoginPw = ({navigation, route}) => {
   };
 
   return (
-    <ImageBackground
-      source={{
-        uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg',
-      }}
-      style={styles.image}>
-      <LinearGradient colors={['#000000', '#00000000']} style={styles.lg}>
-        <SafeAreaView style={{flex: 1}}>
-          <View style={styles.containerLogo}>
-            <Image
-              style={styles.stretch}
-              source={{
-                uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png',
-              }}
-            />
-          </View>
-          <View style={styles.container}>
-            <Text
-              style={{
-                fontFamily: fonts.semibold,
-                color: color.white,
-                fontSize: 16,
-                marginTop: 20,
-              }}>
-              Password
-            </Text>
-
-            <View style={{flexDirection: 'row'}}>
-              <View style={{padding: 10}}>
-                <View style={styles.inputPw}>
-                  <TouchableNativeFeedback onPress={Keyboard.dismiss}>
-                    <TextInput
-                      style={styles.TextInput}
-                      ref={ref_input1}
-                      placeholderTextColor="#000000"
-                      maxLength={1}
-                      // defaultValue='1'
-                      value={pw1}
-                      // onChangeText={value => {
-                      //   setPw1(value);
-                      //   if (value.length === 1) {
-                      //     ref_input2.current.focus();
-                      //   }
-                      // }}
-                      secureTextEntry={true}
-                      showSoftInputOnFocus={false}
-                    />
-                  </TouchableNativeFeedback>
-                </View>
-              </View>
-
-              <View style={{padding: 10}}>
-                <View style={styles.inputPw}>
-                  <TouchableNativeFeedback onPress={Keyboard.dismiss}>
-                    <TextInput
-                      style={styles.TextInput}
-                      ref={ref_input2}
-                      value={pw2}
-                      maxLength={1}
-                      placeholderTextColor="#000000"
-                      secureTextEntry={true}
-                      showSoftInputOnFocus={false}
-                    />
-                  </TouchableNativeFeedback>
-                </View>
-              </View>
-
-              <View style={{padding: 10}}>
-                <View style={styles.inputPw}>
-                  <TouchableNativeFeedback onPress={Keyboard.dismiss}>
-                    <TextInput
-                      style={styles.TextInput}
-                      ref={ref_input3}
-                      value={pw3}
-                      maxLength={1}
-                      placeholderTextColor="#000000"
-                      secureTextEntry={true}
-                      showSoftInputOnFocus={false}
-                    />
-                  </TouchableNativeFeedback>
-                </View>
-              </View>
-
-              <View style={{padding: 10}}>
-                <View style={styles.inputPw}>
-                  <TouchableNativeFeedback onPress={Keyboard.dismiss}>
-                    <TextInput
-                      style={styles.TextInput}
-                      ref={ref_input4}
-                      value={pw4}
-                      maxLength={1}
-                      placeholderTextColor="#000000"
-                      secureTextEntry={true}
-                      showSoftInputOnFocus={false}
-                    />
-                  </TouchableNativeFeedback>
-                </View>
-              </View>
+    <>
+      <StatusBar hidden />
+      <ImageBackground
+        source={{
+          uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg',
+        }}
+        style={styles.image}>
+        <LinearGradient colors={['#000000', '#00000000']} style={styles.lg}>
+          <SafeAreaView style={{flex: 1}}>
+            <View style={styles.containerLogo}>
+              <Image
+                style={styles.stretch}
+                source={{
+                  uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png',
+                }}
+              />
             </View>
-
-            {/* <View style={{position: 'absolute'}}>
-              {numbers.map((chunk, index) => {
-                return (
-                  <View key={index} style={styles.numpadWrapper}>
-                    {chunk.map(number => {
-                      return (
-                        <TouchableOpacity style={styles.btnNumpad}>
-                          <View key={number} style={styles.numpad}>
-                            <Text style={styles.numpadNumber}>{number}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                );
-              })}
-            </View> */}
-
-            <View style={{position: 'absolute'}}>
-              <View style={{flexDirection: 'row', marginTop: 250}}>
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => _inputPw('1')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>1</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => _inputPw('2')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>2</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => _inputPw('3')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>3</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => _inputPw('backspace')}>
-                    <View style={styles.numpad}>
-                      <Icon
-                        name={'backspace-outline'}
-                        type="ionicon"
-                        size={30}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
+            <View style={styles.container}>
+              <Text
+                style={{
+                  fontFamily: fonts.semibold,
+                  color: color.white,
+                  fontSize: 16,
+                  marginTop: 20,
+                }}>
+                Password
+              </Text>
 
               <View style={{flexDirection: 'row'}}>
-                <View style={{flexDirection: 'column'}}>
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => _inputPw('4')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>4</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => _inputPw('5')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>5</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => _inputPw('6')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>6</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => _inputPw('7')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>7</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => _inputPw('8')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>8</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => _inputPw('9')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>9</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
+                <View style={{padding: 10}}>
+                  <View style={styles.inputPw}>
+                    <TouchableNativeFeedback onPress={Keyboard.dismiss}>
+                      <TextInput
+                        style={styles.TextInput}
+                        ref={ref_input1}
+                        placeholderTextColor="#000000"
+                        maxLength={1}
+                        // defaultValue='1'
+                        value={pw1}
+                        // onChangeText={value => {
+                        //   setPw1(value);
+                        //   if (value.length === 1) {
+                        //     ref_input2.current.focus();
+                        //   }
+                        // }}
+                        secureTextEntry={true}
+                        showSoftInputOnFocus={false}
+                      />
+                    </TouchableNativeFeedback>
                   </View>
                 </View>
 
-                <View style={{flexDirection: 'column'}}>
+                <View style={{padding: 10}}>
+                  <View style={styles.inputPw}>
+                    <TouchableNativeFeedback onPress={Keyboard.dismiss}>
+                      <TextInput
+                        style={styles.TextInput}
+                        ref={ref_input2}
+                        value={pw2}
+                        maxLength={1}
+                        placeholderTextColor="#000000"
+                        secureTextEntry={true}
+                        showSoftInputOnFocus={false}
+                      />
+                    </TouchableNativeFeedback>
+                  </View>
+                </View>
+
+                <View style={{padding: 10}}>
+                  <View style={styles.inputPw}>
+                    <TouchableNativeFeedback onPress={Keyboard.dismiss}>
+                      <TextInput
+                        style={styles.TextInput}
+                        ref={ref_input3}
+                        value={pw3}
+                        maxLength={1}
+                        placeholderTextColor="#000000"
+                        secureTextEntry={true}
+                        showSoftInputOnFocus={false}
+                      />
+                    </TouchableNativeFeedback>
+                  </View>
+                </View>
+
+                <View style={{padding: 10}}>
+                  <View style={styles.inputPw}>
+                    <TouchableNativeFeedback onPress={Keyboard.dismiss}>
+                      <TextInput
+                        style={styles.TextInput}
+                        ref={ref_input4}
+                        value={pw4}
+                        maxLength={1}
+                        placeholderTextColor="#000000"
+                        secureTextEntry={true}
+                        showSoftInputOnFocus={false}
+                      />
+                    </TouchableNativeFeedback>
+                  </View>
+                </View>
+              </View>
+
+              {/* <View style={{position: 'absolute'}}>
+      {numbers.map((chunk, index) => {
+        return (
+          <View key={index} style={styles.numpadWrapper}>
+            {chunk.map(number => {
+              return (
+                <TouchableOpacity style={styles.btnNumpad}>
+                  <View key={number} style={styles.numpad}>
+                    <Text style={styles.numpadNumber}>{number}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        );
+      })}
+    </View> */}
+
+              <View style={{position: 'absolute'}}>
+                <View style={{flexDirection: 'row', marginTop: 250}}>
                   <View style={{padding: 10}}>
                     <TouchableOpacity
-                      style={styles.btnNumpadCfm}
-                      onPress={() => validatePw()}>
+                      style={styles.btnNumpad}
+                      onPress={() => _inputPw('1')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>1</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => _inputPw('2')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>2</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => _inputPw('3')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>3</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => _inputPw('backspace')}>
                       <View style={styles.numpad}>
                         <Icon
-                          name={'arrow-forward-circle-outline'}
+                          name={'backspace-outline'}
                           type="ionicon"
                           size={30}
                         />
@@ -449,73 +371,156 @@ const LoginPw = ({navigation, route}) => {
                     </TouchableOpacity>
                   </View>
                 </View>
+
+                <View style={{flexDirection: 'row'}}>
+                  <View style={{flexDirection: 'column'}}>
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => _inputPw('4')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>4</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => _inputPw('5')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>5</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => _inputPw('6')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>6</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => _inputPw('7')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>7</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => _inputPw('8')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>8</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => _inputPw('9')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>9</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={{flexDirection: 'column'}}>
+                    <View style={{padding: 10}}>
+                      <TouchableOpacity
+                        style={styles.btnNumpadCfm}
+                        onPress={() => validatePw()}>
+                        <View style={styles.numpad}>
+                          <Icon
+                            name={'arrow-forward-circle-outline'}
+                            type="ionicon"
+                            size={30}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={{flexDirection: 'row'}}>
+                  <View style={{padding: 10, opacity: 0, height: 0}}>
+                    <TouchableOpacity style={styles.btnNumpad}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>0</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => _inputPw('0')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>0</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10, opacity: 0, height: 0}}>
+                    <TouchableOpacity style={styles.btnNumpad}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>0</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => _login()}>
+                      <Icon
+                        name={'arrow-back-circle-outline'}
+                        type="ionicon"
+                        size={30}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
 
-              <View style={{flexDirection: 'row'}}>
-                <View style={{padding: 10, opacity: 0, height: 0}}>
-                  <TouchableOpacity style={styles.btnNumpad}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>0</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => _inputPw('0')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>0</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10, opacity: 0, height: 0}}>
-                  <TouchableOpacity style={styles.btnNumpad}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>0</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => _login()}>
-                    <Icon
-                      name={'arrow-back-circle-outline'}
-                      type="ionicon"
-                      size={30}
-                    />
-                  </TouchableOpacity>
-                </View>
+              <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
+                <Text
+                  style={{
+                    fontFamily: fonts.semibold,
+                    color: color.white,
+                    fontSize: 21,
+                    marginBottom: 10,
+                    marginTop: 20,
+                  }}>
+                  {outletName}
+                </Text>
               </View>
+
+              {/* <TouchableOpacity>
+      <Text style={styles.forgot_button}>Forgot Password?</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity style={styles.loginBtn}>
+      <Text style={styles.loginText}>LOGIN</Text>
+    </TouchableOpacity> */}
             </View>
-
-            <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
-              <Text
-                style={{
-                  fontFamily: fonts.semibold,
-                  color: color.white,
-                  fontSize: 21,
-                  marginBottom: 10,
-                  marginTop: 20,
-                }}>
-                {outletName}
-              </Text>
-            </View>
-
-            {/* <TouchableOpacity>
-              <Text style={styles.forgot_button}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginBtn}>
-              <Text style={styles.loginText}>LOGIN</Text>
-            </TouchableOpacity> */}
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    </ImageBackground>
+          </SafeAreaView>
+        </LinearGradient>
+      </ImageBackground>
+    </>
   );
 };
 

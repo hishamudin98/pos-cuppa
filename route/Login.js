@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Alert,
+  StatusBar,
 } from 'react-native';
 
 import {Icon} from 'react-native-elements';
@@ -107,190 +108,110 @@ const Login = ({navigation, route}) => {
   };
 
   return (
-    <ImageBackground
-      source={{
-        uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg',
-      }}
-      style={styles.image}>
-      <LinearGradient colors={['#000000', '#00000000']} style={styles.lg}>
-        <SafeAreaView style={{flex: 1}}>
-          <View style={styles.containerLogo}>
-            <Image
-              style={styles.stretch}
-              source={{
-                uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png',
-              }}
-            />
-          </View>
-
-          <View style={styles.container}>
-            <Text
-              style={{
-                fontFamily: fonts.semibold,
-                color: color.white,
-                fontSize: 16,
-                marginBottom: 10,
-                marginTop: 20,
-              }}>
-              Staff No
-            </Text>
-            <View style={styles.inputView}>
-              <TextInput
-                style={[
-                  styles.TextInput,
-                  styles.textFamily,
-                  {
-                    justifyContent: 'center',
-                    alignSelf: 'center',
-                    marginLeft: 0,
-                  },
-                ]}
-                placeholder="Staff No."
-                placeholderTextColor={color.primary}
-                defaultValue={staffNo}
-                onChangeText={text => _changeStaffNo(text)}
+    <>
+      <StatusBar hidden />
+      <ImageBackground
+        source={{
+          uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg',
+        }}
+        style={styles.image}>
+        <LinearGradient colors={['#000000', '#00000000']} style={styles.lg}>
+          <SafeAreaView style={{flex: 1}}>
+            <View style={styles.containerLogo}>
+              <Image
+                style={styles.stretch}
+                source={{
+                  uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png',
+                }}
               />
             </View>
 
-            {/* <View style={{position: 'absolute'}}>
-              {numbers.map((chunk, index) => {
-                return (
-                  <View key={index} style={styles.numpadWrapper}>
-                    {chunk.map(number => {
-                      return (
-                        <TouchableOpacity style={styles.btnNumpad}>
-                          <View key={number} style={styles.numpad}>
-                            <Text style={styles.numpadNumber}>{number}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                );
-              })}
-            </View> */}
-
-            <View style={{position: 'absolute'}}>
-              <View style={{flexDirection: 'row', marginTop: 250}}>
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => inputStaffNo('1')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>1</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => inputStaffNo('2')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>2</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => inputStaffNo('3')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>3</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => inputStaffNo('backspace')}>
-                    <View style={styles.numpad}>
-                      <Icon
-                        name={'backspace-outline'}
-                        type="ionicon"
-                        size={30}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
+            <View style={styles.container}>
+              <Text
+                style={{
+                  fontFamily: fonts.semibold,
+                  color: color.white,
+                  fontSize: 16,
+                  marginBottom: 10,
+                  marginTop: 20,
+                }}>
+                Staff No
+              </Text>
+              <View style={styles.inputView}>
+                <TextInput
+                  style={[
+                    styles.TextInput,
+                    styles.textFamily,
+                    {
+                      justifyContent: 'center',
+                      alignSelf: 'center',
+                      marginLeft: 0,
+                    },
+                  ]}
+                  placeholder="Staff No."
+                  placeholderTextColor={color.primary}
+                  defaultValue={staffNo}
+                  onChangeText={text => _changeStaffNo(text)}
+                />
               </View>
 
-              <View style={{flexDirection: 'row'}}>
-                <View style={{flexDirection: 'column'}}>
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => inputStaffNo('4')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>4</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => inputStaffNo('5')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>5</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => inputStaffNo('6')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>6</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
+              {/* <View style={{position: 'absolute'}}>
+      {numbers.map((chunk, index) => {
+        return (
+          <View key={index} style={styles.numpadWrapper}>
+            {chunk.map(number => {
+              return (
+                <TouchableOpacity style={styles.btnNumpad}>
+                  <View key={number} style={styles.numpad}>
+                    <Text style={styles.numpadNumber}>{number}</Text>
                   </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        );
+      })}
+    </View> */}
 
-                  <View style={{flexDirection: 'row'}}>
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => inputStaffNo('7')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>7</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => inputStaffNo('8')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>8</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                    <View style={{padding: 10}}>
-                      <TouchableOpacity
-                        style={styles.btnNumpad}
-                        onPress={() => inputStaffNo('9')}>
-                        <View style={styles.numpad}>
-                          <Text style={styles.numpadNumber}>9</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </View>
-
-                <View style={{flexDirection: 'column'}}>
+              <View style={{position: 'absolute'}}>
+                <View style={{flexDirection: 'row', marginTop: 250}}>
                   <View style={{padding: 10}}>
                     <TouchableOpacity
-                      style={styles.btnNumpadCfm}
-                      onPress={() => validateLogin()}>
+                      style={styles.btnNumpad}
+                      onPress={() => inputStaffNo('1')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>1</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => inputStaffNo('2')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>2</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => inputStaffNo('3')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>3</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => inputStaffNo('backspace')}>
                       <View style={styles.numpad}>
                         <Icon
-                          name={'arrow-forward-circle-outline'}
+                          name={'backspace-outline'}
                           type="ionicon"
                           size={30}
                         />
@@ -298,53 +219,136 @@ const Login = ({navigation, route}) => {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </View>
 
-              <View style={{flexDirection: 'row'}}>
-                <View style={{padding: 10, opacity: 0, height: 0}}>
-                  <TouchableOpacity style={styles.btnNumpad}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>0</Text>
+                <View style={{flexDirection: 'row'}}>
+                  <View style={{flexDirection: 'column'}}>
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => inputStaffNo('4')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>4</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => inputStaffNo('5')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>5</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => inputStaffNo('6')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>6</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </TouchableOpacity>
+
+                    <View style={{flexDirection: 'row'}}>
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => inputStaffNo('7')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>7</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => inputStaffNo('8')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>8</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={{padding: 10}}>
+                        <TouchableOpacity
+                          style={styles.btnNumpad}
+                          onPress={() => inputStaffNo('9')}>
+                          <View style={styles.numpad}>
+                            <Text style={styles.numpadNumber}>9</Text>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={{flexDirection: 'column'}}>
+                    <View style={{padding: 10}}>
+                      <TouchableOpacity
+                        style={styles.btnNumpadCfm}
+                        onPress={() => validateLogin()}>
+                        <View style={styles.numpad}>
+                          <Icon
+                            name={'arrow-forward-circle-outline'}
+                            type="ionicon"
+                            size={30}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
 
-                <View style={{padding: 10}}>
-                  <TouchableOpacity
-                    style={styles.btnNumpad}
-                    onPress={() => inputStaffNo('0')}>
-                    <View style={styles.numpad}>
-                      <Text style={styles.numpadNumber}>0</Text>
-                    </View>
-                  </TouchableOpacity>
+                <View style={{flexDirection: 'row'}}>
+                  <View style={{padding: 10, opacity: 0, height: 0}}>
+                    <TouchableOpacity style={styles.btnNumpad}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>0</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => inputStaffNo('0')}>
+                      <View style={styles.numpad}>
+                        <Text style={styles.numpadNumber}>0</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
+
+              <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
+                <Text
+                  style={{
+                    fontFamily: fonts.semibold,
+                    color: color.white,
+                    fontSize: 21,
+                    marginBottom: 10,
+                    marginTop: 20,
+                  }}>
+                  {outletName}
+                </Text>
+              </View>
+
+              {/* <TouchableOpacity>
+      <Text style={styles.forgot_button}>Forgot Password?</Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity style={styles.loginBtn}>
+      <Text style={styles.loginText}>LOGIN</Text>
+    </TouchableOpacity> */}
             </View>
-
-            <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
-              <Text
-                style={{
-                  fontFamily: fonts.semibold,
-                  color: color.white,
-                  fontSize: 21,
-                  marginBottom: 10,
-                  marginTop: 20,
-                }}>
-                {outletName}
-              </Text>
-            </View>
-
-            {/* <TouchableOpacity>
-              <Text style={styles.forgot_button}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginBtn}>
-              <Text style={styles.loginText}>LOGIN</Text>
-            </TouchableOpacity> */}
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    </ImageBackground>
+          </SafeAreaView>
+        </LinearGradient>
+      </ImageBackground>
+    </>
   );
 };
 
