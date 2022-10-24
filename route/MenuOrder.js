@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ImageBackground,
   Alert,
+  Switch,
+  ActivityIndicator,
 } from 'react-native';
 
 import {Picker} from '@react-native-picker/picker';
@@ -84,11 +86,17 @@ const local_data = [
 const MenuOrder = ({navigation, route}) => {
   const scrollView = useRef();
 
+  const [loading, setLoading] = useState(false);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDiscount, setModalDiscount] = useState(false);
+  const [toggleEnable, setToggleEnable] = useState(false);
 
   const [textInputMembershipNo, setTextInputMembershipNo] = useState('');
   const [membershipNo, setMembershipNo] = useState('');
+  const [menuOrderTypeId, setMenuOrderTypeId] = useState('');
+
+  const [remark, setRemark] = useState('');
 
   const [menuId, setMenuId] = useState('');
   const [menuCategory, setMenuCategory] = useState([]);
@@ -105,7 +113,7 @@ const MenuOrder = ({navigation, route}) => {
   const [menuVariantId2, setMenuVariantId2] = useState('');
   const [menuVariantType2, setMenuVariantType2] = useState('');
   const [menuVariantPrice2, setMenuVariantPrice2] = useState(0);
-  const [menuVariantSelected2, setMenuVariantSelected2] = useState([]);
+  const [menuVariantSelected2, setMenuVariantSelected2] = useState({});
 
   const [menuImage, setMenuImage] = useState('');
   const [menuAddon, setMenuAddon] = useState('');
@@ -177,6 +185,7 @@ const MenuOrder = ({navigation, route}) => {
       _getCustomer();
       _calculateTotal();
       _checkDiscount();
+      _startLoading();
 
       // AsyncStorage.removeItem('ORDER');
       // AsyncStorage.removeItem('DATA_ORDER');
@@ -185,6 +194,13 @@ const MenuOrder = ({navigation, route}) => {
       // AsyncStorage.removeItem('CUSTOMER');
     });
   }, [route.params?.data]);
+
+  const _startLoading = async () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
 
   const _getOrderNo = async () => {
     console.log('getOrderNo', route.params);
@@ -358,6 +374,16 @@ const MenuOrder = ({navigation, route}) => {
     // alert('haha');
   };
 
+  const _toggleSwitchDiscount = mode => {
+    if (mode === 'order') {
+      setModalVisible(true);
+      setModalDiscount(false);
+    } else {
+      setModalVisible(false);
+      setModalDiscount(true);
+    }
+  };
+
   const _addQuantity = () => {
     setItemQuantity(itemQuantity + 1);
   };
@@ -379,7 +405,7 @@ const MenuOrder = ({navigation, route}) => {
     }
   };
 
-  const _addMenuCartQuantity = async (id, membership, variant) => {
+  const _addMenuCartQuantity = async (id, membership, variant, remark) => {
     // alert(id);
     let fetchOrder = await AsyncStorage.getItem('ORDER');
     let stgParsed = JSON.parse(fetchOrder);
@@ -432,10 +458,14 @@ const MenuOrder = ({navigation, route}) => {
           let prevVariant = JSON.stringify(menu.menu_variant);
           let newVariant = JSON.stringify(variant);
 
+          console.log('prev remark : ', menu.menu_remark);
+          console.log('now remark : ', remark);
+
           if (
             menu.menu_id === id &&
             menu.membership_no === membership &&
-            prevVariant === newVariant
+            prevVariant === newVariant &&
+            menu.menu_remark === remark
           ) {
             // setAmountOrder(amountOrder + menu.menu_price)
             return {
@@ -451,9 +481,20 @@ const MenuOrder = ({navigation, route}) => {
         await AsyncStorage.setItem('ORDER', JSON.stringify(newCart));
       }
     } else {
+      console.log('membershipExists', membershipExists);
+      console.log('menuExists', menuExists);
+      console.log('stgParsed :', stgParsed);
+
       if (menuExists && membershipExists) {
         const newCart = stgParsed.map(menu => {
-          if (menu.menu_id === id && menu.membership_no === membership) {
+          console.log('menu_id', menu.menu_id === id);
+          console.log('membership_no', menu.membership_no === membership);
+          console.log('menu_remark', menu.menu_remark === remark);
+          if (
+            menu.menu_id === id &&
+            menu.membership_no === membership &&
+            menu.menu_remark === remark
+          ) {
             // setAmountOrder(amountOrder + menu.menu_price)
             return {
               ...menu,
@@ -474,14 +515,16 @@ const MenuOrder = ({navigation, route}) => {
     _confirmDiscount();
   };
 
-  const _addMenuCartQuantityTakeaway = async (id, membership, variant) => {
+  const _addMenuCartQuantityTakeaway = async (
+    id,
+    membership,
+    variant,
+    remark
+  ) => {
     // alert(id);
     let fetchOrder = await AsyncStorage.getItem('ORDER_TAKEAWAY');
     let stgParsed = JSON.parse(fetchOrder);
     const menuExists = stgParsed.find(menu => menu.menu_id === id);
-    const membershipExists = stgParsed.find(
-      member => member.membership_no === membership,
-    );
 
     let menuVariantExists = null;
     if (variant.length > 0) {
@@ -510,6 +553,10 @@ const MenuOrder = ({navigation, route}) => {
       // console.log('menuVariantExists', menuVariantExists);
     }
 
+    const membershipExists = stgParsed.find(
+      member => member.membership_no === membership,
+    );
+
     if (variant.length > 0) {
       let isEqual = variant.every(
         (val, i) =>
@@ -524,7 +571,8 @@ const MenuOrder = ({navigation, route}) => {
           if (
             menu.menu_id === id &&
             menu.membership_no === membership &&
-            prevVariant === newVariant
+            prevVariant === newVariant &&
+            menu.menu_remark === remark
           ) {
             // setAmountOrder(amountOrder + menu.menu_price)
             return {
@@ -540,9 +588,21 @@ const MenuOrder = ({navigation, route}) => {
         await AsyncStorage.setItem('ORDER_TAKEAWAY', JSON.stringify(newCart));
       }
     } else {
+      console.log('membershipExists123 : ', membershipExists);
+      console.log('menuExists123 :', menuExists);
+
+      console.log('stgParsed123 :', stgParsed);
+
       if (menuExists && membershipExists) {
         const newCart = stgParsed.map(menu => {
-          if (menu.menu_id === id && menu.membership_no === membership) {
+          console.log('menu_id', menu.menu_id === id);
+          console.log('membership_no', menu.membership_no === membership);
+          console.log('menu_remark', remark );
+          if (
+            menu.menu_id === id &&
+            menu.membership_no === membership &&
+            menu.menu_remark === remark
+          ) {
             // setAmountOrder(amountOrder + menu.menu_price)
             return {
               ...menu,
@@ -563,9 +623,10 @@ const MenuOrder = ({navigation, route}) => {
     _confirmDiscount();
   };
 
-  const _reduceMenuCartQuantity = async (id, membership, variant) => {
+  const _reduceMenuCartQuantity = async (id, membership, variant, remark) => {
     // LOOP ALL CART THEN FIND ID AND REDUCE QUANTITY
     let fetchOrder = await AsyncStorage.getItem('ORDER');
+    console.log('order reduce', fetchOrder);
 
     if (fetchOrder !== null) {
       let stgParsed = JSON.parse(fetchOrder);
@@ -617,7 +678,8 @@ const MenuOrder = ({navigation, route}) => {
             if (
               menu.menu_id === id &&
               menu.membership_no === membership &&
-              prevVariant === newVariant
+              prevVariant === newVariant &&
+              menu.menu_remark === remark
             ) {
               if (menu.menu_quantity - 1 < 1) {
                 return {
@@ -639,7 +701,11 @@ const MenuOrder = ({navigation, route}) => {
       } else {
         if (menuExists && membershipExists) {
           const newCart = stgParsed.map(menu => {
-            if (menu.menu_id === id && menu.membership_no === membership) {
+            if (
+              menu.menu_id === id &&
+              menu.membership_no === membership &&
+              menu.menu_remark === remark
+            ) {
               if (menu.menu_quantity - 1 < 1) {
                 return {
                   ...menu,
@@ -669,11 +735,16 @@ const MenuOrder = ({navigation, route}) => {
     _confirmDiscount();
   };
 
-  const _reduceMenuCartQuantityTakeaway = async (id, membership, variant) => {
+  const _reduceMenuCartQuantityTakeaway = async (
+    id,
+    membership,
+    variant,
+    remark,
+  ) => {
     // LOOP ALL CART THEN FIND ID AND REDUCE QUANTITY
     let fetchOrder = await AsyncStorage.getItem('ORDER_TAKEAWAY');
 
-    console.log('variant momo', variant);
+    console.log('variant momo', fetchOrder);
 
     if (fetchOrder !== null) {
       let stgParsed = JSON.parse(fetchOrder);
@@ -725,7 +796,8 @@ const MenuOrder = ({navigation, route}) => {
             if (
               menu.menu_id === id &&
               menu.membership_no === membership &&
-              prevVariant === newVariant
+              prevVariant === newVariant &&
+              menu.menu_remark === remark
             ) {
               if (menu.menu_quantity - 1 < 1) {
                 return {
@@ -747,7 +819,11 @@ const MenuOrder = ({navigation, route}) => {
       } else {
         if (menuExists && membershipExists) {
           const newCart = stgParsed.map(menu => {
-            if (menu.menu_id === id && menu.membership_no === membership) {
+            if (
+              menu.menu_id === id &&
+              menu.membership_no === membership &&
+              menu.menu_remark === remark
+            ) {
               if (menu.menu_quantity - 1 < 1) {
                 return {
                   ...menu,
@@ -778,6 +854,9 @@ const MenuOrder = ({navigation, route}) => {
   };
 
   const _addToCart = async () => {
+    let fetchCustomer = await AsyncStorage.getItem('CUSTOMER');
+    let customerParsed = JSON.parse(fetchCustomer);
+    let menuOrderTypeId = customerParsed.order_typeId;
     let variantSelected = [];
     let updatedCart = {};
     updatedCart = {
@@ -788,19 +867,45 @@ const MenuOrder = ({navigation, route}) => {
       menu_image: menuImage,
       membership_no: membershipNo,
       menu_variant: menuVariant,
+      menu_remark: remark,
+      orderType:
+        selectDineInOrTakeAway == 0 ? menuOrderTypeId : selectDineInOrTakeAway,
     };
+
+    console.log('updatedCart', updatedCart);
+
+    let lengthVariant = null;
+
+    const details = await axios
+      .post(url + '/getMenuDetails', {menu_id: menuId})
+      .then(res => {
+        console.log('menu details', res.data.data.menu_variant);
+        lengthVariant =
+          res.data.data.menu_variant == null
+            ? 0
+            : JSON.parse(res.data.data.menu_variant).length;
+      });
 
     if (selectDineInOrTakeAway == 1 || selectDineInOrTakeAway == 0) {
       if (menuVariant.length > 0) {
+        if (menuVariantSelected.length == 0) {
+          alert('Please select variant');
+          return;
+        }
         console.log('variantselected', variantSelected);
         console.log('menuVariantSelected2', menuVariantSelected2);
         variantSelected.push(menuVariantSelected);
-        if (menuVariantSelected2 !== '') {
-          variantSelected.push(menuVariantSelected2);
-        }
-        console.log('menuVariant', menuVariant);
-        console.log('menuVariantSelected', variantSelected);
 
+        let emptyVariantSelect2 = JSON.stringify(menuVariantSelected2);
+
+        if (menuVariant.length > 1) {
+          if (emptyVariantSelect2 == '{}') {
+            alert('Please select variant');
+            return;
+          } else {
+            variantSelected.push(menuVariantSelected2);
+          }
+        }
         updatedCart.menu_variant = variantSelected;
         updatedCart.menu_price = menuVariantPrice;
       }
@@ -885,13 +990,15 @@ const MenuOrder = ({navigation, route}) => {
           let checkMembership = checkMenuVariantExists.filter(member => {
             if (
               member.membership_no === updatedCart.membership_no &&
-              member.menu_id === updatedCart.menu_id
+              member.menu_id === updatedCart.menu_id &&
+              member.menu_remark === updatedCart.menu_remark
             ) {
               return true;
             } else {
               return false;
             }
           });
+
           if (checkMembership.length > 0) {
             // console.log('membershipExists', membershipExists);
             const newCart = stgParsed.map(menu => {
@@ -903,9 +1010,12 @@ const MenuOrder = ({navigation, route}) => {
                   menu.menu_id === updatedCart.menu_id,
               );
 
+              let prevVariant = JSON.stringify(menu.menu_variant);
+              let newVariant = JSON.stringify(updatedCart.menu_variant);
+
               if (
                 menu.membership_no === updatedCart.membership_no &&
-                isVariant.length > 0
+                prevVariant === newVariant
               ) {
                 return {
                   ...menu,
@@ -927,9 +1037,15 @@ const MenuOrder = ({navigation, route}) => {
           const isMenu = stgParsed.filter(
             menu =>
               menu.menu_id === updatedCart.menu_id &&
-              menu.membership_no == updatedCart.membership_no,
+              menu.membership_no == updatedCart.membership_no &&
+              menu.menu_remark == updatedCart.menu_remark,
           );
+
           if (updatedCart.menu_variant.length > 0 || isMenu.length == 0) {
+            console.log(
+              'updatedCart.menu_variant.lengt',
+              updatedCart.menu_variant.length,
+            );
             await AsyncStorage.setItem(
               'ORDER',
               JSON.stringify([...stgParsed, updatedCart]),
@@ -939,7 +1055,8 @@ const MenuOrder = ({navigation, route}) => {
               const newCart = stgParsed.map(menu => {
                 if (
                   menu.menu_id === updatedCart.menu_id &&
-                  menu.membership_no === updatedCart.membership_no
+                  menu.membership_no === updatedCart.membership_no &&
+                  menu.menu_remark == updatedCart.menu_remark
                 ) {
                   return {
                     ...menu,
@@ -974,8 +1091,24 @@ const MenuOrder = ({navigation, route}) => {
       setOrderCart(cart);
     } else {
       if (menuVariant.length > 0) {
+        if (menuVariantSelected.length == 0) {
+          alert('Please select variant');
+          return;
+        }
+        console.log('variantselected', variantSelected);
+        console.log('menuVariantSelected2', menuVariantSelected2);
         variantSelected.push(menuVariantSelected);
-        variantSelected.push(menuVariantSelected2);
+
+        let emptyVariantSelect2 = JSON.stringify(menuVariantSelected2);
+
+        if (menuVariant.length > 1) {
+          if (emptyVariantSelect2 == '{}') {
+            alert('Please select variant');
+            return;
+          } else {
+            variantSelected.push(menuVariantSelected2);
+          }
+        }
         updatedCart.menu_variant = variantSelected;
         updatedCart.menu_price = menuVariantPrice;
       }
@@ -1041,7 +1174,8 @@ const MenuOrder = ({navigation, route}) => {
           let checkMembership = checkMenuVariantExists.filter(member => {
             if (
               member.membership_no === updatedCart.membership_no &&
-              member.menu_id === updatedCart.menu_id
+              member.menu_id === updatedCart.menu_id &&
+              member.menu_remark === updatedCart.menu_remark
             ) {
               return true;
             } else {
@@ -1059,9 +1193,12 @@ const MenuOrder = ({navigation, route}) => {
                   menu.menu_id === updatedCart.menu_id,
               );
 
+              let prevVariant = JSON.stringify(menu.menu_variant);
+              let newVariant = JSON.stringify(updatedCart.menu_variant);
+
               if (
                 menu.membership_no === updatedCart.membership_no &&
-                isVariant.length > 0
+                prevVariant === newVariant
               ) {
                 return {
                   ...menu,
@@ -1086,7 +1223,8 @@ const MenuOrder = ({navigation, route}) => {
           const isMenu = stgParsed.filter(
             menu =>
               menu.menu_id === updatedCart.menu_id &&
-              menu.membership_no == updatedCart.membership_no,
+              menu.membership_no == updatedCart.membership_no &&
+              menu.menu_remark == updatedCart.menu_remark,
           );
           if (updatedCart.menu_variant.length > 0 || isMenu.length == 0) {
             await AsyncStorage.setItem(
@@ -1098,7 +1236,8 @@ const MenuOrder = ({navigation, route}) => {
               const newCart = stgParsed.map(menu => {
                 if (
                   menu.menu_id === updatedCart.menu_id &&
-                  menu.membership_no === updatedCart.membership_no
+                  menu.membership_no === updatedCart.membership_no &&
+                  menu.menu_remark == updatedCart.menu_remark
                 ) {
                   return {
                     ...menu,
@@ -1341,12 +1480,17 @@ const MenuOrder = ({navigation, route}) => {
       discountInput: textInputDiscount,
     };
 
+    if (discountType == '') {
+      setToggleEnable(false);
+    } else {
+      setToggleEnable(true);
+    }
+
     console.log('data', data);
 
     await AsyncStorage.setItem('DISCOUNT_ORDER', JSON.stringify(data));
 
     setDiscountConfirm(discountOrder);
-
     await _calculateTotal();
   };
 
@@ -1402,9 +1546,14 @@ const MenuOrder = ({navigation, route}) => {
     console.log('customerDetails', customerDetails);
     console.log('customerParsed', customerParsed);
 
+    console.log('orderparsed', orderParsed);
     // link membership w customer
-    if (orderParsed.length == 0) {
-      alert('Cart is empty');
+    if (orderParsed == null || orderParsed.length == 0) {
+      if (plusTakeway == true) {
+        alert('Dine in cart is empty');
+      } else {
+        alert('Cart is empty');
+      }
       return;
     }
 
@@ -1435,6 +1584,7 @@ const MenuOrder = ({navigation, route}) => {
       serviceCharge: serviceCharge,
       staff: staffParsed.staffId,
       membershipDiscount: membershipDiscount > 0 ? true : false,
+      tableId: customerParsed.table_id,
     };
 
     console.log('data', data);
@@ -1647,576 +1797,493 @@ const MenuOrder = ({navigation, route}) => {
         // height: modalVisible == true ? '100%' : null,
         // width: modalVisible == true ? '100%' : null,
       }}>
-      <View style={styles.mainContainer}>
-        <Drawer navigation={navigation} />
-        <View style={styles.box1}>
-          {/* ROW FIRST */}
-          <View
-            style={{
-              flexDirection: 'row',
-              height: 'auto',
-              alignItems: 'center',
-            }}>
-            <View style={{flex: 1, flexDirection: 'column', padding: 20}}>
-              <View>
-                <Text style={{fontSize: 20, fontFamily: fonts.semibold}}>
-                  Welcome, {staffName}
-                </Text>
-              </View>
-
-              <View style={{paddingTop: 5}}>
-                <Text style={{fontSize: 12, fontFamily: fonts.regular}}>
-                  Discover whatever you need easily
-                </Text>
-              </View>
-            </View>
-            <View style={styles.inputSearch}>
-              <Icon
-                name={'search'}
-                type="feather"
-                size={24}
-                // style={{position: 'absolute', margin: 100}}
-              />
-              <View>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Search menu"
-                  placeholderTextColor={color.textGray}
-                  onChangeText={text => _searchMenu(text)}
-                  // defaultValue={staffNo}
-                />
-              </View>
-            </View>
-          </View>
-
-          {/* ROW SECOND */}
-          <View
-            style={{
-              flexDirection: 'row',
-              height: 'auto',
-              alignItems: 'center',
-              marginRight: 20,
-            }}>
-            <TouchableOpacity
+      {loading == true ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            // backgroundColor: 'red',
+          }}>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <View style={styles.mainContainer}>
+          <Drawer navigation={navigation} />
+          <View style={styles.box1}>
+            {/* ROW FIRST */}
+            <View
               style={{
-                marginLeft: 20,
-                marginRight: 20,
-                marginTop: 0,
-                // marginBottom:0,
-                // backgroundColor:'pink'
-              }}
-              onPress={() => {
-                _endScroll();
+                flexDirection: 'row',
+                height: 'auto',
+                alignItems: 'center',
               }}>
-              <View style={{width: 20}}>
+              <View style={{flex: 1, flexDirection: 'column', padding: 20}}>
+                <View>
+                  <Text style={{fontSize: 20, fontFamily: fonts.semibold}}>
+                    Welcome, {staffName}
+                  </Text>
+                </View>
+
+                <View style={{paddingTop: 5}}>
+                  <Text style={{fontSize: 12, fontFamily: fonts.regular}}>
+                    Discover whatever you need easily
+                  </Text>
+                </View>
+              </View>
+              <View style={{...styles.inputSearch, flexDirection: 'row'}}>
                 <Icon
-                  name={endScroll == true ? 'chevrons-left' : 'chevrons-right'}
+                  name={'search'}
                   type="feather"
                   size={24}
                   // style={{position: 'absolute', margin: 100}}
                 />
-              </View>
-            </TouchableOpacity>
-
-            <ScrollView horizontal={true} ref={scrollView}>
-              <TouchableOpacity
-                style={{
-                  ...styles.boxCategory,
-                  backgroundColor:
-                    activeAllCategory == true ? color.primary : color.white,
-                }}
-                onPress={() => {
-                  _filterByCategory(0);
-                }}>
-                <View>
-                  <Text
+                <View style={{flex: 1, paddingRight: 10}}>
+                  <TextInput
                     style={{
                       ...styles.textInput,
-                      color: activeAllCategory == true ? color.white : null,
-                    }}>
-                    All
-                  </Text>
+                      width: '100%',
+                      flexDirection: 'row',
+                    }}
+                    placeholder="Search menu"
+                    placeholderTextColor={color.textGray}
+                    onChangeText={text => _searchMenu(text)}
+                    // defaultValue={staffNo}
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* ROW SECOND */}
+            <View
+              style={{
+                flexDirection: 'row',
+                height: 'auto',
+                alignItems: 'center',
+                marginRight: 20,
+              }}>
+              <TouchableOpacity
+                style={{
+                  marginLeft: 20,
+                  marginRight: 20,
+                  marginTop: 0,
+                  // marginBottom:0,
+                  // backgroundColor:'pink'
+                }}
+                onPress={() => {
+                  _endScroll();
+                }}>
+                <View style={{width: 20}}>
+                  <Icon
+                    name={
+                      endScroll == true ? 'chevrons-left' : 'chevrons-right'
+                    }
+                    type="feather"
+                    size={24}
+                    // style={{position: 'absolute', margin: 100}}
+                  />
                 </View>
               </TouchableOpacity>
-              {menuCategory.map((data, key) => {
-                return (
-                  <TouchableOpacity
-                    style={{
-                      ...styles.boxCategory,
-                      backgroundColor:
-                        activeCategory == data.category_id
-                          ? color.primary
-                          : color.white,
-                    }}
-                    key={key}
-                    onPress={() => {
-                      _filterByCategory(data.category_id);
-                    }}>
-                    <View>
-                      <Text
-                        style={{
-                          ...styles.textInput,
-                          color:
-                            activeCategory == data.category_id
-                              ? color.white
-                              : color.black,
-                        }}>
-                        {data.category_name}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
 
-          {/* ROW THIRD */}
-          <View
-            style={{
-              flexDirection: 'row',
-              // height: '68%',
-              // backgroundColor:'pink',
-              justifyContent: 'center',
-              // alignItems: 'center',
-              alignContent: 'center',
-              flex: 4,
-              marginRight: 0,
-              paddingLeft: 21,
-              // width:'100%'
-              // flex:1
-            }}>
-            <ScrollView
-              style={{
-                marginTop: 20,
-                // marginLeft: 20,
-              }}
-              // horizontal={true}
-              contentContainerStyle={{
-                flexWrap: 'wrap',
-                flexDirection: 'row',
-                // backgroundColor:'black'
-                // flex: 1,
-              }}>
-              {menu.map((data, key) => {
-                let img = JSON.parse(data.menu_image);
-                let variant = JSON.parse(data.menu_variant);
-                if (variant == null) {
-                  variant = [];
-                }
-
-                if (img) {
-                  var image = img[0].image1;
-                  // console.log('image', image);
-                } else {
-                  var image = null;
-                }
-                return (
-                  <>
-                    <TouchableOpacity
-                      key={key}
-                      // testID={data.id}
-                      style={{...styles.boxMenu, marginRight: 20}}
-                      onPress={() => {
-                        // code use state item
-                        setMenuId(data.menu_id);
-                        setMenuName(data.menu_name);
-                        setMenuPrice(data.menu_price);
-                        setMenuVariant(variant);
-                        // setMenuItem(data.menuItem);
-                        // setMenuAddon(data.menuAddon);
-                        setMenuImage(
-                          img
-                            ? image
-                            : 'https://s3.ap-southeast-1.amazonaws.com/cdn.toyyibfnb.com/images/food.png',
-                        );
-                        _showModal('order');
+              <ScrollView horizontal={true} ref={scrollView}>
+                <TouchableOpacity
+                  style={{
+                    ...styles.boxCategory,
+                    backgroundColor:
+                      activeAllCategory == true ? color.primary : color.white,
+                  }}
+                  onPress={() => {
+                    _filterByCategory(0);
+                  }}>
+                  <View>
+                    <Text
+                      style={{
+                        ...styles.textInput,
+                        color: activeAllCategory == true ? color.white : null,
                       }}>
-                      <View
-                        style={{
-                          justifyContent: 'center',
-                          margin: 5,
-                          alignItems: 'center',
-                          backgroundColor: color.background,
-                          height: 100,
-                          // width:50
-                        }}>
-                        <Image
+                      All
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                {menuCategory.map((data, key) => {
+                  return (
+                    <TouchableOpacity
+                      style={{
+                        ...styles.boxCategory,
+                        backgroundColor:
+                          activeCategory == data.category_id
+                            ? color.primary
+                            : color.white,
+                      }}
+                      key={key}
+                      onPress={() => {
+                        _filterByCategory(data.category_id);
+                      }}>
+                      <View>
+                        <Text
                           style={{
-                            width: '100%',
-                            height: '100%',
-                            justifyContent: 'center',
-                          }}
-                          source={{
-                            uri: img
+                            ...styles.textInput,
+                            color:
+                              activeCategory == data.category_id
+                                ? color.white
+                                : color.black,
+                          }}>
+                          {data.category_name}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* ROW THIRD */}
+            <View
+              style={{
+                flexDirection: 'row',
+                // height: '68%',
+                // backgroundColor:'pink',
+                justifyContent: 'center',
+                // alignItems: 'center',
+                alignContent: 'center',
+                flex: 4,
+                marginRight: 0,
+                paddingLeft: 21,
+                // width:'100%'
+                // flex:1
+              }}>
+              <ScrollView
+                style={{
+                  marginTop: 20,
+                  // marginLeft: 20,
+                }}
+                // horizontal={true}
+                contentContainerStyle={{
+                  flexWrap: 'wrap',
+                  flexDirection: 'row',
+                  // backgroundColor:'black'
+                  // flex: 1,
+                }}>
+                {menu.map((data, key) => {
+                  let img = JSON.parse(data.menu_image);
+                  let variant = JSON.parse(data.menu_variant);
+                  if (variant == null) {
+                    variant = [];
+                  }
+
+                  if (img) {
+                    var image = img[0].image1;
+                    // console.log('image', image);
+                  } else {
+                    var image = null;
+                  }
+                  return (
+                    <>
+                      <TouchableOpacity
+                        key={key}
+                        // testID={data.id}
+                        style={{...styles.boxMenu, marginRight: 20}}
+                        onPress={() => {
+                          // code use state item
+                          setMenuId(data.menu_id);
+                          setMenuName(data.menu_name);
+                          setMenuPrice(data.menu_price);
+                          setMenuVariant(variant);
+                          // setMenuItem(data.menuItem);
+                          // setMenuAddon(data.menuAddon);
+                          setMenuImage(
+                            img
                               ? image
                               : 'https://s3.ap-southeast-1.amazonaws.com/cdn.toyyibfnb.com/images/food.png',
-                          }}
-                        />
-                      </View>
-                      <View style={{height: '21%'}}>
-                        <Text style={styles.textInputMenu}>
-                          {data.menu_code} {}
-                          {data.menu_name}
-                        </Text>
-                      </View>
+                          );
+                          _showModal('order');
+                        }}>
+                        <View
+                          style={{
+                            justifyContent: 'center',
+                            margin: 5,
+                            alignItems: 'center',
+                            backgroundColor: color.background,
+                            height: 100,
+                            // width:50
+                          }}>
+                          <Image
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              justifyContent: 'center',
+                            }}
+                            source={{
+                              uri: img
+                                ? image
+                                : 'https://s3.ap-southeast-1.amazonaws.com/cdn.toyyibfnb.com/images/food.png',
+                            }}
+                          />
+                        </View>
+                        <View style={{height: '21%'}}>
+                          <Text style={styles.textInputMenu}>
+                            {data.menu_code} {}
+                            {data.menu_name}
+                          </Text>
+                        </View>
 
-                      <Text style={styles.textInputPrice}>
-                        RM {data.menu_price.toFixed(2)}
-                      </Text>
-                      <View style={{flexDirection: 'row', alignItem: 'center'}}>
-                        <Text style={styles.textInputDiscount}>
+                        <Text style={styles.textInputPrice}>
                           RM {data.menu_price.toFixed(2)}
                         </Text>
+                        <View
+                          style={{flexDirection: 'row', alignItem: 'center'}}>
+                          <Text style={styles.textInputDiscount}>
+                            RM {data.menu_price.toFixed(2)}
+                          </Text>
+
+                          <View
+                            style={{
+                              alignSelf: 'center',
+                              height: 13,
+                              width: 1,
+                              backgroundColor: color.textGray,
+                            }}
+                          />
+                          <Text style={styles.textInputQuantity}>50 Left</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </>
+                  );
+                })}
+
+                {/* <View style={styles.boxMenu}></View>
+              <View style={styles.boxMenu}></View>
+              <View style={styles.boxMenu}></View> */}
+              </ScrollView>
+            </View>
+
+            <View style={styles.centeredView}>
+              <Modal
+                id={menuId}
+                animationType="fade"
+                visible={modalVisible}
+                // onRequestClose={() => {
+                //   Alert.alert('Modal has been closed.');
+                //   setModalVisible(!modalVisible);
+                // }}
+                style={{
+                  justifyContent: 'flex-start',
+                  flex: 1,
+                  // alignContent:'center',
+                  // margin: 100,
+                  width: 800,
+                  // height:'50%',
+                  marginLeft: 'auto',
+                  marginBottom:
+                    menuVariant.length > 0
+                      ? 'auto'
+                      : plusTakeway == true
+                      ? 160
+                      : 190,
+                  marginTop:
+                    menuVariant.length > 0
+                      ? 'auto'
+                      : plusTakeway == true
+                      ? 180
+                      : 190,
+                  marginRight: 'auto',
+                  // backgroundColor: 'pink',
+                  // margin: 50,
+                  backgroundColor: color.background,
+                  borderRadius: 20,
+                  // padding: 35,
+                  // alignItems: 'center',
+                  shadowColor: '#000',
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 6,
+                  // opacity:0.6,
+                  // elevation: 5,
+                  // justifyContent: 'center',
+                }}>
+                <View
+                  style={{
+                    alignItems: 'flex-start',
+                    padding: 20,
+                    paddingBottom: 0,
+                  }}>
+                  <Icon
+                    name={'x'}
+                    type="feather"
+                    size={24}
+                    onPress={() => {
+                      setModalVisible(!modalVisible);
+                      setMenuQuantity(1);
+                      setSelectDineInOrTakeAway(0);
+
+                      setMenuVariantId('');
+                      setMenuVariantPrice2(0);
+                      setMenuVariantType('');
+                      setMenuVariantSelected([]);
+
+                      setMenuVariantId2('');
+                      setMenuVariantPrice2(0);
+                      setMenuVariantType2('');
+                      setMenuVariantSelected2({});
+                    }}
+                    // style={{position: 'absolute', margin: 100}}
+                  />
+                </View>
+
+                <View
+                  style={{
+                    alignItems: 'center',
+                    // justifyContent: 'center',
+                    // justifyContent: 'flex-start',
+
+                    // backgroundColor: 'black',
+                  }}>
+                  <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
+                    Choose Variant
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    width: '70%',
+                    // backgroundColor: 'black',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                    height: 'auto',
+                    flex: 1,
+                    marginBottom: 20,
+                    // justifyContent:'space-around'
+                  }}>
+                  <View style={{flex: 6}}>
+                    <View style={{...styles.modalVariant, paddingTop: 20}}>
+                      <TextInput
+                        style={{
+                          ...styles.inputMembership,
+                          flex: 8,
+                          backgroundColor: color.white,
+                        }}
+                        placeholder="Membership No."
+                        keyboardType="numeric"
+                        placeholderTextColor={color.textGray}
+                        defaultValue={String(textInputMembershipNo)}
+                        onChangeText={text => {
+                          setTextInputMembershipNo(String(text));
+                        }}
+                        editable={membershipNo ? false : true}
+                        selectTextOnFocus={membershipNo ? false : true}
+                      />
+                      <TouchableOpacity
+                        style={{
+                          ...styles.btnMembership,
+                          flex: 3,
+                          borderWidth: 1,
+                          borderColor: color.primary,
+                          backgroundColor: color.white,
+                        }}
+                        onPress={() => {
+                          setMembershipNo('');
+                          setTextInputMembershipNo('');
+                        }}>
+                        <Text style={styles.textInput}>Clear</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{...styles.btnMembership, flex: 3}}
+                        onPress={() => {
+                          _applyMembership();
+                        }}>
+                        <Text style={{...styles.textInput, color: color.white}}>
+                          Apply
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View
+                      style={{
+                        ...styles.modalVariant,
+                        justifyContent: 'space-between',
+                      }}>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 24}}>
+                        {menuName}
+                      </Text>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 24}}>
+                        RM {menuPrice.toFixed(2)}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          // marginRight: 5,
+                        }}>
+                        <TouchableOpacity
+                          style={{
+                            height: 40,
+                            backgroundColor: color.primary,
+                            width: 40,
+                            borderRadius: 5,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          onPress={() => _reduceMenuQuantity()}>
+                          <Icon
+                            name={'minus'}
+                            type="feather"
+                            size={24}
+                            color={color.white}
+
+                            // style={{position: 'absolute'}}
+                          />
+                        </TouchableOpacity>
 
                         <View
                           style={{
-                            alignSelf: 'center',
-                            height: 13,
-                            width: 1,
-                            backgroundColor: color.textGray,
-                          }}
-                        />
-                        <Text style={styles.textInputQuantity}>50 Left</Text>
-                      </View>
-                    </TouchableOpacity>
-                  </>
-                );
-              })}
-
-              {/* <View style={styles.boxMenu}></View>
-              <View style={styles.boxMenu}></View>
-              <View style={styles.boxMenu}></View> */}
-            </ScrollView>
-          </View>
-
-          <View style={styles.centeredView}>
-            <Modal
-              id={menuId}
-              animationType="fade"
-              visible={modalVisible}
-              // onRequestClose={() => {
-              //   Alert.alert('Modal has been closed.');
-              //   setModalVisible(!modalVisible);
-              // }}
-              style={{
-                justifyContent: 'flex-start',
-                flex: 1,
-                // alignContent:'center',
-                // margin: 100,
-                width: 800,
-                // height:'50%',
-                marginLeft: 'auto',
-                marginBottom:
-                  menuVariant.length > 0
-                    ? 'auto'
-                    : plusTakeway == true
-                    ? 220
-                    : 250,
-                marginTop:
-                  menuVariant.length > 0
-                    ? 'auto'
-                    : plusTakeway == true
-                    ? 220
-                    : 250,
-                marginRight: 'auto',
-                // backgroundColor: 'pink',
-                // margin: 50,
-                backgroundColor: color.background,
-                borderRadius: 20,
-                // padding: 35,
-                // alignItems: 'center',
-                shadowColor: '#000',
-                shadowOffset: {
-                  width: 0,
-                  height: 2,
-                },
-                shadowOpacity: 0.25,
-                shadowRadius: 6,
-                // opacity:0.6,
-                // elevation: 5,
-                // justifyContent: 'center',
-              }}>
-              <View
-                style={{
-                  alignItems: 'flex-start',
-                  padding: 20,
-                  paddingBottom: 0,
-                }}>
-                <Icon
-                  name={'x'}
-                  type="feather"
-                  size={24}
-                  onPress={() => {
-                    setModalVisible(!modalVisible);
-                    setMenuQuantity(1);
-                    setSelectDineInOrTakeAway(0);
-
-                    setMenuVariantId('');
-                    setMenuVariantPrice2(0);
-                    setMenuVariantType('');
-                    setMenuVariantSelected([]);
-
-                    setMenuVariantId2('');
-                    setMenuVariantPrice2(0);
-                    setMenuVariantType2('');
-                    setMenuVariantSelected2([]);
-                  }}
-                  // style={{position: 'absolute', margin: 100}}
-                />
-              </View>
-
-              <View
-                style={{
-                  alignItems: 'center',
-                  // justifyContent: 'center',
-                  // justifyContent: 'flex-start',
-
-                  // backgroundColor: 'black',
-                }}>
-                <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
-                  Choose Variant
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'column',
-                  width: '70%',
-                  // backgroundColor: 'black',
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  height: 'auto',
-                  flex: 1,
-                  marginBottom: 20,
-                  // justifyContent:'space-around'
-                }}>
-                <View style={{flex: 6}}>
-                  <View style={{...styles.modalVariant, paddingTop: 20}}>
-                    <TextInput
-                      style={{
-                        ...styles.inputMembership,
-                        flex: 8,
-                        backgroundColor: color.white,
-                      }}
-                      placeholder="Membership No."
-                      keyboardType="numeric"
-                      placeholderTextColor={color.textGray}
-                      defaultValue={String(textInputMembershipNo)}
-                      onChangeText={text => {
-                        setTextInputMembershipNo(String(text));
-                      }}
-                    />
-                    <TouchableOpacity
-                      style={{
-                        ...styles.btnMembership,
-                        flex: 3,
-                        borderWidth: 1,
-                        borderColor: color.primary,
-                        backgroundColor: color.white,
-                      }}
-                      onPress={() => {
-                        setMembershipNo('');
-                        setTextInputMembershipNo('');
-                      }}>
-                      <Text style={styles.textInput}>Clear</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={{...styles.btnMembership, flex: 3}}
-                      onPress={() => {
-                        _applyMembership();
-                      }}>
-                      <Text style={{...styles.textInput, color: color.white}}>
-                        Apply
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View
-                    style={{
-                      ...styles.modalVariant,
-                      justifyContent: 'space-between',
-                    }}>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 24}}>
-                      {menuName}
-                    </Text>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 24}}>
-                      RM {menuPrice.toFixed(2)}
-                    </Text>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        // marginRight: 5,
-                      }}>
-                      <TouchableOpacity
-                        style={{
-                          height: 40,
-                          backgroundColor: color.primary,
-                          width: 40,
-                          borderRadius: 5,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                        onPress={() => _reduceMenuQuantity()}>
-                        <Icon
-                          name={'minus'}
-                          type="feather"
-                          size={24}
-                          color={color.white}
-
-                          // style={{position: 'absolute'}}
-                        />
-                      </TouchableOpacity>
-
-                      <View
-                        style={{
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          marginLeft: 15,
-                          marginRight: 15,
-                        }}>
-                        <Text style={{fontFamily: fonts.regular}}>
-                          {menuQuantity}
-                        </Text>
-                      </View>
-
-                      <TouchableOpacity
-                        style={{
-                          height: 40,
-                          backgroundColor: color.primary,
-                          width: 40,
-                          borderRadius: 5,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          // marginRight:5
-                        }}
-                        onPress={() => _addMenuQuantity()}>
-                        <Icon
-                          name={'plus'}
-                          type="feather"
-                          size={24}
-                          color={color.white}
-
-                          // style={{position: 'absolute'}}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-
-                  {menuVariant.length == 0 || menuVariant == null ? null : (
-                    <>
-                      <View style={{...styles.modalVariant}}>
-                        <View style={{flexDirection: 'column', flex: 1}}>
-                          <View>
-                            <Text
-                              style={{
-                                fontFamily: fonts.semibold,
-                                fontSize: 16,
-                              }}>
-                              {menuVariant[0].type.charAt(0).toUpperCase() +
-                                menuVariant[0].type.slice(1)}
-                            </Text>
-                          </View>
-
-                          {menuVariant[0].data.map((item, index) => {
-                            return (
-                              <TouchableOpacity
-                                style={{
-                                  // flex: 8,
-                                  height: 40,
-                                  backgroundColor:
-                                    menuVariantId == item.id &&
-                                    menuVariantType == menuVariant[0].type
-                                      ? color.primary
-                                      : color.white,
-                                  alignItems: 'center',
-                                  flexDirection: 'row',
-                                  // borderWidth:0.5,
-                                  borderRadius: 5,
-                                  marginTop: 5,
-                                }}
-                                onPress={() => {
-                                  setMenuVariantId(item.id);
-                                  setMenuVariantPrice(item.price + menuPrice);
-                                  setMenuVariantType(menuVariant[0].type);
-
-                                  setMenuVariantSelected({
-                                    id: item.id,
-                                    name: item.name,
-                                    price: item.price + menuPrice,
-                                    type: menuVariant[0].type,
-                                  });
-
-                                  setMenuVariantId2('');
-                                  setMenuVariantPrice2(0);
-                                  setMenuVariantType2('');
-                                  setMenuVariantSelected2([]);
-
-                                  // setMenuPrice(data.price + menuPrice);
-                                }}>
-                                <View
-                                  style={{
-                                    height: 30,
-                                    width: 30,
-                                    margin: 5,
-                                    borderRadius: 5,
-                                    backgroundColor:
-                                      menuVariantId == item.id &&
-                                      menuVariantType == menuVariant[0].type
-                                        ? color.white
-                                        : color.background,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}>
-                                  {menuVariantId == item.id &&
-                                  menuVariantType == menuVariant[0].type ? (
-                                    <Icon
-                                      name={'check'}
-                                      type="feather"
-                                      size={24}
-                                    />
-                                  ) : null}
-                                </View>
-                                <View
-                                  style={{
-                                    marginLeft: 5,
-                                    marginRight: 5,
-                                    justifyContent: 'space-between',
-                                    flexDirection: 'row',
-                                    flex: 1,
-                                  }}>
-                                  <Text
-                                    style={{
-                                      fontFamily: fonts.regular,
-                                      color:
-                                        menuVariantId == item.id &&
-                                        menuVariantType == menuVariant[0].type
-                                          ? color.white
-                                          : null,
-                                    }}>
-                                    {item.name.charAt(0).toUpperCase() +
-                                      item.name.slice(1)}
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: fonts.regular,
-                                      color:
-                                        menuVariantId == item.id &&
-                                        menuVariantType == menuVariant[0].type
-                                          ? color.white
-                                          : null,
-                                    }}>
-                                    ( + RM {item.price.toFixed(2)} )
-                                  </Text>
-                                </View>
-                              </TouchableOpacity>
-                            );
-                          })}
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginLeft: 15,
+                            marginRight: 15,
+                          }}>
+                          <Text style={{fontFamily: fonts.regular}}>
+                            {menuQuantity}
+                          </Text>
                         </View>
-                      </View>
 
-                      {menuVariant[1] == null ? null : (
-                        <View style={{...styles.modalVariant}}>
+                        <TouchableOpacity
+                          style={{
+                            height: 40,
+                            backgroundColor: color.primary,
+                            width: 40,
+                            borderRadius: 5,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            // marginRight:5
+                          }}
+                          onPress={() => _addMenuQuantity()}>
+                          <Icon
+                            name={'plus'}
+                            type="feather"
+                            size={24}
+                            color={color.white}
+
+                            // style={{position: 'absolute'}}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+
+                    {menuVariant.length == 0 || menuVariant == null ? null : (
+                      <>
+                        <View
+                          style={{
+                            ...styles.modalVariant,
+                            height: menuVariant[1] == null ? '30%' : null,
+                            // backgroundColor: 'pink',
+                          }}>
                           <View style={{flexDirection: 'column', flex: 1}}>
                             <View>
                               <Text
@@ -2224,109 +2291,239 @@ const MenuOrder = ({navigation, route}) => {
                                   fontFamily: fonts.semibold,
                                   fontSize: 16,
                                 }}>
-                                {menuVariant[1].type.charAt(0).toUpperCase() +
-                                  menuVariant[1].type.slice(1)}
+                                {menuVariant[0].type.charAt(0).toUpperCase() +
+                                  menuVariant[0].type.slice(1)}
                               </Text>
                             </View>
 
-                            {menuVariant[1].data.map((item, index) => {
-                              return (
-                                <TouchableOpacity
-                                  style={{
-                                    // flex: 8,
-                                    height: 40,
-                                    backgroundColor:
-                                      menuVariantId2 == item.id &&
-                                      menuVariantType2 == menuVariant[1].type
-                                        ? color.primary
-                                        : color.white,
-                                    alignItems: 'center',
-                                    flexDirection: 'row',
-                                    // borderWidth:0.5,
-                                    borderRadius: 5,
-                                    marginTop: 5,
-                                  }}
-                                  onPress={() => {
-                                    setMenuVariantId2(item.id);
-                                    setMenuVariantPrice2(
-                                      item.price + menuPrice,
-                                    );
-                                    setMenuVariantType2(menuVariant[1].type);
-
-                                    setMenuVariantSelected2({
-                                      id: item.id,
-                                      name: item.name,
-                                      price: item.price + menuPrice,
-                                      type: menuVariant[1].type,
-                                    });
-                                    // setMenuPrice(data.price + menuPrice);
-                                  }}>
-                                  <View
+                            <ScrollView style={{}}>
+                              {menuVariant[0].data.map((item, index) => {
+                                return (
+                                  <TouchableOpacity
                                     style={{
-                                      height: 30,
-                                      width: 30,
-                                      margin: 5,
-                                      borderRadius: 5,
+                                      // flex: 8,
+                                      height: 40,
                                       backgroundColor:
-                                        menuVariantId2 == item.id &&
-                                        menuVariantType2 == menuVariant[1].type
-                                          ? color.white
-                                          : color.background,
+                                        menuVariantId == item.id &&
+                                        menuVariantType == menuVariant[0].type
+                                          ? color.primary
+                                          : color.white,
                                       alignItems: 'center',
-                                      justifyContent: 'center',
-                                    }}>
-                                    {menuVariantId2 == item.id &&
-                                    menuVariantType2 == menuVariant[1].type ? (
-                                      <Icon
-                                        name={'check'}
-                                        type="feather"
-                                        size={24}
-                                      />
-                                    ) : null}
-                                  </View>
-                                  <View
-                                    style={{
-                                      marginLeft: 5,
-                                      marginRight: 5,
-                                      justifyContent: 'space-between',
                                       flexDirection: 'row',
-                                      flex: 1,
+                                      // borderWidth:0.5,
+                                      borderRadius: 5,
+                                      marginTop: 5,
+                                    }}
+                                    onPress={() => {
+                                      setMenuVariantId(item.id);
+                                      setMenuVariantPrice(
+                                        item.price + menuPrice,
+                                      );
+                                      setMenuVariantType(menuVariant[0].type);
+
+                                      setMenuVariantSelected({
+                                        id: item.id,
+                                        name: item.name,
+                                        price: item.price + menuPrice,
+                                        type: menuVariant[0].type,
+                                      });
+
+                                      setMenuVariantId2('');
+                                      setMenuVariantPrice2(0);
+                                      setMenuVariantType2('');
+                                      setMenuVariantSelected2({});
+
+                                      // setMenuPrice(data.price + menuPrice);
                                     }}>
-                                    <Text
+                                    <View
                                       style={{
-                                        fontFamily: fonts.regular,
-                                        color:
-                                          menuVariantId2 == item.id &&
-                                          menuVariantType2 ==
-                                            menuVariant[1].type
+                                        height: 30,
+                                        width: 30,
+                                        margin: 5,
+                                        borderRadius: 5,
+                                        backgroundColor:
+                                          menuVariantId == item.id &&
+                                          menuVariantType == menuVariant[0].type
                                             ? color.white
-                                            : null,
+                                            : color.background,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                       }}>
-                                      {item.name.charAt(0).toUpperCase() +
-                                        item.name.slice(1)}
-                                    </Text>
-                                    <Text
+                                      {menuVariantId == item.id &&
+                                      menuVariantType == menuVariant[0].type ? (
+                                        <Icon
+                                          name={'check'}
+                                          type="feather"
+                                          size={24}
+                                        />
+                                      ) : null}
+                                    </View>
+                                    <View
                                       style={{
-                                        fontFamily: fonts.regular,
-                                        color:
-                                          menuVariantId2 == item.id &&
-                                          menuVariantType2 ==
-                                            menuVariant[1].type
-                                            ? color.white
-                                            : null,
+                                        marginLeft: 5,
+                                        marginRight: 5,
+                                        justifyContent: 'space-between',
+                                        flexDirection: 'row',
+                                        flex: 1,
                                       }}>
-                                      ( + RM {item.price.toFixed(2)} )
-                                    </Text>
-                                  </View>
-                                </TouchableOpacity>
-                              );
-                            })}
+                                      <Text
+                                        style={{
+                                          fontFamily: fonts.regular,
+                                          color:
+                                            menuVariantId == item.id &&
+                                            menuVariantType ==
+                                              menuVariant[0].type
+                                              ? color.white
+                                              : null,
+                                        }}>
+                                        {item.name.charAt(0).toUpperCase() +
+                                          item.name.slice(1)}
+                                      </Text>
+                                      <Text
+                                        style={{
+                                          fontFamily: fonts.regular,
+                                          color:
+                                            menuVariantId == item.id &&
+                                            menuVariantType ==
+                                              menuVariant[0].type
+                                              ? color.white
+                                              : null,
+                                        }}>
+                                        ( + RM {item.price.toFixed(2)} )
+                                      </Text>
+                                    </View>
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </ScrollView>
                           </View>
                         </View>
-                      )}
-                    </>
-                  )}
-                  {/* <View style={{...styles.modalVariant}}>
+
+                        {menuVariant[1] == null ? null : (
+                          <View
+                            style={{
+                              ...styles.modalVariant,
+                              height: '27%',
+                              // backgroundColor: 'pink',
+                            }}>
+                            <View style={{flexDirection: 'column', flex: 1}}>
+                              <View>
+                                <Text
+                                  style={{
+                                    fontFamily: fonts.semibold,
+                                    fontSize: 16,
+                                  }}>
+                                  {menuVariant[1].type.charAt(0).toUpperCase() +
+                                    menuVariant[1].type.slice(1)}
+                                </Text>
+                              </View>
+
+                              <ScrollView style={{}}>
+                                {menuVariant[1].data.map((item, index) => {
+                                  return (
+                                    <TouchableOpacity
+                                      style={{
+                                        // flex: 8,
+                                        height: 40,
+                                        backgroundColor:
+                                          menuVariantId2 == item.id &&
+                                          menuVariantType2 ==
+                                            menuVariant[1].type
+                                            ? color.primary
+                                            : color.white,
+                                        alignItems: 'center',
+                                        flexDirection: 'row',
+                                        // borderWidth:0.5,
+                                        borderRadius: 5,
+                                        marginTop: 5,
+                                      }}
+                                      onPress={() => {
+                                        setMenuVariantId2(item.id);
+                                        setMenuVariantPrice2(
+                                          item.price + menuPrice,
+                                        );
+                                        setMenuVariantType2(
+                                          menuVariant[1].type,
+                                        );
+
+                                        setMenuVariantSelected2({
+                                          id: item.id,
+                                          name: item.name,
+                                          price: item.price + menuPrice,
+                                          type: menuVariant[1].type,
+                                        });
+                                        // setMenuPrice(data.price + menuPrice);
+                                      }}>
+                                      <View
+                                        style={{
+                                          height: 30,
+                                          width: 30,
+                                          margin: 5,
+                                          borderRadius: 5,
+                                          backgroundColor:
+                                            menuVariantId2 == item.id &&
+                                            menuVariantType2 ==
+                                              menuVariant[1].type
+                                              ? color.white
+                                              : color.background,
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                        }}>
+                                        {menuVariantId2 == item.id &&
+                                        menuVariantType2 ==
+                                          menuVariant[1].type ? (
+                                          <Icon
+                                            name={'check'}
+                                            type="feather"
+                                            size={24}
+                                          />
+                                        ) : null}
+                                      </View>
+                                      <View
+                                        style={{
+                                          marginLeft: 5,
+                                          marginRight: 5,
+                                          justifyContent: 'space-between',
+                                          flexDirection: 'row',
+                                          flex: 1,
+                                        }}>
+                                        <Text
+                                          style={{
+                                            fontFamily: fonts.regular,
+                                            color:
+                                              menuVariantId2 == item.id &&
+                                              menuVariantType2 ==
+                                                menuVariant[1].type
+                                                ? color.white
+                                                : null,
+                                          }}>
+                                          {item.name.charAt(0).toUpperCase() +
+                                            item.name.slice(1)}
+                                        </Text>
+                                        <Text
+                                          style={{
+                                            fontFamily: fonts.regular,
+                                            color:
+                                              menuVariantId2 == item.id &&
+                                              menuVariantType2 ==
+                                                menuVariant[1].type
+                                                ? color.white
+                                                : null,
+                                          }}>
+                                          ( + RM {item.price.toFixed(2)} )
+                                        </Text>
+                                      </View>
+                                    </TouchableOpacity>
+                                  );
+                                })}
+                              </ScrollView>
+                            </View>
+                          </View>
+                        )}
+                      </>
+                    )}
+
+                    {/* <View style={{...styles.modalVariant}}>
                     <View style={{flexDirection: 'column', flex: 1}}>
                       <View>
                         <Text
@@ -2396,7 +2593,7 @@ const MenuOrder = ({navigation, route}) => {
                     </View>
                   </View> */}
 
-                  {/* <View style={{...styles.modalVariant}}>
+                    {/* <View style={{...styles.modalVariant}}>
                     <View style={{flexDirection: 'column', flex: 1}}>
                       <View>
                         <Text
@@ -2570,1288 +2767,1475 @@ const MenuOrder = ({navigation, route}) => {
                     </View>
                   </View> */}
 
-                  {plusTakeway == true ? (
+                    {plusTakeway == true ? (
+                      <View style={{flexDirection: 'row', marginTop: 20}}>
+                        <TouchableOpacity
+                          style={{
+                            marginLeft: 10,
+                            height: 40,
+                            backgroundColor:
+                              selectDineInOrTakeAway == 1
+                                ? color.primary
+                                : color.white,
+                            width: 130,
+                            borderRadius: 5,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderColor: color.primary,
+                            borderWidth: 1,
+                          }}
+                          onPress={() => {
+                            setSelectDineInOrTakeAway(1);
+                          }}>
+                          <Text
+                            style={{
+                              fontFamily: fonts.medium,
+                              fontSize: 16,
+                              color:
+                                selectDineInOrTakeAway == 1
+                                  ? color.white
+                                  : null,
+                            }}>
+                            Dine In
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={{
+                            marginLeft: 20,
+                            height: 40,
+                            backgroundColor:
+                              selectDineInOrTakeAway == 2
+                                ? color.primary
+                                : color.white,
+                            width: 130,
+                            borderRadius: 5,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderColor: color.primary,
+                            borderWidth: 1,
+                          }}
+                          onPress={() => {
+                            setSelectDineInOrTakeAway(2);
+                          }}>
+                          <Text
+                            style={{
+                              fontFamily: fonts.medium,
+                              fontSize: 16,
+                              color:
+                                selectDineInOrTakeAway == 2
+                                  ? color.white
+                                  : null,
+                            }}>
+                            Take Away
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : null}
+
                     <View
-                      style={{flexDirection: 'row', flex: 1, marginTop: 20}}>
-                      <TouchableOpacity
-                        style={{
-                          marginLeft: 10,
-                          height: 40,
-                          backgroundColor:
-                            selectDineInOrTakeAway == 1
-                              ? color.primary
-                              : color.white,
-                          width: 130,
-                          borderRadius: 5,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderColor: color.primary,
-                          borderWidth: 1,
-                        }}
-                        onPress={() => {
-                          setSelectDineInOrTakeAway(1);
-                        }}>
-                        <Text
-                          style={{
-                            fontFamily: fonts.medium,
-                            fontSize: 16,
-                            color:
-                              selectDineInOrTakeAway == 1 ? color.white : null,
-                          }}>
-                          Dine In
-                        </Text>
-                      </TouchableOpacity>
+                      style={{
+                        ...styles.modalVariant,
+                        paddingTop: 0,
+                        marginTop: 20,
+                        marginBottom: 20,
+                      }}>
+                      <View style={{flexDirection: 'column', flex: 1}}>
+                        <View>
+                          <Text
+                            style={{
+                              fontFamily: fonts.semibold,
+                              fontSize: 16,
+                            }}>
+                            Remark
+                          </Text>
+                        </View>
 
-                      <TouchableOpacity
-                        style={{
-                          marginLeft: 20,
-                          height: 40,
-                          backgroundColor:
-                            selectDineInOrTakeAway == 2
-                              ? color.primary
-                              : color.white,
-                          width: 130,
-                          borderRadius: 5,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderColor: color.primary,
-                          borderWidth: 1,
-                        }}
-                        onPress={() => {
-                          setSelectDineInOrTakeAway(2);
-                        }}>
-                        <Text
+                        <View
                           style={{
-                            fontFamily: fonts.medium,
-                            fontSize: 16,
-                            color:
-                              selectDineInOrTakeAway == 2 ? color.white : null,
+                            backgroundColor: color.white,
+                            width: '100%',
+                            height: 70,
+                            marginTop: 5,
+                            borderRadius: 5,
                           }}>
-                          Take Away
-                        </Text>
-                      </TouchableOpacity>
+                          <TextInput
+                            style={{
+                              // borderRadius: 5,
+                              width: '100%',
+                              // height: 40,
+                              paddingLeft: 10,
+                              fontFamily: fonts.medium,
+                              fontSize: 16,
+                              flex: 1,
+                              // backgroundColor: 'pink',
+                            }}
+                            multiline={true}
+                            placeholder="Enter your remark here"
+                            keyboardType="numeric"
+                            placeholderTextColor={color.textGray}
+                            defaultValue={remark}
+                            onChangeText={text => {
+                              setRemark(text);
+                            }}
+                          />
+                        </View>
+                      </View>
                     </View>
-                  ) : null}
-                </View>
+                  </View>
 
-                <View
-                  style={{
-                    ...styles.modalVariant,
-                    // marginTop: 20,
-                    // flex: 1,
-                    // backgroundColor: 'green',
-                  }}>
-                  <TouchableOpacity
+                  <View
                     style={{
-                      height: 40,
-                      borderRadius: 5,
-                      backgroundColor: color.primary,
-                      flex: 1,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                    onPress={() => {
-                      if (plusTakeway == true) {
-                        if (selectDineInOrTakeAway == 0) {
-                          alert('Please select dine in or take away');
-                          return;
+                      ...styles.modalVariant,
+                      // marginTop: 20,
+                      // flex: 1,
+                      // backgroundColor: 'green',
+                    }}>
+                    <TouchableOpacity
+                      style={{
+                        height: 40,
+                        borderRadius: 5,
+                        backgroundColor: color.primary,
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      onPress={() => {
+                        if (plusTakeway == true) {
+                          if (selectDineInOrTakeAway == 0) {
+                            alert('Please select dine in or take away');
+                            return;
+                          }
+
+                          _addToCart();
+                          setModalVisible(!modalVisible);
+                          setMenuQuantity(1);
+                          setSelectDineInOrTakeAway(0);
+                        } else {
+                          _addToCart();
+                          setModalVisible(!modalVisible);
+                          setMenuQuantity(1);
                         }
 
-                        _addToCart();
-                        setModalVisible(!modalVisible);
-                        setMenuQuantity(1);
-                        setSelectDineInOrTakeAway(0);
-                      } else {
-                        _addToCart();
-                        setModalVisible(!modalVisible);
-                        setMenuQuantity(1);
-                      }
+                        setRemark('');
 
-                      setMenuVariantId('');
-                      setMenuVariantType('');
-                      setMenuVariantPrice(0);
-                      setMenuVariantSelected([]);
+                        setMenuVariantId('');
+                        setMenuVariantType('');
+                        setMenuVariantPrice(0);
+                        setMenuVariantSelected([]);
 
-                      setMenuVariantId2('');
-                      setMenuVariantType2('');
-                      setMenuVariantPrice2(0);
-                      setMenuVariantSelected2([]);
+                        setMenuVariantId2('');
+                        setMenuVariantType2('');
+                        setMenuVariantPrice2(0);
+                        setMenuVariantSelected2({});
+                      }}>
+                      <View>
+                        <Text
+                          style={{
+                            fontFamily: fonts.medium,
+                            fontSize: 16,
+                            color: color.white,
+                          }}>
+                          Add To Cart
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </View>
+
+            {/* { MODAL FOR SET DISCOUNT} */}
+
+            <Modal
+              id={menuId}
+              animationType="fade"
+              visible={modalDiscount}
+              // onRequestClose={() => {
+              //   Alert.alert('Modal has been closed.');
+              //   setModalVisible(!modalVisible);
+              // }}
+              style={{...styles.modalViewDiscount}}>
+              <View
+                style={{
+                  alignItems: 'flex-start',
+                  padding: 20,
+                  paddingBottom: 0,
+                }}>
+                <Icon
+                  name={'x'}
+                  type="feather"
+                  size={24}
+                  onPress={() => {
+                    setModalDiscount(!modalDiscount);
+                    setTextInputDiscount(0);
+                    setDiscountType('');
+                  }}
+                  // style={{position: 'absolute', margin: 100}}
+                />
+              </View>
+
+              <View
+                style={{
+                  alignItems: 'center',
+                  // justifyContent: 'center',
+                  // justifyContent: 'flex-start',
+
+                  // backgroundColor: 'black',
+                }}>
+                <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
+                  Discount
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  justifyContent: 'center',
+                  height: 160,
+                  // flex: 1,
+                  // backgroundColor: 'white',
+                }}>
+                <View
+                  style={{
+                    flexDirection: 'column',
+                    width: '70%',
+                    // backgroundColor: 'black',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                    // height: 200,
+                    // justifyContent:'space-around'
+                    // justifyContent: 'center',
+                    // backgroundColor: 'white',
+                    alignItems: 'center',
+                  }}>
+                  <View style={{...styles.modalVariant, marginTop: 20}}>
+                    <TextInput
+                      style={{
+                        ...styles.inputMembership,
+                        flex: 8,
+                        backgroundColor: 'white',
+                      }}
+                      placeholder="Enter Discount"
+                      keyboardType="numeric"
+                      placeholderTextColor={color.textGray}
+                      onChangeText={value => {
+                        setTextInputDiscount(value);
+                      }}
+                      defaultValue={textInputDiscount}
+                    />
+                    <TouchableOpacity
+                      style={{
+                        ...styles.btnMembership,
+                        flex: 2,
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                        backgroundColor:
+                          discountTypeSelect == 'amount'
+                            ? color.primary
+                            : color.white,
+                      }}
+                      onPress={() => {
+                        _discountType('amount');
+                      }}>
+                      <Text
+                        style={{
+                          ...styles.textInput,
+                          color:
+                            discountTypeSelect == 'amount'
+                              ? color.white
+                              : color.black,
+                        }}>
+                        MYR
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        ...styles.btnMembership,
+                        backgroundColor:
+                          discountTypeSelect == 'percent'
+                            ? color.primary
+                            : color.white,
+                        marginLeft: 0,
+                        flex: 2,
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                      }}
+                      onPress={() => {
+                        _discountType('percent');
+                      }}>
+                      <Text
+                        style={{
+                          ...styles.textInput,
+                          color:
+                            discountTypeSelect == 'percent'
+                              ? color.white
+                              : color.black,
+                        }}>
+                        %
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    style={{
+                      ...styles.modalVariant,
+                      // bottom: 0,
+                      marginTop: 15,
+                    }}>
+                    <TouchableOpacity
+                      style={{
+                        height: 40,
+                        borderRadius: 5,
+                        backgroundColor: color.white,
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: color.primary,
+                        marginRight: 10,
+                      }}
+                      onPress={async () => {
+                        let data = {};
+                        let discountOrder = 0;
+                        setDiscountInput(0);
+                        setAmountDiscount(0);
+                        setAmountDiscountDisplay(
+                          discountOrder
+                            .toFixed(2)
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                        );
+                        setTextInputDiscount(0);
+                        setDiscountType('');
+                        setDiscountTypeSelect('');
+
+                        data = {
+                          discountAmount: 0,
+                          discountType: '',
+                          discountInput: '',
+                        };
+                        setToggleEnable(false);
+                        console.log('data', data);
+
+                        await AsyncStorage.setItem(
+                          'DISCOUNT_ORDER',
+                          JSON.stringify(data),
+                        );
+
+                        setDiscountConfirm(0);
+                        await _calculateTotal();
+                      }}>
+                      <View style={{margin: 5}}>
+                        <Text
+                          style={{
+                            fontFamily: fonts.medium,
+                            fontSize: 16,
+                          }}>
+                          Clear
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        height: 40,
+                        borderRadius: 5,
+                        backgroundColor: color.primary,
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      onPress={() => {
+                        // _addToCart();
+                        // alert(discount)
+                        if (textInputDiscount == '') {
+                          alert('Enter discount');
+                          return;
+                        } else if (discountTypeSelect == '') {
+                          alert('Choose discount type');
+                          return;
+                        } else {
+                          // setDiscount(textInputDiscount);
+                          setModalDiscount(!modalDiscount);
+                        }
+                        // _calculateTotal();
+                        _confirmDiscount();
+                      }}>
+                      <View style={{margin: 5}}>
+                        <Text
+                          style={{
+                            fontFamily: fonts.medium,
+                            fontSize: 16,
+                            color: color.white,
+                          }}>
+                          Confirm
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+
+            {/* ROW FOURTH */}
+            <View style={styles.boxBottom}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  width: '100%',
+                  height: '100%',
+                  // backgroundColor: 'pink',
+                }}>
+                {linkMembership == true ? (
+                  <View
+                    style={{
+                      flexDirection: 'column',
+                      // alignItems: 'center',
+                      width: '60%',
+                      // justifyContent: 'flex-end',
+                      marginBottom: 10,
+                      marginTop: 10,
+                      marginRight: 10,
+                      marginLeft: 10,
+                      // backgroundColor: 'blue',
                     }}>
                     <View>
                       <Text
                         style={{
-                          fontFamily: fonts.medium,
-                          fontSize: 16,
-                          color: color.white,
+                          ...styles.textFamily,
+                          fontFamily: fonts.semibold,
                         }}>
-                        Add To Cart
+                        {linkMembershipName}
                       </Text>
                     </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </Modal>
-          </View>
 
-          {/* { MODAL FOR SET DISCOUNT} */}
-
-          <Modal
-            id={menuId}
-            animationType="fade"
-            visible={modalDiscount}
-            // onRequestClose={() => {
-            //   Alert.alert('Modal has been closed.');
-            //   setModalVisible(!modalVisible);
-            // }}
-            style={{...styles.modalViewDiscount}}>
-            <View
-              style={{alignItems: 'flex-start', padding: 20, paddingBottom: 0}}>
-              <Icon
-                name={'x'}
-                type="feather"
-                size={24}
-                onPress={() => {
-                  setModalDiscount(!modalDiscount);
-                  setTextInputDiscount(0);
-                  setDiscountType('');
-                }}
-                // style={{position: 'absolute', margin: 100}}
-              />
-            </View>
-
-            <View
-              style={{
-                alignItems: 'center',
-                // justifyContent: 'center',
-                // justifyContent: 'flex-start',
-
-                // backgroundColor: 'black',
-              }}>
-              <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
-                Discount
-              </Text>
-            </View>
-
-            <View
-              style={{
-                justifyContent: 'center',
-                height: 160,
-                // flex: 1,
-                // backgroundColor: 'white',
-              }}>
-              <View
-                style={{
-                  flexDirection: 'column',
-                  width: '70%',
-                  // backgroundColor: 'black',
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  // height: 200,
-                  // justifyContent:'space-around'
-                  // justifyContent: 'center',
-                  // backgroundColor: 'white',
-                  alignItems: 'center',
-                }}>
-                <View style={{...styles.modalVariant, marginTop: 20}}>
-                  <TextInput
-                    style={{
-                      ...styles.inputMembership,
-                      flex: 8,
-                      backgroundColor: 'white',
-                    }}
-                    placeholder="Enter Discount"
-                    keyboardType="numeric"
-                    placeholderTextColor={color.textGray}
-                    onChangeText={value => {
-                      setTextInputDiscount(value);
-                    }}
-                    defaultValue={textInputDiscount}
-                  />
-                  <TouchableOpacity
-                    style={{
-                      ...styles.btnMembership,
-                      flex: 2,
-                      borderTopRightRadius: 0,
-                      borderBottomRightRadius: 0,
-                      backgroundColor:
-                        discountTypeSelect == 'amount'
-                          ? color.primary
-                          : color.white,
-                    }}
-                    onPress={() => {
-                      _discountType('amount');
-                    }}>
-                    <Text style={styles.textInput}>MYR</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      ...styles.btnMembership,
-                      backgroundColor:
-                        discountTypeSelect == 'percent'
-                          ? color.primary
-                          : color.white,
-                      marginLeft: 0,
-                      flex: 2,
-                      borderTopLeftRadius: 0,
-                      borderBottomLeftRadius: 0,
-                    }}
-                    onPress={() => {
-                      _discountType('percent');
-                    }}>
-                    <Text style={styles.textInput}>%</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View
-                  style={{
-                    ...styles.modalVariant,
-                    // bottom: 0,
-                    marginTop: 15,
-                  }}>
-                  <TouchableOpacity
-                    style={{
-                      height: 40,
-                      borderRadius: 5,
-                      backgroundColor: color.primary,
-                      flex: 1,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                    onPress={() => {
-                      // _addToCart();
-                      // alert(discount)
-                      if (textInputDiscount == '') {
-                        alert('Enter discount');
-                        return;
-                      } else if (discountTypeSelect == '') {
-                        alert('Choose discount type');
-                        return;
-                      } else {
-                        // setDiscount(textInputDiscount);
-                        setModalDiscount(!modalDiscount);
-                      }
-                      // _calculateTotal();
-                      _confirmDiscount();
-                    }}>
-                    <View style={{margin: 5}}>
-                      <Text style={{fontFamily: fonts.medium, fontSize: 16}}>
-                        Confirm
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
-
-          {/* ROW FOURTH */}
-          <View style={styles.boxBottom}>
-            <View
-              style={{
-                flexDirection: 'row',
-                width: '100%',
-                height: '100%',
-                // backgroundColor: 'pink',
-              }}>
-              {linkMembership == true ? (
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    // alignItems: 'center',
-                    width: '60%',
-                    // justifyContent: 'flex-end',
-                    marginBottom: 10,
-                    marginTop: 10,
-                    marginRight: 10,
-                    marginLeft: 10,
-                    // backgroundColor: 'blue',
-                  }}>
-                  <View>
-                    <Text
-                      style={{
-                        ...styles.textFamily,
-                        fontFamily: fonts.semibold,
-                      }}>
-                      {linkMembershipName}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: 3,
-                    }}>
-                    <Text style={{fontFamily: fonts.regular, fontSize: 14}}>
-                      {linkMembershipNo}
-                    </Text>
                     <View
                       style={{
-                        alignSelf: 'center',
-                        height: '100%',
-                        width: 3,
-                        backgroundColor: color.background,
-                        marginLeft: 5,
-                        marginRight: 5,
-                      }}
-                    />
-                    <View
-                      style={{
-                        height: 20,
-                        width: 60,
-                        backgroundColor: 'grey',
-                        borderRadius: 5,
-                        justifyContent: 'center',
+                        flexDirection: 'row',
                         alignItems: 'center',
+                        marginTop: 3,
                       }}>
-                      <Text
+                      <Text style={{fontFamily: fonts.regular, fontSize: 14}}>
+                        {linkMembershipNo}
+                      </Text>
+                      <View
                         style={{
-                          fontFamily: fonts.medium,
-                          fontSize: 14,
-                          color: color.white,
-                        }}>
-                        Basic
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      marginTop: 5,
-                      marginBottom: 10,
-                    }}>
-                    <Text style={{fontFamily: fonts.regular, fontSize: 14}}>
-                      {moment(linkMembershipExpiry).format('DD-MM-YYYY')}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-end',
-                      width: '100%',
-                      // justifyContent:'center',
-                      // marginTop:'10%',
-                      // height:'100%',
-                      // backgroundColor: 'green',
-                      flex: 1,
-                      marginRight: 5,
-                    }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        // alignContent:'center',
-                        // backgroundColor: color.background,
-                        borderRadius: 5,
-                        width: '100%',
-                        height: 40,
-                        // paddingLeft: 10,
-                        fontFamily: fonts.medium,
-                        fontSize: 16,
-                        flex: 1,
-                      }}>
-                      <Text style={{fontFamily: fonts.semibold, fontSize: 16}}>
-                        {linkMembershipPoint} pts
-                      </Text>
-                    </View>
-
-                    <TouchableOpacity
-                      style={{...styles.btnMembership, width: '30%'}}
-                      onPress={() => {
-                        setLinkMembershipNo('');
-                        setLinkMembership(false);
-                        setTextInputLinkMember('');
-                        _calculateTotal();
-                      }}>
-                      <Text style={{...styles.textInput, color: color.white}}>
-                        Unlink
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                <View
-                  style={{
-                    flexDirection: 'column',
-                    // alignItems: 'center',
-                    width: '60%',
-                    // justifyContent: 'flex-end',
-                    marginBottom: 10,
-                    marginTop: 10,
-                    marginRight: 10,
-                    marginLeft: 10,
-                    // backgroundColor: 'green',
-                    // height:'100%',
-                    // flex: 1,
-                  }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-end',
-                      width: '100%',
-                      // justifyContent:'center',
-                      // marginTop:'10%',
-                      // height:'100%',
-                      // backgroundColor: 'blue',
-                      flex: 1,
-                      marginRight: 5,
-                    }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        // alignContent:'center',
-                        backgroundColor: color.background,
-                        borderRadius: 5,
-                        width: '100%',
-                        height: 40,
-                        paddingLeft: 10,
-                        fontFamily: fonts.medium,
-                        fontSize: 16,
-                        flex: 1,
-                      }}>
-                      <TextInput
-                        style={{...styles.textInput}}
-                        placeholder="Membership No."
-                        keyboardType="numeric"
-                        placeholderTextColor={color.textGray}
-                        defaultValue={String(textInputLinkMember)}
-                        onChangeText={value => {
-                          setTextInputLinkMember(value);
+                          alignSelf: 'center',
+                          height: '100%',
+                          width: 3,
+                          backgroundColor: color.background,
+                          marginLeft: 5,
+                          marginRight: 5,
                         }}
                       />
+                      <View
+                        style={{
+                          height: 20,
+                          width: 60,
+                          backgroundColor: 'grey',
+                          borderRadius: 5,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <Text
+                          style={{
+                            fontFamily: fonts.medium,
+                            fontSize: 14,
+                            color: color.white,
+                          }}>
+                          Basic
+                        </Text>
+                      </View>
                     </View>
 
-                    <TouchableOpacity
-                      style={{...styles.btnMembership, width: '30%'}}
-                      onPress={async () => {
-                        _linkMembership();
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        marginTop: 5,
+                        marginBottom: 10,
                       }}>
-                      <Text style={{...styles.textInput, color: color.white}}>
-                        Link
+                      <Text style={{fontFamily: fonts.regular, fontSize: 14}}>
+                        {moment(linkMembershipExpiry).format('DD-MM-YYYY')}
                       </Text>
-                    </TouchableOpacity>
+                    </View>
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'flex-end',
+                        width: '100%',
+                        // justifyContent:'center',
+                        // marginTop:'10%',
+                        // height:'100%',
+                        // backgroundColor: 'green',
+                        flex: 1,
+                        marginRight: 5,
+                      }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          // alignContent:'center',
+                          // backgroundColor: color.background,
+                          borderRadius: 5,
+                          width: '100%',
+                          height: 40,
+                          // paddingLeft: 10,
+                          fontFamily: fonts.medium,
+                          fontSize: 16,
+                          flex: 1,
+                        }}>
+                        <Text
+                          style={{fontFamily: fonts.semibold, fontSize: 16}}>
+                          {linkMembershipPoint} pts
+                        </Text>
+                      </View>
+
+                      <TouchableOpacity
+                        style={{...styles.btnMembership, width: '30%'}}
+                        onPress={() => {
+                          setLinkMembershipNo('');
+                          setLinkMembership(false);
+                          setTextInputLinkMember('');
+                          _calculateTotal();
+                        }}>
+                        <Text style={{...styles.textInput, color: color.white}}>
+                          Unlink
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
+                ) : (
+                  <View
+                    style={{
+                      flexDirection: 'column',
+                      // alignItems: 'center',
+                      width: '60%',
+                      // justifyContent: 'flex-end',
+                      marginBottom: 10,
+                      marginTop: 10,
+                      marginRight: 10,
+                      marginLeft: 10,
+                      // backgroundColor: 'green',
+                      // height:'100%',
+                      // flex: 1,
+                    }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'flex-end',
+                        width: '100%',
+                        // justifyContent:'center',
+                        // marginTop:'10%',
+                        // height:'100%',
+                        // backgroundColor: 'blue',
+                        flex: 1,
+                        marginRight: 5,
+                      }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          // alignContent:'center',
+                          backgroundColor: color.background,
+                          borderRadius: 5,
+                          width: '100%',
+                          height: 40,
+                          paddingLeft: 10,
+                          fontFamily: fonts.medium,
+                          fontSize: 16,
+                          flex: 1,
+                        }}>
+                        <TextInput
+                          style={{...styles.textInput}}
+                          placeholder="Membership No."
+                          keyboardType="numeric"
+                          placeholderTextColor={color.textGray}
+                          defaultValue={String(textInputLinkMember)}
+                          onChangeText={value => {
+                            setTextInputLinkMember(value);
+                          }}
+                        />
+                      </View>
+
+                      <TouchableOpacity
+                        style={{...styles.btnMembership, width: '30%'}}
+                        onPress={async () => {
+                          _linkMembership();
+                        }}>
+                        <Text style={{...styles.textInput, color: color.white}}>
+                          Link
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                <View
+                  style={{
+                    alignSelf: 'center',
+                    height: '90%',
+                    width: 5,
+                    backgroundColor: color.background,
+                  }}
+                />
+                <View style={{flexDirection: 'row', flex: 1}}>
+                  <ScrollView horizontal={true}>
+                    <View
+                      style={{
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      {dataReward.map((data, key) => {
+                        return (
+                          <>
+                            <TouchableOpacity style={{...styles.btnReward}}>
+                              <View>
+                                <Text style={styles.textInput}>
+                                  {data.rewardName}
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.btnReward}>
+                              <View>
+                                <Text style={styles.textInput}>aa</Text>
+                              </View>
+                            </TouchableOpacity>
+                          </>
+                        );
+                      })}
+                    </View>
+
+                    <View
+                      style={{
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      {dataReward.map((data, key) => {
+                        return (
+                          <>
+                            <TouchableOpacity style={styles.btnReward}>
+                              <View>
+                                <Text style={styles.textInput}>
+                                  {data.rewardName}
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.btnReward}>
+                              <View>
+                                <Text style={styles.textInput}>aa</Text>
+                              </View>
+                            </TouchableOpacity>
+                          </>
+                        );
+                      })}
+                    </View>
+
+                    <View
+                      style={{
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      {dataReward.map((data, key) => {
+                        return (
+                          <>
+                            <TouchableOpacity style={styles.btnReward}>
+                              <View>
+                                <Text style={styles.textInput}>
+                                  {data.rewardName}
+                                </Text>
+                              </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.btnReward}>
+                              <View>
+                                <Text style={styles.textInput}>aa</Text>
+                              </View>
+                            </TouchableOpacity>
+                          </>
+                        );
+                      })}
+                    </View>
+                  </ScrollView>
                 </View>
-              )}
 
-              <View
-                style={{
-                  alignSelf: 'center',
-                  height: '90%',
-                  width: 5,
-                  backgroundColor: color.background,
-                }}
-              />
-              <View style={{flexDirection: 'row', flex: 1}}>
-                <ScrollView horizontal={true}>
-                  <View
-                    style={{
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    {dataReward.map((data, key) => {
-                      return (
-                        <>
-                          <TouchableOpacity style={{...styles.btnReward}}>
-                            <View>
-                              <Text style={styles.textInput}>
-                                {data.rewardName}
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.btnReward}>
-                            <View>
-                              <Text style={styles.textInput}>aa</Text>
-                            </View>
-                          </TouchableOpacity>
-                        </>
-                      );
-                    })}
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    {dataReward.map((data, key) => {
-                      return (
-                        <>
-                          <TouchableOpacity style={styles.btnReward}>
-                            <View>
-                              <Text style={styles.textInput}>
-                                {data.rewardName}
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.btnReward}>
-                            <View>
-                              <Text style={styles.textInput}>aa</Text>
-                            </View>
-                          </TouchableOpacity>
-                        </>
-                      );
-                    })}
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    {dataReward.map((data, key) => {
-                      return (
-                        <>
-                          <TouchableOpacity style={styles.btnReward}>
-                            <View>
-                              <Text style={styles.textInput}>
-                                {data.rewardName}
-                              </Text>
-                            </View>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.btnReward}>
-                            <View>
-                              <Text style={styles.textInput}>aa</Text>
-                            </View>
-                          </TouchableOpacity>
-                        </>
-                      );
-                    })}
-                  </View>
-                </ScrollView>
-              </View>
-
-              {/* <View style={{flexDirection: 'row'}}>
+                {/* <View style={{flexDirection: 'row'}}>
                 <Text>discount</Text>
                 <Text>hahwa</Text>
               </View> */}
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={{...styles.box2, marginLeft: 0}}>
-          <View
-            style={{
-              flexDirection: 'column',
-              height: '100%',
-              // backgroundColor:'green'
-            }}>
-            <View style={{height: '69.6%', marginBottom: 10}}>
-              {/* {ROW FIRST} */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  height: 'auto',
-                  alignItems: 'center',
-                  // backgroundColor: 'pink',
-                }}>
-                {selectOrderTypeId == 1 && plusTakeway == false ? (
-                  <TouchableOpacity
-                    style={{
-                      ...styles.inputBox2,
-                      marginLeft: 10,
-                      justifyContent: 'center',
-                      paddingLeft: 0,
-                      marginRight: 0,
-                      // backgroundColor: 'black',
-                    }}
-                    onPress={() => {
-                      _clickPlusTakeway();
-                    }}>
-                    <Icon
-                      name={'plus'}
-                      type="feather"
-                      size={24}
-                      // style={{position: 'absolute', margin: 100}}
-                    />
-                  </TouchableOpacity>
-                ) : plusTakeway == true ? null : null}
-
-                {/* <DropDownPicker containerStyle={{flex: 6,height:20}} style={{paddingVertical:80}}/> */}
-
-                <View
-                  style={{
-                    ...styles.inputBox2,
-                    flex: 6,
-                    paddingLeft: 0,
-                    justifyContent: 'center',
-                    alignSelf: 'center',
-                    marginLeft: 10,
-                  }}>
-                  <View>
-                    <Text style={styles.textFamily}>{selectOrderType}</Text>
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  style={{
-                    ...styles.inputBox2,
-                    // marginLeft: 10,
-                    justifyContent: 'center',
-                    paddingLeft: 0,
-                    // backgroundColor: 'black',
-                  }}
-                  onPress={() => {
-                    Alert.alert('Clear', 'Are you sure want to clear cart?', [
-                      {
-                        text: 'Cancel',
-                        onPress: () => console.log('Cancel Pressed'),
-                        style: 'cancel',
-                      },
-                      {
-                        text: 'OK',
-                        onPress: () => {
-                          // console.log('OK Pressed');
-
-                          // if (plusTakeway == true) {
-                          //   setOrderCart([]);
-                          //   AsyncStorage.removeItem('ORDER');
-                          //   _calculateTotal();
-                          // } else {
-                          setOrderCart([]);
-                          AsyncStorage.removeItem('ORDER');
-                          AsyncStorage.removeItem('DATA_ORDER');
-                          AsyncStorage.removeItem('DISCOUNT_ORDER');
-                          setOrderCartTakeAway([]);
-                          AsyncStorage.removeItem('ORDER_TAKEAWAY');
-
-                          setPlusTakeway(false);
-                          setSelectOrderTypeId(1);
-
-                          setTextInputDiscount(0);
-                          setDiscountInput(0);
-                          setDiscountType('');
-                          setDiscountTypeSelect('');
-
-                          setTax(0);
-                          setAmountOrder(0);
-                          setServiceCharge(0);
-                          setAmountDiscount(0);
-                          setTotalAmountOrder(0);
-                          setOutletDiscount(0);
-                          setMembershipDiscount(0);
-
-                          setTaxDisplay('');
-                          setAmountOrderDisplay('');
-                          setServiceChargeDisplay('');
-                          setAmountDiscountDisplay('');
-                          setTotalAmountOrderDisplay('');
-                          // }
-                        },
-                      },
-                    ]);
-                  }}>
-                  <Icon
-                    name={'trash-2'}
-                    type="feather"
-                    size={24}
-                    // style={{position: 'absolute', margin: 100}}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {/* {ROW SECOND} */}
-              {selectOrderTypeId == 1 ? (
+          <View style={{...styles.box2, marginLeft: 0}}>
+            <View
+              style={{
+                flexDirection: 'column',
+                height: '68.5%',
+                // backgroundColor:'green'
+              }}>
+              <View style={{height: '100%', marginBottom: 10}}>
+                {/* {ROW FIRST} */}
                 <View
                   style={{
                     flexDirection: 'row',
                     height: 'auto',
                     alignItems: 'center',
+                    // backgroundColor: 'pink',
                   }}>
+                  {selectOrderTypeId == 1 && plusTakeway == false ? (
+                    <TouchableOpacity
+                      style={{
+                        ...styles.inputBox2,
+                        marginLeft: 10,
+                        justifyContent: 'center',
+                        paddingLeft: 0,
+                        marginRight: 0,
+                        // backgroundColor: 'black',
+                      }}
+                      onPress={() => {
+                        _clickPlusTakeway();
+                      }}>
+                      <Icon
+                        name={'plus'}
+                        type="feather"
+                        size={24}
+                        // style={{position: 'absolute', margin: 100}}
+                      />
+                    </TouchableOpacity>
+                  ) : plusTakeway == true ? null : null}
+
+                  {/* <DropDownPicker containerStyle={{flex: 6,height:20}} style={{paddingVertical:80}}/> */}
+
                   <View
                     style={{
                       ...styles.inputBox2,
+                      flex: 6,
+                      paddingLeft: 0,
+                      justifyContent: 'center',
+                      alignSelf: 'center',
                       marginLeft: 10,
-                      // marginTop: 5,
+                    }}>
+                    <View>
+                      <Text style={styles.textFamily}>{selectOrderType}</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={{
+                      ...styles.inputBox2,
+                      // marginLeft: 10,
                       justifyContent: 'center',
                       paddingLeft: 0,
-                      marginTop: 10,
-                      // marginRight:0
-                      // alignItems: 'center',
-                    }}>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontFamily: fonts.medium,
-                      }}>
-                      {selectTable}
-                    </Text>
-                  </View>
-                </View>
-              ) : null}
+                      // backgroundColor: 'black',
+                    }}
+                    onPress={() => {
+                      Alert.alert('Clear', 'Are you sure want to clear cart?', [
+                        {
+                          text: 'Cancel',
+                          onPress: () => console.log('Cancel Pressed'),
+                          style: 'cancel',
+                        },
+                        {
+                          text: 'OK',
+                          onPress: () => {
+                            // console.log('OK Pressed');
 
-              {/* {ROW THIRD} */}
-              <View style={{height: '100%', flex: 1}}>
-                <ScrollView
-                  // style={{backgroundColor: 'pink'}}
-                  contentContainerStyle={
-                    {
-                      // height: setPlusTakeway == true ? '50%' : '100%',
-                      // backgroundColor: 'pink',
-                    }
-                  }>
-                  {orderCart.map((data, key) => {
-                    return (
-                      <View
+                            // if (plusTakeway == true) {
+                            //   setOrderCart([]);
+                            //   AsyncStorage.removeItem('ORDER');
+                            //   _calculateTotal();
+                            // } else {
+                            setOrderCart([]);
+                            AsyncStorage.removeItem('ORDER');
+                            AsyncStorage.removeItem('DATA_ORDER');
+                            AsyncStorage.removeItem('DISCOUNT_ORDER');
+                            setOrderCartTakeAway([]);
+                            AsyncStorage.removeItem('ORDER_TAKEAWAY');
+
+                            setPlusTakeway(false);
+                            setSelectOrderTypeId(1);
+
+                            setTextInputDiscount(0);
+                            setDiscountInput(0);
+                            setDiscountType('');
+                            setDiscountTypeSelect('');
+
+                            setTax(0);
+                            setAmountOrder(0);
+                            setServiceCharge(0);
+                            setAmountDiscount(0);
+                            setTotalAmountOrder(0);
+                            setOutletDiscount(0);
+                            setMembershipDiscount(0);
+
+                            setTaxDisplay('');
+                            setAmountOrderDisplay('');
+                            setServiceChargeDisplay('');
+                            setAmountDiscountDisplay('');
+                            setTotalAmountOrderDisplay('');
+                            // }
+                          },
+                        },
+                      ]);
+                    }}>
+                    <Icon
+                      name={'trash-2'}
+                      type="feather"
+                      size={24}
+                      // style={{position: 'absolute', margin: 100}}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {/* {ROW SECOND} */}
+                {selectOrderTypeId == 1 ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      height: 'auto',
+                      alignItems: 'center',
+                    }}>
+                    <View
+                      style={{
+                        ...styles.inputBox2,
+                        marginLeft: 10,
+                        // marginTop: 5,
+                        justifyContent: 'center',
+                        paddingLeft: 0,
+                        marginTop: 10,
+                        // marginRight:0
+                        // alignItems: 'center',
+                      }}>
+                      <Text
                         style={{
-                          marginTop: 5,
-                          flexDirection: 'row',
-                          height: 'auto',
-                          alignItems: 'center',
+                          fontSize: 16,
+                          fontFamily: fonts.medium,
                         }}>
+                        {selectTable}
+                      </Text>
+                    </View>
+                  </View>
+                ) : null}
+
+                {/* {ROW THIRD} */}
+                <View style={{height: '100%', flex: 1}}>
+                  <ScrollView
+                    // style={{backgroundColor: 'pink'}}
+                    contentContainerStyle={
+                      {
+                        // height: setPlusTakeway == true ? '50%' : '100%',
+                        // backgroundColor: 'pink',
+                      }
+                    }>
+                    {orderCart.map((data, key) => {
+                      return (
                         <View
                           style={{
-                            ...styles.inputBox2,
-                            paddingLeft: 0,
-                            marginLeft: 10,
                             marginTop: 5,
-                            marginBottom: 5,
-                            flex: 0.3,
-                            // width:'1%',
-                            height: 70,
-                            justifyContent: 'center',
+                            flexDirection: 'row',
+                            height: 'auto',
                             alignItems: 'center',
                           }}>
-                          <Image
+                          <View
                             style={{
-                              width: '100%',
-                              height: '60%',
+                              ...styles.inputBox2,
+                              paddingLeft: 0,
+                              marginLeft: 10,
+                              marginTop: 5,
+                              marginBottom: 5,
+                              flex: 0.3,
+                              // width:'1%',
+                              height: 70,
                               justifyContent: 'center',
                               alignItems: 'center',
-                              // backgroundColor:'black'
-                            }}
-                            source={{uri: data.menu_image}}
-                          />
-                        </View>
-                        <View
-                          style={{
-                            flex: 1,
-                            flexDestination: 'column',
-                            height: 70,
-                            justifyContent: 'space-between',
-                            // backgroundColor: 'black',
-                          }}>
-                          <View>
-                            <View style={{marginBottom: 10}}>
-                              <Text style={styles.textInputAddToCart}>
-                                {data.menu_name}
+                            }}>
+                            <Image
+                              style={{
+                                width: '100%',
+                                height: '60%',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                // backgroundColor:'black'
+                              }}
+                              source={{uri: data.menu_image}}
+                            />
+                          </View>
+                          <View
+                            style={{
+                              flex: 1,
+                              flexDestination: 'column',
+                              height: 70,
+                              justifyContent: 'space-between',
+                              // backgroundColor: 'black',
+                            }}>
+                            <View>
+                              <View style={{marginBottom: 10}}>
+                                <Text style={styles.textInputAddToCart}>
+                                  {data.menu_name}
+                                </Text>
+                              </View>
+
+                              <View style={{flexDirection: 'row'}}>
+                                {data.menu_variant
+                                  ? data.menu_variant.map((variant, key) => {
+                                      return (
+                                        <Text
+                                          style={{
+                                            fontFamily: fonts.medium,
+                                            fontSize: 12,
+                                            color: color.textGray,
+                                          }}>
+                                          {data.menu_variant.length == key + 1
+                                            ? variant.name
+                                            : variant.name + ', '}
+                                        </Text>
+                                      );
+                                    })
+                                  : null}
+                              </View>
+
+                              <View style={{flexDirection: 'row'}}>
+                                {data.menu_remark ? (
+                                  <Text
+                                    style={{
+                                      fontFamily: fonts.medium,
+                                      fontSize: 12,
+                                      color: color.textGray,
+                                    }}>
+                                    - {data.menu_remark}
+                                  </Text>
+                                ) : null}
+                              </View>
+                            </View>
+                            <View>
+                              <Text style={styles.textInputPriceAddToCart}>
+                                RM {data.menu_price.toFixed(2)}
+                              </Text>
+                            </View>
+                          </View>
+                          <View
+                            style={{
+                              flex: 0.6,
+                              height: 70,
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                              // backgroundColor: 'black',
+                            }}>
+                            <View
+                              style={{
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              }}>
+                              <Text
+                                style={{
+                                  fontFamily: fonts.regular,
+                                  fontSize: 12,
+                                  color: color.textGray,
+                                }}>
+                                {data.membership_no}
                               </Text>
                             </View>
 
-                            <View style={{flexDirection: 'row'}}>
-                              {data.menu_variant
-                                ? data.menu_variant.map((variant, key) => {
-                                    return (
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginRight: 10,
+                                justifyContent: 'space-evenly',
+                                // backgroundColor:'black'
+                              }}>
+                              <TouchableOpacity
+                                style={{
+                                  height: 35,
+                                  backgroundColor: color.primary,
+                                  width: 35,
+                                  borderRadius: 5,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                                onPress={() =>
+                                  _reduceMenuCartQuantity(
+                                    data.menu_id,
+                                    data.membership_no,
+                                    data.menu_variant,
+                                    data.menu_remark,
+                                  )
+                                }>
+                                <Icon
+                                  name={'minus'}
+                                  type="feather"
+                                  size={19}
+                                  color="white"
+
+                                  // style={{position: 'absolute'}}
+                                />
+                              </TouchableOpacity>
+
+                              <View
+                                style={{
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  marginLeft: 15,
+                                  marginRight: 15,
+                                }}>
+                                <Text style={{fontFamily: fonts.regular}}>
+                                  {data.menu_quantity}
+                                </Text>
+                              </View>
+
+                              <TouchableOpacity
+                                style={{
+                                  height: 35,
+                                  backgroundColor: color.primary,
+                                  width: 35,
+                                  borderRadius: 5,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                                onPress={() =>
+                                  _addMenuCartQuantity(
+                                    data.menu_id,
+                                    data.membership_no,
+                                    data.menu_variant,
+                                    data.menu_remark,
+                                  )
+                                }>
+                                <Icon
+                                  name={'plus'}
+                                  type="feather"
+                                  size={19}
+                                  color="white"
+
+                                  // style={{position: 'absolute'}}
+                                />
+                              </TouchableOpacity>
+
+                              {/* <Text style={{fontFamily: fonts.regular}}>
+                          {} RM {itemQuantity}.00
+                        </Text> */}
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+
+                  {plusTakeway == true ? (
+                    <View style={{height: '50%'}}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          height: 'auto',
+                          alignItems: 'center',
+                          backgroundColor: 'white',
+                        }}>
+                        <TouchableOpacity
+                          style={{
+                            ...styles.inputBox2,
+                            marginLeft: 10,
+                            justifyContent: 'center',
+                            paddingLeft: 0,
+                            marginRight: 0,
+                            marginTop: 10,
+                            // backgroundColor: 'black',
+                          }}
+                          onPress={() => {
+                            setSelectDineInOrTakeAway(0);
+                            setPlusTakeway(false);
+                            setOrderCartTakeAway([]);
+                            AsyncStorage.removeItem('ORDER_TAKEAWAY');
+                            _calculateTotal();
+                            _confirmDiscount();
+                          }}>
+                          <Icon
+                            name={'minus'}
+                            type="feather"
+                            size={24}
+                            // style={{position: 'absolute', margin: 100}}
+                          />
+                        </TouchableOpacity>
+                        <View
+                          style={{
+                            ...styles.inputBox2,
+                            flex: 6,
+                            paddingLeft: 0,
+                            justifyContent: 'center',
+                            alignSelf: 'center',
+                            marginTop: 10,
+                            marginLeft: 10,
+                          }}>
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              fontFamily: fonts.medium,
+                            }}>
+                            Takeaway
+                          </Text>
+                        </View>
+
+                        <TouchableOpacity
+                          style={{
+                            ...styles.inputBox2,
+                            // marginLeft: 10,
+                            justifyContent: 'center',
+                            paddingLeft: 0,
+                            marginTop: 10,
+                            // backgroundColor: 'black',
+                          }}
+                          onPress={() => {
+                            Alert.alert(
+                              'Clear',
+                              'Are you sure want to clear cart?',
+                              [
+                                {
+                                  text: 'Cancel',
+                                  onPress: () => console.log('Cancel Pressed'),
+                                  style: 'cancel',
+                                },
+                                {
+                                  text: 'OK',
+                                  onPress: () => {
+                                    setOrderCartTakeAway([]);
+                                    AsyncStorage.removeItem('ORDER_TAKEAWAY');
+                                    _calculateTotal();
+                                    _confirmDiscount();
+                                  },
+                                },
+                              ],
+                            );
+                          }}>
+                          <Icon
+                            name={'trash-2'}
+                            type="feather"
+                            size={24}
+                            // style={{position: 'absolute', margin: 100}}
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <ScrollView>
+                        {orderCartTakeAway.map((data, index) => {
+                          return (
+                            <View
+                              style={{
+                                marginTop: 5,
+                                flexDirection: 'row',
+                                height: 'auto',
+                                alignItems: 'center',
+                              }}>
+                              <View
+                                style={{
+                                  ...styles.inputBox2,
+                                  paddingLeft: 0,
+                                  marginLeft: 10,
+                                  marginTop: 5,
+                                  marginBottom: 5,
+                                  flex: 0.3,
+                                  // width:'1%',
+                                  height: 70,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                }}>
+                                <Image
+                                  style={{
+                                    width: '100%',
+                                    height: '60%',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    // backgroundColor:'black'
+                                  }}
+                                  source={{uri: data.menu_image}}
+                                />
+                              </View>
+                              <View
+                                style={{
+                                  flex: 1,
+                                  flexDestination: 'column',
+                                  height: 70,
+                                  justifyContent: 'space-between',
+                                  // backgroundColor: 'black',
+                                }}>
+                                <View>
+                                  <View style={{marginBottom: 10}}>
+                                    <Text style={styles.textInputAddToCart}>
+                                      {data.menu_name}
+                                    </Text>
+                                  </View>
+                                  <View style={{flexDirection: 'row'}}>
+                                    {data.menu_variant
+                                      ? data.menu_variant.map(
+                                          (variant, key) => {
+                                            return (
+                                              <Text
+                                                style={{
+                                                  fontFamily: fonts.medium,
+                                                  fontSize: 12,
+                                                  color: color.textGray,
+                                                }}>
+                                                {data.menu_variant.length ==
+                                                key + 1
+                                                  ? variant.name
+                                                  : variant.name + ', '}
+                                              </Text>
+                                            );
+                                          },
+                                        )
+                                      : null}
+                                  </View>
+
+                                  <View style={{flexDirection: 'row'}}>
+                                    {data.menu_remark ? (
                                       <Text
                                         style={{
                                           fontFamily: fonts.medium,
                                           fontSize: 12,
                                           color: color.textGray,
                                         }}>
-                                        {data.menu_variant.length == key + 1
-                                          ? variant.name
-                                          : variant.name + ', '}
+                                        - {data.menu_remark}
                                       </Text>
-                                    );
-                                  })
-                                : null}
-                            </View>
-                          </View>
-                          <View>
-                            <Text style={styles.textInputPriceAddToCart}>
-                              RM {data.menu_price.toFixed(2)}
-                            </Text>
-                          </View>
-                        </View>
-                        <View
-                          style={{
-                            flex: 0.6,
-                            height: 70,
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            // backgroundColor: 'black',
-                          }}>
-                          <View
-                            style={{
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }}>
-                            <Text
-                              style={{
-                                fontFamily: fonts.regular,
-                                fontSize: 12,
-                                color: color.textGray,
-                              }}>
-                              {data.membership_no}
-                            </Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                              marginRight: 10,
-                              justifyContent: 'space-evenly',
-                              // backgroundColor:'black'
-                            }}>
-                            <TouchableOpacity
-                              style={{
-                                height: 30,
-                                backgroundColor: color.primary,
-                                width: 30,
-                                borderRadius: 5,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                              onPress={() =>
-                                _reduceMenuCartQuantity(
-                                  data.menu_id,
-                                  data.membership_no,
-                                  data.menu_variant,
-                                )
-                              }>
-                              <Icon
-                                name={'minus'}
-                                type="feather"
-                                size={19}
-                                color="white"
-
-                                // style={{position: 'absolute'}}
-                              />
-                            </TouchableOpacity>
-
-                            <View
-                              style={{
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                marginLeft: 15,
-                                marginRight: 15,
-                              }}>
-                              <Text style={{fontFamily: fonts.regular}}>
-                                {data.menu_quantity}
-                              </Text>
-                            </View>
-
-                            <TouchableOpacity
-                              style={{
-                                height: 30,
-                                backgroundColor: color.primary,
-                                width: 30,
-                                borderRadius: 5,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                              onPress={() =>
-                                _addMenuCartQuantity(
-                                  data.menu_id,
-                                  data.membership_no,
-                                  data.menu_variant,
-                                )
-                              }>
-                              <Icon
-                                name={'plus'}
-                                type="feather"
-                                size={19}
-                                color="white"
-
-                                // style={{position: 'absolute'}}
-                              />
-                            </TouchableOpacity>
-
-                            {/* <Text style={{fontFamily: fonts.regular}}>
-                          {} RM {itemQuantity}.00
-                        </Text> */}
-                          </View>
-                        </View>
-                      </View>
-                    );
-                  })}
-                </ScrollView>
-
-                {plusTakeway == true ? (
-                  <View style={{height: '50%'}}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        height: 'auto',
-                        alignItems: 'center',
-                        backgroundColor: 'white',
-                      }}>
-                      <TouchableOpacity
-                        style={{
-                          ...styles.inputBox2,
-                          marginLeft: 10,
-                          justifyContent: 'center',
-                          paddingLeft: 0,
-                          marginRight: 0,
-                          marginTop: 10,
-                          // backgroundColor: 'black',
-                        }}
-                        onPress={() => {
-                          setSelectDineInOrTakeAway(0);
-                          setPlusTakeway(false);
-                          setOrderCartTakeAway([]);
-                          AsyncStorage.removeItem('ORDER_TAKEAWAY');
-                          _calculateTotal();
-                          _confirmDiscount();
-                        }}>
-                        <Icon
-                          name={'minus'}
-                          type="feather"
-                          size={24}
-                          // style={{position: 'absolute', margin: 100}}
-                        />
-                      </TouchableOpacity>
-                      <View
-                        style={{
-                          ...styles.inputBox2,
-                          flex: 6,
-                          paddingLeft: 0,
-                          justifyContent: 'center',
-                          alignSelf: 'center',
-                          marginTop: 10,
-                          marginLeft: 10,
-                        }}>
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            fontFamily: fonts.medium,
-                          }}>
-                          Takeaway
-                        </Text>
-                      </View>
-
-                      <TouchableOpacity
-                        style={{
-                          ...styles.inputBox2,
-                          // marginLeft: 10,
-                          justifyContent: 'center',
-                          paddingLeft: 0,
-                          marginTop: 10,
-                          // backgroundColor: 'black',
-                        }}
-                        onPress={() => {
-                          Alert.alert(
-                            'Clear',
-                            'Are you sure want to clear cart?',
-                            [
-                              {
-                                text: 'Cancel',
-                                onPress: () => console.log('Cancel Pressed'),
-                                style: 'cancel',
-                              },
-                              {
-                                text: 'OK',
-                                onPress: () => {
-                                  setOrderCartTakeAway([]);
-                                  AsyncStorage.removeItem('ORDER_TAKEAWAY');
-                                  _calculateTotal();
-                                  _confirmDiscount();
-                                },
-                              },
-                            ],
-                          );
-                        }}>
-                        <Icon
-                          name={'trash-2'}
-                          type="feather"
-                          size={24}
-                          // style={{position: 'absolute', margin: 100}}
-                        />
-                      </TouchableOpacity>
-                    </View>
-
-                    <ScrollView>
-                      {orderCartTakeAway.map((data, index) => {
-                        return (
-                          <View
-                            style={{
-                              marginTop: 5,
-                              flexDirection: 'row',
-                              height: 'auto',
-                              alignItems: 'center',
-                            }}>
-                            <View
-                              style={{
-                                ...styles.inputBox2,
-                                paddingLeft: 0,
-                                marginLeft: 10,
-                                marginTop: 5,
-                                marginBottom: 5,
-                                flex: 0.3,
-                                // width:'1%',
-                                height: 70,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                              }}>
-                              <Image
-                                style={{
-                                  width: '100%',
-                                  height: '60%',
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  // backgroundColor:'black'
-                                }}
-                                source={{uri: data.menu_image}}
-                              />
-                            </View>
-                            <View
-                              style={{
-                                flex: 1,
-                                flexDestination: 'column',
-                                height: 70,
-                                justifyContent: 'space-between',
-                                // backgroundColor: 'black',
-                              }}>
-                              <View>
-                                <View style={{marginBottom: 10}}>
-                                  <Text style={styles.textInputAddToCart}>
-                                    {data.menu_name}
+                                    ) : null}
+                                  </View>
+                                </View>
+                                <View>
+                                  <Text style={styles.textInputPriceAddToCart}>
+                                    RM {data.menu_price.toFixed(2)}
                                   </Text>
                                 </View>
-                                <View style={{flexDirection: 'row'}}>
-                                  {data.menu_variant
-                                    ? data.menu_variant.map((variant, key) => {
-                                        return (
-                                          <Text
-                                            style={{
-                                              fontFamily: fonts.medium,
-                                              fontSize: 12,
-                                              color: color.textGray,
-                                            }}>
-                                            {data.menu_variant.length == key + 1
-                                              ? variant.name
-                                              : variant.name + ', '}
-                                          </Text>
-                                        );
-                                      })
-                                    : null}
-                                </View>
                               </View>
-                              <View>
-                                <Text style={styles.textInputPriceAddToCart}>
-                                  RM {data.menu_price.toFixed(2)}
-                                </Text>
-                              </View>
-                            </View>
-                            <View
-                              style={{
-                                flex: 0.6,
-                                height: 70,
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                // backgroundColor: 'black',
-                              }}>
                               <View
                                 style={{
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
+                                  flex: 0.6,
+                                  height: 70,
+                                  flexDirection: 'column',
+                                  justifyContent: 'space-between',
+                                  // backgroundColor: 'black',
                                 }}>
-                                <Text
-                                  style={{
-                                    fontFamily: fonts.regular,
-                                    fontSize: 12,
-                                    color: color.textGray,
-                                  }}>
-                                  {data.membership_no}
-                                </Text>
-                              </View>
-
-                              <View
-                                style={{
-                                  flexDirection: 'row',
-                                  alignItems: 'center',
-                                  marginRight: 10,
-                                  justifyContent: 'space-evenly',
-                                  // backgroundColor:'black'
-                                }}>
-                                <TouchableOpacity
-                                  style={{
-                                    height: 30,
-                                    backgroundColor: color.primary,
-                                    width: 30,
-                                    borderRadius: 5,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}
-                                  onPress={() =>
-                                    _reduceMenuCartQuantityTakeaway(
-                                      data.menu_id,
-                                      data.membership_no,
-                                      data.menu_variant,
-                                    )
-                                  }>
-                                  <Icon
-                                    name={'minus'}
-                                    type="feather"
-                                    size={19}
-                                    color="white"
-
-                                    // style={{position: 'absolute'}}
-                                  />
-                                </TouchableOpacity>
-
                                 <View
                                   style={{
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    marginLeft: 15,
-                                    marginRight: 15,
                                   }}>
-                                  <Text style={{fontFamily: fonts.regular}}>
-                                    {data.menu_quantity}
+                                  <Text
+                                    style={{
+                                      fontFamily: fonts.regular,
+                                      fontSize: 12,
+                                      color: color.textGray,
+                                    }}>
+                                    {data.membership_no}
                                   </Text>
                                 </View>
 
-                                <TouchableOpacity
+                                <View
                                   style={{
-                                    height: 30,
-                                    backgroundColor: color.primary,
-                                    width: 30,
-                                    borderRadius: 5,
+                                    flexDirection: 'row',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}
-                                  onPress={() =>
-                                    _addMenuCartQuantityTakeaway(
-                                      data.menu_id,
-                                      data.membership_no,
-                                      data.menu_variant,
-                                    )
-                                  }>
-                                  <Icon
-                                    name={'plus'}
-                                    type="feather"
-                                    size={19}
-                                    color="white"
+                                    marginRight: 10,
+                                    justifyContent: 'space-evenly',
+                                    // backgroundColor:'black'
+                                  }}>
+                                  <TouchableOpacity
+                                    style={{
+                                      height: 35,
+                                      backgroundColor: color.primary,
+                                      width: 35,
+                                      borderRadius: 5,
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                    onPress={() =>
+                                      _reduceMenuCartQuantityTakeaway(
+                                        data.menu_id,
+                                        data.membership_no,
+                                        data.menu_variant,
+                                        data.menu_remark,
+                                      )
+                                    }>
+                                    <Icon
+                                      name={'minus'}
+                                      type="feather"
+                                      size={19}
+                                      color="white"
 
-                                    // style={{position: 'absolute'}}
-                                  />
-                                </TouchableOpacity>
+                                      // style={{position: 'absolute'}}
+                                    />
+                                  </TouchableOpacity>
 
-                                {/* <Text style={{fontFamily: fonts.regular}}>
+                                  <View
+                                    style={{
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                      marginLeft: 15,
+                                      marginRight: 15,
+                                    }}>
+                                    <Text style={{fontFamily: fonts.regular}}>
+                                      {data.menu_quantity}
+                                    </Text>
+                                  </View>
+
+                                  <TouchableOpacity
+                                    style={{
+                                      height: 35,
+                                      backgroundColor: color.primary,
+                                      width: 35,
+                                      borderRadius: 5,
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                    onPress={() =>
+                                      _addMenuCartQuantityTakeaway(
+                                        data.menu_id,
+                                        data.membership_no,
+                                        data.menu_variant,
+                                        data.menu_remark,
+                                      )
+                                    }>
+                                    <Icon
+                                      name={'plus'}
+                                      type="feather"
+                                      size={19}
+                                      color="white"
+
+                                      // style={{position: 'absolute'}}
+                                    />
+                                  </TouchableOpacity>
+
+                                  {/* <Text style={{fontFamily: fonts.regular}}>
                               {} RM {itemQuantity}.00
                             </Text> */}
+                                </View>
                               </View>
                             </View>
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
-                  </View>
-                ) : null}
+                          );
+                        })}
+                      </ScrollView>
+                    </View>
+                  ) : null}
+                </View>
               </View>
-            </View>
 
-            <View
-              style={{
-                // marginTop:10,
-                // justifyContent: 'flex-end',
-                flexDirection: 'column',
-                // backgroundColor: 'pink',
-                height: 'auto',
-                // marginTop: 10,
-                // flex: 1,
-              }}>
-              {/* {calculation section} */}
               <View
                 style={{
-                  marginLeft: 10,
-                  marginRight: 10,
-                  backgroundColor: color.background,
-                  height: 'auto',
+                  // marginTop:10,
+                  // justifyContent: 'flex-end',
+                  flexDirection: 'column',
                   // backgroundColor: 'pink',
+                  height: 'auto',
+                  // marginTop: 10,
+                  // marginBottom:20
+                  // flex: 1,
                 }}>
+                {/* {calculation section} */}
                 <View
                   style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    margin: 5,
+                    marginLeft: 10,
+                    marginRight: 10,
+                    backgroundColor: color.background,
+                    height: 'auto',
+                    // backgroundColor: 'green',
                   }}>
-                  <Text style={styles.textCart}>Subtotal</Text>
-                  <Text style={styles.textCart}>
-                    {amountOrderDisplay ? amountOrderDisplay : (0).toFixed(2)}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    margin: 5,
-                  }}
-                  onPress={() => {
-                    _showModal('discount');
-                  }}>
-                  <Text style={styles.textCart}>
-                    Discount{' '}
-                    {discountType == 'amount'
-                      ? '(MYR)'
-                      : discountType == 'percent'
-                      ? '(' + textInputDiscount + '%)'
-                      : null}
-                  </Text>
-                  <Text style={styles.textCart}>
-                    {' '}
-                    {amountDiscountDisplay
-                      ? amountDiscountDisplay
-                      : (0).toFixed(2)}
-                  </Text>
-                </TouchableOpacity>
-
-                {linkMembership == true || membershipDiscount > 0 ? (
                   <View
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
                       margin: 5,
                     }}>
-                    <Text style={styles.textCart}>Membership Discount 7%</Text>
+                    <Text style={styles.textCart}>Subtotal</Text>
                     <Text style={styles.textCart}>
-                      {membershipDiscount
-                        ? membershipDiscount
-                            .toFixed(2)
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                        : (0).toFixed(2)}
+                      {amountOrderDisplay ? amountOrderDisplay : (0).toFixed(2)}
                     </Text>
                   </View>
-                ) : null}
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      margin: 5,
+                      alignItems: 'center',
+                    }}
+                    onPress={() => {
+                      _showModal('discount');
+                    }}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <Text style={{...styles.textCart}}>
+                        Discount{' '}
+                        {discountType == 'amount'
+                          ? '(MYR)'
+                          : discountType == 'percent'
+                          ? '(' + textInputDiscount + '%)'
+                          : null}
+                      </Text>
+                      <Switch
+                        trackColor={{false: color.primary, true: color.success}}
+                        thumbColor={color.white}
+                        ios_backgroundColor={color.primary}
+                        onValueChange={() => {
+                          _toggleSwitchDiscount('discount');
+                        }}
+                        value={toggleEnable}
+                        style={{
+                          transform: [{scaleX: 0.5}, {scaleY: 0.5}],
+                        }}
+                      />
+                    </View>
 
-                {outletDiscount > 0 ? (
+                    <Text style={styles.textCart}>
+                      {' '}
+                      {amountDiscountDisplay
+                        ? amountDiscountDisplay
+                        : (0).toFixed(2)}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {linkMembership == true || membershipDiscount > 0 ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        margin: 5,
+                      }}>
+                      <Text style={styles.textCart}>
+                        Membership Discount 7%
+                      </Text>
+                      <Text style={styles.textCart}>
+                        {membershipDiscount
+                          ? membershipDiscount
+                              .toFixed(2)
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                          : (0).toFixed(2)}
+                      </Text>
+                    </View>
+                  ) : null}
+
+                  {outletDiscount > 0 ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        margin: 5,
+                      }}>
+                      <Text style={styles.textCart}>Outlet Discount 10%</Text>
+                      <Text style={styles.textCart}>
+                        {outletDiscount
+                          ? outletDiscount
+                              .toFixed(2)
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                          : (0).toFixed(2)}
+                      </Text>
+                    </View>
+                  ) : null}
+
                   <View
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
                       margin: 5,
                     }}>
-                    <Text style={styles.textCart}>Outlet Discount 10%</Text>
+                    <Text style={styles.textCart}>Tax 6%</Text>
                     <Text style={styles.textCart}>
-                      {outletDiscount
-                        ? outletDiscount
-                            .toFixed(2)
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                        : (0).toFixed(2)}
+                      {taxDisplay ? taxDisplay : (0).toFixed(2)}
                     </Text>
                   </View>
-                ) : null}
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    margin: 5,
-                  }}>
-                  <Text style={styles.textCart}>Tax 6%</Text>
-                  <Text style={styles.textCart}>
-                    {taxDisplay ? taxDisplay : (0).toFixed(2)}
-                  </Text>
-                </View>
-                {/* <View
+                  {/* <View
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -3861,7 +4245,7 @@ const MenuOrder = ({navigation, route}) => {
                   <Text style={styles.textCart}>0.00</Text>
                 </View> */}
 
-                {/* <View
+                  {/* <View
                   style={{
                     flexDirection: 'row',
                     justifyContent: 'space-between',
@@ -3877,76 +4261,77 @@ const MenuOrder = ({navigation, route}) => {
                   <Text style={styles.textCart}>Add Voucher Code</Text>
                 </View> */}
 
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    margin: 5,
-                    marginTop: 15,
-                  }}>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 18}}>
-                    Total
-                  </Text>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 18}}>
-                    RM{' '}
-                    {totalAmountOrderDisplay
-                      ? totalAmountOrderDisplay
-                      : (0).toFixed(2)}
-                  </Text>
-                </View>
-              </View>
-              <View>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    margin: 10,
-                    // marginTop: 15,
-                    backgroundColor: color.primary,
-                    borderRadius: 5,
-                    height: 40,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  onPress={() => {
-                    // alert('test');
-
-                    _checkout();
-                    // navigation.navigate('Checkout');
-                  }}>
-                  <Text
+                  <View
                     style={{
-                      fontFamily: fonts.medium,
-                      fontSize: 16,
-                      color: color.white,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      margin: 5,
+                      marginTop: 15,
                     }}>
-                    Proceed
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    margin: 10,
-                    marginTop: 0,
-                    backgroundColor: 'white',
-                    borderRadius: 5,
-                    height: 40,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderColor: color.primary,
-                    borderWidth: 1,
-                  }}
-                  onPress={() => navigation.goBack()}>
-                  <Text style={{fontFamily: fonts.medium, fontSize: 16}}>
-                    Back
-                  </Text>
-                </TouchableOpacity>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 18}}>
+                      Total
+                    </Text>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 18}}>
+                      RM{' '}
+                      {totalAmountOrderDisplay
+                        ? totalAmountOrderDisplay
+                        : (0).toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+                <View>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      margin: 10,
+                      // marginTop: 15,
+                      backgroundColor: color.primary,
+                      borderRadius: 5,
+                      height: 40,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                    onPress={() => {
+                      // alert('test');
+
+                      _checkout();
+                      // navigation.navigate('Checkout');
+                    }}>
+                    <Text
+                      style={{
+                        fontFamily: fonts.medium,
+                        fontSize: 16,
+                        color: color.white,
+                      }}>
+                      Proceed
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      margin: 10,
+                      marginTop: 0,
+                      backgroundColor: 'white',
+                      borderRadius: 5,
+                      height: 40,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderColor: color.primary,
+                      borderWidth: 1,
+                    }}
+                    onPress={() => navigation.goBack()}>
+                    <Text style={{fontFamily: fonts.medium, fontSize: 16}}>
+                      Back
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
     </SafeAreaView>
   );
 };
