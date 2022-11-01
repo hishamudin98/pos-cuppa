@@ -149,12 +149,12 @@ const App = () => {
         <Stack.Screen name="KDS" component={KDS} />
 
 
-        {/* <Stack.Screen name="_OrderPendingScreen" component={_OrderPendingScreen} /> */}
+        <Stack.Screen name="_OrderPendingScreen" component={_OrderPendingScreen} />
         {/* <Stack.Screen name="_OrderScreen" component={_OrderScreen} /> */}
-        <Stack.Screen name="MenuOrder" component={MenuOrder} />
+        {/* <Stack.Screen name="MenuOrder" component={MenuOrder} />
         <Stack.Screen name="Checkout" component={Checkout} />
-        {/* <Stack.Screen name="Transactions" component={Transactions} /> */}
-        {/* <Stack.Screen name="Shift" component={Shift} /> */}
+        <Stack.Screen name="Transactions" component={Transactions} />
+        <Stack.Screen name="Shift" component={Shift} /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
