@@ -519,7 +519,7 @@ const MenuOrder = ({navigation, route}) => {
     id,
     membership,
     variant,
-    remark
+    remark,
   ) => {
     // alert(id);
     let fetchOrder = await AsyncStorage.getItem('ORDER_TAKEAWAY');
@@ -597,7 +597,7 @@ const MenuOrder = ({navigation, route}) => {
         const newCart = stgParsed.map(menu => {
           console.log('menu_id', menu.menu_id === id);
           console.log('membership_no', menu.membership_no === membership);
-          console.log('menu_remark', remark );
+          console.log('menu_remark', remark);
           if (
             menu.menu_id === id &&
             menu.membership_no === membership &&
@@ -890,6 +890,7 @@ const MenuOrder = ({navigation, route}) => {
       if (menuVariant.length > 0) {
         if (menuVariantSelected.length == 0) {
           alert('Please select variant');
+          setModalVisible(true);
           return;
         }
         console.log('variantselected', variantSelected);
@@ -901,6 +902,8 @@ const MenuOrder = ({navigation, route}) => {
         if (menuVariant.length > 1) {
           if (emptyVariantSelect2 == '{}') {
             alert('Please select variant');
+            setModalVisible(true);
+
             return;
           } else {
             variantSelected.push(menuVariantSelected2);
@@ -1093,6 +1096,8 @@ const MenuOrder = ({navigation, route}) => {
       if (menuVariant.length > 0) {
         if (menuVariantSelected.length == 0) {
           alert('Please select variant');
+          setModalVisible(true);
+
           return;
         }
         console.log('variantselected', variantSelected);
@@ -1103,6 +1108,7 @@ const MenuOrder = ({navigation, route}) => {
 
         if (menuVariant.length > 1) {
           if (emptyVariantSelect2 == '{}') {
+            setModalVisible(true);
             alert('Please select variant');
             return;
           } else {
@@ -3397,7 +3403,9 @@ const MenuOrder = ({navigation, route}) => {
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.btnReward}>
                               <View>
-                                <Text style={styles.textInput}>aa</Text>
+                                <Text style={styles.textInput}>
+                                  {data.rewardName}
+                                </Text>
                               </View>
                             </TouchableOpacity>
                           </>
@@ -3423,7 +3431,9 @@ const MenuOrder = ({navigation, route}) => {
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.btnReward}>
                               <View>
-                                <Text style={styles.textInput}>aa</Text>
+                                <Text style={styles.textInput}>
+                                  {data.rewardName}
+                                </Text>
                               </View>
                             </TouchableOpacity>
                           </>
@@ -3449,7 +3459,9 @@ const MenuOrder = ({navigation, route}) => {
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.btnReward}>
                               <View>
-                                <Text style={styles.textInput}>aa</Text>
+                                <Text style={styles.textInput}>
+                                  {data.rewardName}
+                                </Text>
                               </View>
                             </TouchableOpacity>
                           </>
