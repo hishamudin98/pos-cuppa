@@ -9,6 +9,7 @@ import {
   StatusBar,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Modal from 'react-native-modal';
 
@@ -34,6 +35,7 @@ const counterPOS = system_configuration.counterSecretKey;
 // create a component
 const OrderPending = ({navigation, route}) => {
   const [orderList, setOrderList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [transactionList, setTransactionList] = useState([]);
   const [modalQR, setModalQR] = useState(false);
   const [dataScan, setDataScan] = useState('');
@@ -41,8 +43,16 @@ const OrderPending = ({navigation, route}) => {
   useEffect(() => {
     navigation.addListener('focus', function () {
       _fetchOrderPending();
+      _startLoading();
     });
   }, []);
+
+  const _startLoading = async () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
 
   const _fetchOrderPending = async () => {
     await axios
@@ -99,473 +109,487 @@ const OrderPending = ({navigation, route}) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar hidden />
-      <View style={styles.header}>
-        <Drawer navigation={navigation} />
+      {loading == true ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            // backgroundColor: 'red',
+          }}>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <>
+          <StatusBar hidden />
+          <View style={styles.header}>
+            <Drawer navigation={navigation} />
 
-        <View style={{flexDirection: 'row', flex: 1}}>
-          <View style={{flexDirection: 'column', flex: 1}}>
-            <View style={{marginTop: 30, marginLeft: 20}}>
-              <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
-                Order Pending
-              </Text>
-            </View>
-            <View style={{flexDirection: 'row'}}></View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingLeft: 20,
-                marginTop: 20,
-                justifyContent: 'space-between',
-                // height: 50,
-              }}>
-              <View style={styles.inputSearch}>
-                <Icon
-                  name={'search'}
-                  type="feather"
-                  size={24}
-                  // style={{position: 'absolute', margin: 100}}
-                />
-                <View style={{flex: 1}}>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Search"
-                    placeholderTextColor={color.textGray}
-                    onChangeText={text => _search(text)}
-                  />
+            <View style={{flexDirection: 'row', flex: 1}}>
+              <View style={{flexDirection: 'column', flex: 1}}>
+                <View style={{marginTop: 30, marginLeft: 20}}>
+                  <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
+                    Order Pending
+                  </Text>
                 </View>
-              </View>
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: color.primary,
-                  height: 40,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: '20%',
-                  borderRadius: 5,
-                  // flex: 0.7,
-                  marginRight: 20,
-                  flexDirection: 'row',
-
-                  // borderWidth: 1,
-                  // borderColor:color.primary
-                }}
-                onPress={() => {
-                  // navigation.navigate('QrScan');
-                  _fetchOrderPending();
-                }}>
-                <Text
+                <View style={{flexDirection: 'row'}}></View>
+                <View
                   style={{
-                    ...styles.textFamily,
-                    color: color.white,
-                    marginLeft: 5,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingLeft: 20,
+                    marginTop: 20,
+                    justifyContent: 'space-between',
+                    // height: 50,
                   }}>
-                  Refresh
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: color.primary,
-                  height: 40,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: '20%',
-                  borderRadius: 5,
-                  // flex: 0.7,
-                  marginRight: 20,
-                  flexDirection: 'row',
-
-                  // borderWidth: 1,
-                  // borderColor:color.primary
-                }}
-                onPress={() => {
-                  // navigation.navigate('QrScan');
-                  setModalQR(true);
-                }}>
-                <Icon
-                  name={'camera'}
-                  type="feather"
-                  size={24}
-                  color={color.white}
-                  // style={{position: 'absolute', margin: 100}}
-                />
-                <Text
-                  style={{
-                    ...styles.textFamily,
-                    color: color.white,
-                    marginLeft: 5,
-                  }}>
-                  Scan QR Code
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <Modal
-              animationType="fade"
-              visible={modalQR}
-              style={{...styles.modalView}}>
-              <View
-                style={{
-                  alignItems: 'flex-start',
-                  padding: 20,
-                  paddingBottom: 0,
-                }}>
-                <Icon
-                  name={'x'}
-                  type="feather"
-                  size={24}
-                  onPress={() => {
-                    setModalQR(!modalQR);
-                    setDataScan('');
-                  }}
-                  // style={{position: 'absolute', margin: 100}}
-                />
-              </View>
-              <View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  // backgroundColor: 'green',
-                }}>
-                <QRCodeScanner
-                  // reactivate={true}
-                  onRead={read => onSuccess(read)}
-                  flashMode={RNCamera.Constants.FlashMode.off}
-                  // containerStyle={{flex: 1, backgroundColor: color.white, width:20, height:20}}
-                  // topContent={
-                  //   <Text style={styles.centerText}>
-                  //     Go to{' '}
-                  //     <Text style={styles.textBold}>wikipedia.org/wiki/QR_code</Text>{' '}
-                  //     on your computer and scan the QR code.
-                  //   </Text>
-                  // }
-                  cameraContainerStyle={{
-                    flex: 1,
-                    backgroundColor: color.primary,
-                  }}
-                  cameraStyle={{
-                    flex: 1,
-                    backgroundColor: color.white,
-                    width: 700,
-                    height: 500,
-                    alignSelf: 'center',
-                  }}
-                />
-              </View>
-            </Modal>
-
-            <View style={{flexDirection: 'row', marginTop: 20}}>
-              <View
-                style={{
-                  backgroundColor: color.white,
-                  flex: 1,
-                  height: 'auto',
-                  marginLeft: 20,
-                  marginRight: 20,
-                  marginBottom: 20,
-                }}>
-                <View style={{flexDirection: 'column', height: 'auto'}}>
-                  <View style={{flexDirection: 'row', backgroundColor:color.primary}}>
-                    <View
-                      style={{
-                        flex: 0.5,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        No.{' '}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={{
-                        flex: 1.5,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        Order No
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        Datetime
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        Table No
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        Total (RM)
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flex: 0.7,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        Status
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flex: 2,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: 60,
-                      }}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          fontFamily: fonts.semibold,
-                          color: color.white,
-                        }}>
-                        Action
-                      </Text>
+                  <View style={styles.inputSearch}>
+                    <Icon name={'search'} type="feather" size={24} />
+                    <View style={{flex: 1}}>
+                      <TextInput
+                        style={styles.textInput}
+                        placeholder="Search"
+                        placeholderTextColor={color.textGray}
+                        onChangeText={text => _search(text)}
+                      />
                     </View>
                   </View>
-                  <View style={{height: 600}}>
-                    <ScrollView>
-                      {orderList.map((item, index) => {
-                        return (
-                          <View style={{flexDirection: 'row'}}>
-                            <View
-                              style={{
-                                flex: 0.5,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                              }}>
-                              <Text style={styles.textFamily}>
-                                {index + 1}.
-                              </Text>
-                            </View>
 
-                            <View
-                              style={{
-                                flex: 1.5,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                              }}>
-                              <Text style={styles.textFamily}>
-                                {item.order_no}
-                              </Text>
-                            </View>
-                            <View
-                              style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                              }}>
-                              <Text style={styles.textFamily}>
-                                {moment(item.order_datetime).format(
-                                  'h:mm A DD-MM-YYYY',
-                                )}
-                              </Text>
-                            </View>
-                            <View
-                              style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                              }}>
-                              <Text style={styles.textFamily}>
-                                {item.order_tableNo}
-                              </Text>
-                            </View>
-                            <View
-                              style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                              }}>
-                              <Text style={styles.textFamily}>
-                                {item.order_total_amount}
-                              </Text>
-                            </View>
-                            <View
-                              style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                                flex: 0.7,
-                              }}>
-                              <View
-                                style={{
-                                  backgroundColor: color.warning,
-                                  height: 30,
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  width: 100,
-                                  borderRadius: 5,
-                                  flex: 0.7,
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: color.primary,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '20%',
+                      borderRadius: 5,
+                      // flex: 0.7,
+                      marginRight: 20,
+                      flexDirection: 'row',
+                      // borderWidth: 1,
+                      // borderColor:color.primary
+                    }}
+                    onPress={() => {
+                      // navigation.navigate('QrScan');
+                      _startLoading();
+                      _fetchOrderPending();
+                    }}>
+                    <Text
+                      style={{
+                        ...styles.textFamily,
+                        color: color.white,
+                        marginLeft: 5,
+                      }}>
+                      Refresh
+                    </Text>
+                  </TouchableOpacity>
 
-                                  // borderWidth: 1,
-                                  // borderColor:color.primary
-                                }}>
-                                <Text
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: color.primary,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '20%',
+                      borderRadius: 5,
+                      // flex: 0.7,
+                      marginRight: 20,
+                      flexDirection: 'row',
+                      // borderWidth: 1,
+                      // borderColor:color.primary
+                    }}
+                    onPress={() => {
+                      // navigation.navigate('QrScan');
+                      setModalQR(true);
+                    }}>
+                    <Icon
+                      name={'camera'}
+                      type="feather"
+                      size={24}
+                      color={color.white}
+                    />
+                    <Text
+                      style={{
+                        ...styles.textFamily,
+                        color: color.white,
+                        marginLeft: 5,
+                      }}>
+                      Scan QR Code
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Modal
+                  animationType="fade"
+                  visible={modalQR}
+                  style={{...styles.modalView}}>
+                  <View
+                    style={{
+                      alignItems: 'flex-start',
+                      padding: 20,
+                      paddingBottom: 0,
+                    }}>
+                    <Icon
+                      name={'x'}
+                      type="feather"
+                      size={24}
+                      onPress={() => {
+                        setModalQR(!modalQR);
+                        setDataScan('');
+                      }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      // backgroundColor: 'green',
+                    }}>
+                    <QRCodeScanner
+                      // reactivate={true}
+                      onRead={read => onSuccess(read)}
+                      flashMode={RNCamera.Constants.FlashMode.off}
+                      // containerStyle={{flex: 1, backgroundColor: color.white, width:20, height:20}}
+                      // topContent={
+                      //   <Text style={styles.centerText}>
+                      //     Go to{' '}
+                      //     <Text style={styles.textBold}>wikipedia.org/wiki/QR_code</Text>{' '}
+                      //     on your computer and scan the QR code.
+                      //   </Text>
+                      // }
+                      cameraContainerStyle={{
+                        flex: 1,
+                        backgroundColor: color.primary,
+                      }}
+                      cameraStyle={{
+                        flex: 1,
+                        backgroundColor: color.white,
+                        width: 700,
+                        height: 500,
+                        alignSelf: 'center',
+                      }}
+                    />
+                  </View>
+                </Modal>
+
+                <View style={{flexDirection: 'row', marginTop: 20}}>
+                  <View
+                    style={{
+                      backgroundColor: color.white,
+                      flex: 1,
+                      height: 'auto',
+                      marginLeft: 20,
+                      marginRight: 20,
+                      marginBottom: 20,
+                    }}>
+                    <View style={{flexDirection: 'column', height: 'auto'}}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          backgroundColor: color.primary,
+                        }}>
+                        <View
+                          style={{
+                            flex: 0.5,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            No.{' '}
+                          </Text>
+                        </View>
+
+                        <View
+                          style={{
+                            flex: 1.5,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            Order No
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            Datetime
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            Table No
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            Total (RM)
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flex: 0.7,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            Status
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flex: 2,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 60,
+                          }}>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              fontFamily: fonts.semibold,
+                              color: color.white,
+                            }}>
+                            Action
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={{height: 600}}>
+                        <ScrollView>
+                          {orderList.map((item, index) => {
+                            return (
+                              <View style={{flexDirection: 'row'}}>
+                                <View
                                   style={{
-                                    ...styles.textFamily,
-                                    color: color.white,
+                                    flex: 0.5,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
                                   }}>
-                                  {item.order_status == 2 ? 'Pending' : null}
-                                </Text>
+                                  <Text style={styles.textFamily}>
+                                    {index + 1}.
+                                  </Text>
+                                </View>
+
+                                <View
+                                  style={{
+                                    flex: 1.5,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                  }}>
+                                  <Text style={styles.textFamily}>
+                                    {item.order_no}
+                                  </Text>
+                                </View>
+                                <View
+                                  style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                  }}>
+                                  <Text style={styles.textFamily}>
+                                    {moment(item.order_datetime).format(
+                                      'h:mm A DD-MM-YYYY',
+                                    )}
+                                  </Text>
+                                </View>
+                                <View
+                                  style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                  }}>
+                                  <Text style={styles.textFamily}>
+                                    {item.order_tableNo}
+                                  </Text>
+                                </View>
+                                <View
+                                  style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                  }}>
+                                  <Text style={styles.textFamily}>
+                                    {item.order_total_amount}
+                                  </Text>
+                                </View>
+                                <View
+                                  style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                    flex: 0.7,
+                                  }}>
+                                  <View
+                                    style={{
+                                      backgroundColor: color.warning,
+                                      height: 30,
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                      width: 100,
+                                      borderRadius: 5,
+                                      flex: 0.7,
+                                      // borderWidth: 1,
+                                      // borderColor:color.primary
+                                    }}>
+                                    <Text
+                                      style={{
+                                        ...styles.textFamily,
+                                        color: color.white,
+                                      }}>
+                                      {item.order_status == 2
+                                        ? 'Pending'
+                                        : null}
+                                    </Text>
+                                  </View>
+                                </View>
+                                <View
+                                  style={{
+                                    flex: 2,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    height: 60,
+                                    flexDirection: 'row',
+                                  }}>
+                                  <TouchableOpacity
+                                    style={{
+                                      backgroundColor: color.primary,
+                                      height: 30,
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                      width: 90,
+                                      borderRadius: 5,
+                                      marginRight: 10,
+                                      // borderWidth: 1,
+                                      // borderColor:color.primary
+                                    }}
+                                    onPress={async () => {
+                                      await AsyncStorage.removeItem('ORDER');
+                                      await AsyncStorage.removeItem(
+                                        'DATA_ORDER',
+                                      );
+                                      await AsyncStorage.removeItem(
+                                        'DISCOUNT_ORDER',
+                                      );
+                                      await AsyncStorage.removeItem(
+                                        'ORDER_TAKEAWAY',
+                                      );
+                                      await AsyncStorage.removeItem('CUSTOMER');
+
+                                      navigation.navigate('Order', {
+                                        screen: 'MenuOrder',
+                                        params: {data: item.order_no},
+                                      });
+                                    }}>
+                                    <Text
+                                      style={{
+                                        ...styles.textFamily,
+                                        color: color.white,
+                                      }}>
+                                      Edit
+                                    </Text>
+                                  </TouchableOpacity>
+
+                                  <TouchableOpacity
+                                    style={{
+                                      backgroundColor: color.primary,
+                                      height: 30,
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                      width: 90,
+                                      borderRadius: 5,
+                                      // borderWidth: 1,
+                                      // borderColor:color.primary
+                                    }}
+                                    onPress={() => {
+                                      AsyncStorage.removeItem('ORDER');
+                                      AsyncStorage.removeItem('DATA_ORDER');
+                                      AsyncStorage.removeItem('DISCOUNT_ORDER');
+                                      AsyncStorage.removeItem('ORDER_TAKEAWAY');
+                                      AsyncStorage.removeItem('CUSTOMER');
+
+                                      navigation.navigate('Order', {
+                                        screen: 'Checkout',
+                                        params: {data: item.order_no},
+                                      });
+                                    }}>
+                                    <Text
+                                      style={{
+                                        ...styles.textFamily,
+                                        color: color.white,
+                                      }}>
+                                      Pay
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
                               </View>
-                            </View>
-                            <View
-                              style={{
-                                flex: 2,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                height: 60,
-                                flexDirection: 'row',
-                              }}>
-                              <TouchableOpacity
-                                style={{
-                                  backgroundColor: color.primary,
-                                  height: 30,
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  width: 90,
-                                  borderRadius: 5,
-                                  marginRight: 10,
-
-                                  // borderWidth: 1,
-                                  // borderColor:color.primary
-                                }}
-                                onPress={async () => {
-                                  await AsyncStorage.removeItem('ORDER');
-                                  await AsyncStorage.removeItem('DATA_ORDER');
-                                  await AsyncStorage.removeItem(
-                                    'DISCOUNT_ORDER',
-                                  );
-                                  await AsyncStorage.removeItem(
-                                    'ORDER_TAKEAWAY',
-                                  );
-                                  await AsyncStorage.removeItem('CUSTOMER');
-
-                                  navigation.navigate('Order', {
-                                    screen: 'MenuOrder',
-                                    params: {data: item.order_no},
-                                  });
-                                }}>
-                                <Text
-                                  style={{
-                                    ...styles.textFamily,
-                                    color: color.white,
-                                  }}>
-                                  Edit
-                                </Text>
-                              </TouchableOpacity>
-
-                              <TouchableOpacity
-                                style={{
-                                  backgroundColor: color.primary,
-                                  height: 30,
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                  width: 90,
-                                  borderRadius: 5,
-
-                                  // borderWidth: 1,
-                                  // borderColor:color.primary
-                                }}
-                                onPress={() => {
-                                  AsyncStorage.removeItem('ORDER');
-                                  AsyncStorage.removeItem('DATA_ORDER');
-                                  AsyncStorage.removeItem('DISCOUNT_ORDER');
-                                  AsyncStorage.removeItem('ORDER_TAKEAWAY');
-                                  AsyncStorage.removeItem('CUSTOMER');
-
-                                  navigation.navigate('Order', {
-                                    screen: 'Checkout',
-                                    params: {data: item.order_no},
-                                  });
-                                }}>
-                                <Text
-                                  style={{
-                                    ...styles.textFamily,
-                                    color: color.white,
-                                  }}>
-                                  Pay
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-                        );
-                      })}
-                    </ScrollView>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>
             </View>
           </View>
-        </View>
-      </View>
+        </>
+      )}
     </View>
   );
 };

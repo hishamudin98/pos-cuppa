@@ -10,6 +10,7 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {DataTable} from 'react-native-paper';
@@ -29,6 +30,8 @@ const counterPOS = system_configuration.counterSecretKey;
 // create a component
 const Shift = ({navigation, route}) => {
   const [details, setDetails] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [orderId, setOrderId] = useState('');
   const [staffId, setStaffId] = useState('');
 
@@ -96,6 +99,7 @@ const Shift = ({navigation, route}) => {
     _getStaff();
     _getOpenShiftAPI();
     _getOpenShift();
+    _startLoading();
 
     // AsyncStorage.removeItem('OPENSHIFT_DETAILS');
     // _fetchOrder();
@@ -122,6 +126,12 @@ const Shift = ({navigation, route}) => {
     });
   };
 
+  const _startLoading = async () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
   const _calculateSales = async () => {
     let total = 0;
     let discount = 0;
@@ -1277,543 +1287,159 @@ const Shift = ({navigation, route}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          //   backgroundColor: color.white,
-          flex: 1,
-          flexDirection: 'row',
-        }}>
-        <Drawer navigation={navigation} />
+      {loading == true ? (
         <View
           style={{
             flex: 1,
-            flexDirection: 'column',
-            margin: 20,
-            borderRadius: 5,
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            // backgroundColor: 'red',
           }}>
-          <View style={{marginTop: 10, marginBottom: 10}}>
-            <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
-              Shift
-            </Text>
-          </View>
-
-          <View
-            style={{
-              justifyContent: 'center',
-              //   alignItems: 'center',
-              //   flex: 1,
-              height: '20%',
-
-              // width: '50%',
-              //   marginLeft: '10%',
-              //   marginRight: '10%',
-              borderRadius: 5,
-              backgroundColor: color.white,
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-evenly',
-              }}>
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                <View
-                  style={{
-                    backgroundColor: color.primary,
-                    borderRadius: 5,
-                    padding: 2,
-                  }}>
-                  <Icon
-                    name={'dollar-sign'}
-                    type="feather"
-                    size={24}
-                    color={color.white}
-                    // style={{position: 'absolute', margin: 100}}
-                  />
-                </View>
-
-                <View style={styles.boxMiddle}>
-                  <Text style={styles.textFamily}> Open Shift </Text>
-                </View>
-                <View style={styles.boxNumber}>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                    {openShiftCashTotal
-                      .toFixed(2)
-                      .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                <View
-                  style={{
-                    backgroundColor: color.primary,
-                    borderRadius: 5,
-                    padding: 2,
-                  }}>
-                  <Icon
-                    name={'dollar-sign'}
-                    type="feather"
-                    size={24}
-                    color={color.white}
-                    // style={{position: 'absolute', margin: 100}}
-                  />
-                </View>
-                <View style={styles.boxMiddle}>
-                  <Text style={{...styles.textFamily, alignSelf: 'center'}}>
-                    Close Shift
-                  </Text>
-                </View>
-                <View style={styles.boxNumber}>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                    {closeShiftCashTotal
-                      .toFixed(2)
-                      .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-              </View>
-              <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                <View
-                  style={{
-                    backgroundColor: color.primary,
-                    borderRadius: 5,
-                    padding: 2,
-                  }}>
-                  <Icon
-                    name={'dollar-sign'}
-                    type="feather"
-                    size={24}
-                    color={color.white}
-                    // style={{position: 'absolute', margin: 100}}
-                  />
-                </View>
-                <View style={styles.boxMiddle}>
-                  <Text style={styles.textFamily}> Net Sales </Text>
-                </View>
-                <View style={styles.boxNumber}>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                    {netSales.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <View
+          style={{
+            //   backgroundColor: color.white,
+            flex: 1,
+            flexDirection: 'row',
+          }}>
+          <Drawer navigation={navigation} />
           <View
             style={{
               flex: 1,
-              marginTop: 20,
-              flexDirection: 'row',
+              flexDirection: 'column',
+              margin: 20,
+              borderRadius: 5,
             }}>
-            {openShift == true && openShiftId == '' ? (
+            <View style={{marginTop: 10, marginBottom: 10}}>
+              <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
+                Shift
+              </Text>
+            </View>
+
+            <View
+              style={{
+                justifyContent: 'center',
+                //   alignItems: 'center',
+                //   flex: 1,
+                height: '20%',
+
+                // width: '50%',
+                //   marginLeft: '10%',
+                //   marginRight: '10%',
+                borderRadius: 5,
+                backgroundColor: color.white,
+              }}>
               <View
                 style={{
-                  backgroundColor: color.white,
-                  flex: 3,
-                  marginRight: 20,
                   flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  paddingTop: 20,
-                  width: '100%',
+                  alignItems: 'center',
+                  justifyContent: 'space-evenly',
                 }}>
-                <TouchableOpacity
-                  style={{
-                    flex: 1,
-                    // width: '100%',
-
-                    backgroundColor: color.primary,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderRadius: 5,
-                    marginRight: 20,
-                    marginLeft: 20,
-                  }}
-                  onPress={() => {
-                    setModalVisibleOpenShift(true);
-                    setTypeModal('add');
-                  }}>
-                  {/* // button open modal shift */}
-
-                  <Text style={{...styles.textFamily, color:color.white}}>Open Shift</Text>
-                </TouchableOpacity>
-              </View>
-            ) : openShiftId != '' && closeShift == true ? (
-              <View
-                style={{
-                  backgroundColor: color.white,
-                  flex: 3,
-                  marginRight: 20,
-                  flexDirection: 'column',
-                  //   justifyContent: 'space-between',
-                  paddingTop: 20,
-                  width: '100%',
-                }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    // marginTop: 10,
-                    paddingBottom: 100,
-                  }}>
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
                   <View
                     style={{
-                      //   flex: 1,
-                      width: '50%',
-                      //   backgroundColor: color.primary,
-
+                      backgroundColor: color.primary,
                       borderRadius: 5,
-                      //   paddingLeft: 20,
-                      flexDirection: 'column',
-                    }}
-                    onPress={() => {
-                      setModalVisibleOpenShift(true);
+                      padding: 2,
                     }}>
-                    <View
-                      style={{
-                        flexDirection: 'column',
-                        // backgroundColor: color.danger,
-                        height: 60,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
-                      <View style={{flexDirection: 'row', marginBottom: 5}}>
-                        {/* // edit cash open shift */}
-                        <Text style={{...styles.textFamily, paddingRight: 10}}>
-                          Open Shift
-                        </Text>
-                        <Icon
-                          name={'edit-3'}
-                          type="feather"
-                          size={20}
-                          onPress={() => {
-                            setModalVisibleOpenShift(!modalVisibleOpenShift);
-                            setTypeModal('edit');
-                          }}
-                          // style={{position: 'absolute', margin: 100}}
-                        />
-                      </View>
-                      <Text style={{...styles.textFamily}}>
-                        {moment(openShiftTime).format('h:mm A DD-MM-YYYY')}
-                      </Text>
-                    </View>
-
-                    <ScrollView
-                      style={{
-                        marginTop: 20,
-                      }}>
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            5 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val5cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            10 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val10cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            20 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val20cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            50 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val50cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 1
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val1RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 5
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val5RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 10
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val10RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 20
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val20RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 50
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val50RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 100
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val100RM}
-                          </Text>
-                        </View>
-                      </View>
-                    </ScrollView>
+                    <Icon
+                      name={'dollar-sign'}
+                      type="feather"
+                      size={24}
+                      color={color.white}
+                      // style={{position: 'absolute', margin: 100}}
+                    />
                   </View>
 
+                  <View style={styles.boxMiddle}>
+                    <Text style={styles.textFamily}> Open Shift </Text>
+                  </View>
+                  <View style={styles.boxNumber}>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                      {openShiftCashTotal
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
                   <View
                     style={{
-                      flexDirection: 'row',
-                      flex: 1,
-                      marginRight: 20,
-                      marginLeft: 20,
+                      backgroundColor: color.primary,
+                      borderRadius: 5,
+                      padding: 2,
                     }}>
-                    <TouchableOpacity
-                      style={{
-                        height: 40,
-                        backgroundColor: color.primary,
-                        justifyContent: 'center',
-                        width: '100%',
-                        // margin: 20,
-                        alignItems: 'center',
-                        borderRadius: 5,
-                        //   flex: 1,
-                        // marginLeft:'auto',
-                      }}
-                      onPress={() => {
-                        // _closeShift();
-                        setModalVisibleCloseShift(!modalVisibleCloseShift);
-                        setTypeModal('addClose');
-                      }}>
-                      {/* // button open modal close shift  */}
-                      <Text style={{...styles.textFamily, color:color.white}}>Close Shift</Text>
-                    </TouchableOpacity>
+                    <Icon
+                      name={'dollar-sign'}
+                      type="feather"
+                      size={24}
+                      color={color.white}
+                      // style={{position: 'absolute', margin: 100}}
+                    />
+                  </View>
+                  <View style={styles.boxMiddle}>
+                    <Text style={{...styles.textFamily, alignSelf: 'center'}}>
+                      Close Shift
+                    </Text>
+                  </View>
+                  <View style={styles.boxNumber}>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                      {closeShiftCashTotal
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+                </View>
+                <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                  <View
+                    style={{
+                      backgroundColor: color.primary,
+                      borderRadius: 5,
+                      padding: 2,
+                    }}>
+                    <Icon
+                      name={'dollar-sign'}
+                      type="feather"
+                      size={24}
+                      color={color.white}
+                      // style={{position: 'absolute', margin: 100}}
+                    />
+                  </View>
+                  <View style={styles.boxMiddle}>
+                    <Text style={styles.textFamily}> Net Sales </Text>
+                  </View>
+                  <View style={styles.boxNumber}>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                      {netSales.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
                   </View>
                 </View>
               </View>
-            ) : openShiftId != '' && closeShiftId != '' ? (
-              <View
-                style={{
-                  backgroundColor: color.white,
-                  flex: 3,
-                  marginRight: 20,
-                  flexDirection: 'column',
-                  //   justifyContent: 'space-between',
-                  paddingTop: 20,
-                  width: '100%',
-                }}>
-                <View style={{flexDirection: 'row'}}>
+            </View>
+
+            <View
+              style={{
+                flex: 1,
+                marginTop: 20,
+                flexDirection: 'row',
+              }}>
+              {openShift == true && openShiftId == '' ? (
+                <View
+                  style={{
+                    backgroundColor: color.white,
+                    flex: 3,
+                    marginRight: 20,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingTop: 20,
+                    width: '100%',
+                  }}>
                   <TouchableOpacity
                     style={{
                       flex: 1,
@@ -1828,816 +1454,1263 @@ const Shift = ({navigation, route}) => {
                       marginLeft: 20,
                     }}
                     onPress={() => {
-                      //   setModalVisibleOpenShift(true);
-                      setOpenShiftId('');
-                      setOpenShift(true);
-                      setCloseShift(true);
-                      setCloseShiftId('');
-                      _newShift();
+                      setModalVisibleOpenShift(true);
+                      setTypeModal('add');
                     }}>
-                    <Text style={{...styles.textFamily, color:color.white}}>New Shift</Text>
+                    {/* // button open modal shift */}
+
+                    <Text style={{...styles.textFamily, color: color.white}}>
+                      Open Shift
+                    </Text>
                   </TouchableOpacity>
                 </View>
+              ) : openShiftId != '' && closeShift == true ? (
                 <View
                   style={{
-                    flexDirection: 'row',
-                    marginTop: 20,
-                    paddingBottom: 100,
+                    backgroundColor: color.white,
+                    flex: 3,
+                    marginRight: 20,
+                    flexDirection: 'column',
+                    //   justifyContent: 'space-between',
+                    paddingTop: 20,
+                    width: '100%',
                   }}>
                   <View
                     style={{
-                      //   flex: 1,
-                      width: '50%',
-                      //   backgroundColor: color.primary,
-
-                      borderRadius: 5,
-                      //   paddingLeft: 20,
-                      flexDirection: 'column',
-                    }}
-                    onPress={() => {
-                      setModalVisibleOpenShift(true);
+                      flexDirection: 'row',
+                      // marginTop: 10,
+                      paddingBottom: 100,
                     }}>
                     <View
                       style={{
-                        flexDirection: 'column',
-                        // backgroundColor: color.danger,
-                        height: 60,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
-                      <View style={{flexDirection: 'row', marginBottom: 5}}>
-                        {/* // edit cash open shift */}
+                        //   flex: 1,
+                        width: '50%',
+                        //   backgroundColor: color.primary,
 
-                        <Text style={{...styles.textFamily, paddingRight: 10}}>
-                          Open Shift
+                        borderRadius: 5,
+                        //   paddingLeft: 20,
+                        flexDirection: 'column',
+                      }}
+                      onPress={() => {
+                        setModalVisibleOpenShift(true);
+                      }}>
+                      <View
+                        style={{
+                          flexDirection: 'column',
+                          // backgroundColor: color.danger,
+                          height: 60,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <View style={{flexDirection: 'row', marginBottom: 5}}>
+                          {/* // edit cash open shift */}
+                          <Text
+                            style={{...styles.textFamily, paddingRight: 10}}>
+                            Open Shift
+                          </Text>
+                          <Icon
+                            name={'edit-3'}
+                            type="feather"
+                            size={20}
+                            onPress={() => {
+                              setModalVisibleOpenShift(!modalVisibleOpenShift);
+                              setTypeModal('edit');
+                            }}
+                            // style={{position: 'absolute', margin: 100}}
+                          />
+                        </View>
+                        <Text style={{...styles.textFamily}}>
+                          {moment(openShiftTime).format('h:mm A DD-MM-YYYY')}
                         </Text>
-                        <Icon
-                          name={'edit-3'}
-                          type="feather"
-                          size={20}
-                          onPress={() => {
-                            setModalVisibleOpenShift(!modalVisibleOpenShift);
-                            setTypeModal('edit');
-                          }}
-                          // style={{position: 'absolute', margin: 100}}
-                        />
                       </View>
-                      <Text style={{...styles.textFamily}}>
-                        {moment(openShiftTime).format('h:mm A DD-MM-YYYY')}
-                      </Text>
+
+                      <ScrollView
+                        style={{
+                          marginTop: 20,
+                        }}>
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              5 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val5cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              10 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val10cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              20 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val20cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              50 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val50cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 1
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val1RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 5
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val5RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 10
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val10RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 20
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val20RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 50
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val50RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 100
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val100RM}
+                            </Text>
+                          </View>
+                        </View>
+                      </ScrollView>
                     </View>
 
-                    <ScrollView
+                    <View
                       style={{
-                        marginTop: 20,
+                        flexDirection: 'row',
+                        flex: 1,
+                        marginRight: 20,
+                        marginLeft: 20,
                       }}>
-                      <View
+                      <TouchableOpacity
                         style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
+                          height: 40,
+                          backgroundColor: color.primary,
                           justifyContent: 'center',
+                          width: '100%',
+                          // margin: 20,
+                          alignItems: 'center',
+                          borderRadius: 5,
+                          //   flex: 1,
+                          // marginLeft:'auto',
+                        }}
+                        onPress={() => {
+                          // _closeShift();
+                          setModalVisibleCloseShift(!modalVisibleCloseShift);
+                          setTypeModal('addClose');
                         }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            5 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val5cents}
-                          </Text>
-                        </View>
-                      </View>
+                        {/* // button open modal close shift  */}
+                        <Text
+                          style={{...styles.textFamily, color: color.white}}>
+                          Close Shift
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ) : openShiftId != '' && closeShiftId != '' ? (
+                <View
+                  style={{
+                    backgroundColor: color.white,
+                    flex: 3,
+                    marginRight: 20,
+                    flexDirection: 'column',
+                    //   justifyContent: 'space-between',
+                    paddingTop: 20,
+                    width: '100%',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <TouchableOpacity
+                      style={{
+                        flex: 1,
+                        // width: '100%',
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            10 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val10cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            20 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val20cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            50 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val50cents}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 1
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val1RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 5
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val5RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 10
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val10RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 20
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val20RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 50
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val50RM}
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 100
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {openShiftCash.val100RM}
-                          </Text>
-                        </View>
-                      </View>
-                    </ScrollView>
+                        backgroundColor: color.primary,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderRadius: 5,
+                        marginRight: 20,
+                        marginLeft: 20,
+                      }}
+                      onPress={() => {
+                        //   setModalVisibleOpenShift(true);
+                        setOpenShiftId('');
+                        setOpenShift(true);
+                        setCloseShift(true);
+                        setCloseShiftId('');
+                        _newShift();
+                      }}>
+                      <Text style={{...styles.textFamily, color: color.white}}>
+                        New Shift
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                   <View
                     style={{
-                      //   flex: 1,
-                      width: '50%',
-                      // backgroundColor: color.primary,
-
-                      borderRadius: 5,
-                      //   paddingLeft: 20,
-                      flexDirection: 'column',
-                    }}
-                    onPress={() => {
-                      setModalVisibleCloseShift(true);
+                      flexDirection: 'row',
+                      marginTop: 20,
+                      paddingBottom: 100,
                     }}>
                     <View
                       style={{
+                        //   flex: 1,
+                        width: '50%',
+                        //   backgroundColor: color.primary,
+
+                        borderRadius: 5,
+                        //   paddingLeft: 20,
                         flexDirection: 'column',
-                        // backgroundColor: color.danger,
-                        height: 60,
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                      }}
+                      onPress={() => {
+                        setModalVisibleOpenShift(true);
                       }}>
-                      <View style={{flexDirection: 'row', marginBottom: 5}}>
-                        {/* // modal close edit shift */}
-                        <Text style={{...styles.textFamily, paddingRight: 10}}>
-                          Close Shift
+                      <View
+                        style={{
+                          flexDirection: 'column',
+                          // backgroundColor: color.danger,
+                          height: 60,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <View style={{flexDirection: 'row', marginBottom: 5}}>
+                          {/* // edit cash open shift */}
+
+                          <Text
+                            style={{...styles.textFamily, paddingRight: 10}}>
+                            Open Shift
+                          </Text>
+                          <Icon
+                            name={'edit-3'}
+                            type="feather"
+                            size={20}
+                            onPress={() => {
+                              setModalVisibleOpenShift(!modalVisibleOpenShift);
+                              setTypeModal('edit');
+                            }}
+                            // style={{position: 'absolute', margin: 100}}
+                          />
+                        </View>
+                        <Text style={{...styles.textFamily}}>
+                          {moment(openShiftTime).format('h:mm A DD-MM-YYYY')}
                         </Text>
-                        <Icon
-                          name={'edit-3'}
-                          type="feather"
-                          size={20}
-                          onPress={() => {
-                            setModalVisibleCloseShift(!modalVisibleCloseShift);
-                            setTypeModal('editCloseShift');
-                          }}
-                          // style={{position: 'absolute', margin: 100}}
-                        />
                       </View>
-                      <Text style={{...styles.textFamily}}>
-                        {moment(closeShiftTime).format('h:mm A DD-MM-YYYY')}
-                      </Text>
-                    </View>
 
-                    <ScrollView
+                      <ScrollView
+                        style={{
+                          marginTop: 20,
+                        }}>
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              5 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val5cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              10 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val10cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              20 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val20cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              50 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val50cents}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 1
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val1RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 5
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val5RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 10
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val10RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 20
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val20RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 50
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val50RM}
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 100
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {openShiftCash.val100RM}
+                            </Text>
+                          </View>
+                        </View>
+                      </ScrollView>
+                    </View>
+                    <View
                       style={{
-                        marginTop: 20,
+                        //   flex: 1,
+                        width: '50%',
+                        // backgroundColor: color.primary,
+
+                        borderRadius: 5,
+                        //   paddingLeft: 20,
+                        flexDirection: 'column',
+                      }}
+                      onPress={() => {
+                        setModalVisibleCloseShift(true);
                       }}>
                       <View
                         style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
+                          flexDirection: 'column',
+                          // backgroundColor: color.danger,
+                          height: 60,
                           justifyContent: 'center',
+                          alignItems: 'center',
                         }}>
-                        <View
-                          style={{
-                            backgroundColor: color.background,
-                            width: '70%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
-                          }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            5 cents
-                          </Text>
+                        <View style={{flexDirection: 'row', marginBottom: 5}}>
+                          {/* // modal close edit shift */}
                           <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal5cents}
+                            style={{...styles.textFamily, paddingRight: 10}}>
+                            Close Shift
                           </Text>
+                          <Icon
+                            name={'edit-3'}
+                            type="feather"
+                            size={20}
+                            onPress={() => {
+                              setModalVisibleCloseShift(
+                                !modalVisibleCloseShift,
+                              );
+                              setTypeModal('editCloseShift');
+                            }}
+                            // style={{position: 'absolute', margin: 100}}
+                          />
                         </View>
+                        <Text style={{...styles.textFamily}}>
+                          {moment(closeShiftTime).format('h:mm A DD-MM-YYYY')}
+                        </Text>
                       </View>
 
-                      <View
+                      <ScrollView
                         style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
                           marginTop: 20,
                         }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            10 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal10cents}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              5 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal5cents}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            20 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal20cents}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              10 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal10cents}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            50 cents
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal50cents}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              20 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal20cents}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 1
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal1RM}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              50 cents
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal50cents}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 5
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal5RM}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 1
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal1RM}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 10
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal10RM}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 5
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal5RM}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 20
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal20RM}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 10
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal10RM}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 50
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal50RM}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 20
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal20RM}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
 
-                      <View
-                        style={{
-                          width: '100%',
-                          height: 50,
-                          flexDirection: 'row',
-                          justifyContent: 'center',
-                          marginTop: 20,
-                        }}>
                         <View
                           style={{
-                            backgroundColor: color.background,
-                            width: '70%',
+                            width: '100%',
+                            height: 50,
                             flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            borderRadius: 5,
+                            justifyContent: 'center',
+                            marginTop: 20,
                           }}>
-                          <Text style={{...styles.textFamily, paddingLeft: 20}}>
-                            RM 100
-                          </Text>
-                          <Text
-                            style={{...styles.textFamily, paddingRight: 20}}>
-                            x {closeShiftCash.closedVal100RM}
-                          </Text>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 50
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal50RM}
+                            </Text>
+                          </View>
                         </View>
-                      </View>
-                    </ScrollView>
+
+                        <View
+                          style={{
+                            width: '100%',
+                            height: 50,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            marginTop: 20,
+                          }}>
+                          <View
+                            style={{
+                              backgroundColor: color.background,
+                              width: '70%',
+                              flexDirection: 'row',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              borderRadius: 5,
+                            }}>
+                            <Text
+                              style={{...styles.textFamily, paddingLeft: 20}}>
+                              RM 100
+                            </Text>
+                            <Text
+                              style={{...styles.textFamily, paddingRight: 20}}>
+                              x {closeShiftCash.closedVal100RM}
+                            </Text>
+                          </View>
+                        </View>
+                      </ScrollView>
+                    </View>
                   </View>
                 </View>
-              </View>
-            ) : null}
+              ) : null}
 
-            <View
-              style={{
-                backgroundColor: color.white,
-                flex: 2.5,
-                justifyContent: 'space-between',
-              }}>
               <View
                 style={{
-                  flexDirection: 'column',
-                  paddingRight: 20,
-                  paddingLeft: 20,
-                  width: '100%',
+                  backgroundColor: color.white,
+                  flex: 2.5,
+                  justifyContent: 'space-between',
                 }}>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 20,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Gross Sales
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    {grossSales.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Refunds
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    {totalRefund.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Discount
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    {totalDiscount
-                      .toFixed(2)
-                      .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Net Sales
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    {netSales.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Deposit
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    {totalDeposit
-                      .toFixed(2)
-                      .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Rounding
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    0.00
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    paddingTop: 10,
-                  }}>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    Tax
-                  </Text>
-                  <Text style={{...styles.textFamily, marginBottom: 10}}>
-                    {totalTax.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
-                </View>
-              </View>
-
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    paddingLeft: 20,
-                    paddingBottom: 20,
+                    flexDirection: 'column',
                     paddingRight: 20,
-                    justifyContent: 'space-between',
+                    paddingLeft: 20,
+                    width: '100%',
                   }}>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
-                    Total
-                  </Text>
-                  <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
-                    {total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 20,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Gross Sales
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      {grossSales
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 10,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Refunds
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      {totalRefund
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 10,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Discount
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      {totalDiscount
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 10,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Net Sales
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      {netSales.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 10,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Deposit
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      {totalDeposit
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 10,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Rounding
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      0.00
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      paddingTop: 10,
+                    }}>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      Tax
+                    </Text>
+                    <Text style={{...styles.textFamily, marginBottom: 10}}>
+                      {totalTax.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
                 </View>
 
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: color.primary,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    // paddingTop: 10,
-                    marginLeft: 20,
-                    marginRight: 20,
-                    borderRadius: 5,
-                    // borderWidth: 1,
-                    // borderColor: color.primary,
-                    marginBottom: 20,
-                  }}
-                  onPress={() => {
-                    _generateReport();
-                  }}>
-                  <Text style={{...styles.textFamily, color:color.white}}>Download Report</Text>
-                </TouchableOpacity>
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      paddingLeft: 20,
+                      paddingBottom: 20,
+                      paddingRight: 20,
+                      justifyContent: 'space-between',
+                    }}>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
+                      Total
+                    </Text>
+                    <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
+                      {total.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: color.primary,
+                      height: 40,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      // paddingTop: 10,
+                      marginLeft: 20,
+                      marginRight: 20,
+                      borderRadius: 5,
+                      // borderWidth: 1,
+                      // borderColor: color.primary,
+                      marginBottom: 20,
+                    }}
+                    onPress={() => {
+                      _generateReport();
+                    }}>
+                    <Text style={{...styles.textFamily, color: color.white}}>
+                      Download Report
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
 
       {/* // modal open shift */}
       <Modal
@@ -3447,7 +3520,7 @@ const Shift = ({navigation, route}) => {
                 }}>
                 {/* // button confirm cash open shift */}
 
-                <Text style={{...styles.textFamily, color:color.white}}>
+                <Text style={{...styles.textFamily, color: color.white}}>
                   {typeModal == 'edit' ? 'Confirm' : 'Open Shift'}{' '}
                 </Text>
               </TouchableOpacity>
@@ -4270,7 +4343,7 @@ const Shift = ({navigation, route}) => {
                 }}>
                 {/* // button confirm cash open shift */}
 
-                <Text style={{...styles.textFamily,color:color.white}}>
+                <Text style={{...styles.textFamily, color: color.white}}>
                   {closeShift == true
                     ? 'Close Shift'
                     : typeModal == 'editCloseShift'

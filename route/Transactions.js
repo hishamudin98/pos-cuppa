@@ -17,6 +17,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 
 import {jsonToCSV} from 'react-native-csv';
@@ -50,6 +51,7 @@ const itemsPerPage = 5;
 // create a component
 const Transactions = ({navigation, route}) => {
   const [modalFilter, setModalFilter] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [details, setDetails] = useState(false);
   const [orderId, setOrderId] = useState('');
@@ -89,8 +91,16 @@ const Transactions = ({navigation, route}) => {
       _filterPaymentMethod(filterPaymentMethod.length == 0 ? 'all' : id);
       _fetchPaymentMethod();
       _fetchPaymentStatus();
+      _startLoading();
     });
   }, []);
+
+  const _startLoading = async () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  };
 
   const _fetchOrder = async () => {
     const response = await axios.post(url + '/pos/getOrderList', {
@@ -490,994 +500,1015 @@ const Transactions = ({navigation, route}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{flexDirection: 'row', flex: 1}}>
-        <Drawer navigation={navigation} />
+      {loading == true ? (
         <View
           style={{
-            //   backgroundColor: color.white,
             flex: 1,
-            flexDirection: 'row',
-            margin: 20,
-            borderRadius: 5,
-            // marginBottom:0
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            // backgroundColor: 'red',
           }}>
-          <View style={{flex: 1, flexDirection: 'column'}}>
-            <View style={{marginTop: 10}}>
-              <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
-                Transactions
-              </Text>
-            </View>
-
-            <View
-              style={{
-                marginTop: 20,
-                justifyContent: 'center',
-                //   alignItems: 'center',
-                //   flex: 1,
-                height: '20%',
-
-                // width: '50%',
-                marginLeft: '10%',
-                marginRight: '10%',
-                borderRadius: 5,
-                backgroundColor: color.white,
-              }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-evenly',
-                }}>
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                  <View
-                    style={{
-                      backgroundColor: color.primary,
-                      borderRadius: 5,
-                      padding: 2,
-                    }}>
-                    <Icon
-                      name={'dollar-sign'}
-                      type="feather"
-                      size={24}
-                      color={color.white}
-                      // style={{position: 'absolute', margin: 100}}
-                    />
-                  </View>
-
-                  <View style={styles.boxMiddle}>
-                    <Text style={styles.textFamily}> Order </Text>
-                  </View>
-                  <View style={styles.boxNumber}>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                      {orderList.length}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                  <View
-                    style={{
-                      backgroundColor: color.primary,
-                      borderRadius: 5,
-                      padding: 2,
-                      width: 50,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      // height: 40,
-                    }}>
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        fontFamily: fonts.bold,
-                        color: color.white,
-                      }}>
-                      RM
-                    </Text>
-                  </View>
-                  <View style={styles.boxMiddle}>
-                    <Text style={styles.textFamily}> Refunds </Text>
-                  </View>
-                  <View style={styles.boxNumber}>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                      {
-                        orderList.filter(item => item.payment_status === '5')
-                          .length
-                      }
-                    </Text>
-                  </View>
-                </View>
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                  <View
-                    style={{
-                      backgroundColor: color.primary,
-                      borderRadius: 5,
-                      padding: 2,
-                      width: 50,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      // height: 40,
-                    }}>
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        fontFamily: fonts.bold,
-                        color: color.white,
-                      }}>
-                      RM
-                    </Text>
-                  </View>
-                  <View style={styles.boxMiddle}>
-                    <Text style={{...styles.textFamily, alignSelf: 'center'}}>
-                      Average Order Value
-                    </Text>
-                  </View>
-                  <View style={styles.boxNumber}>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                      {(
-                        orderList
-                          .filter(item => item.payment_status === '1')
-                          .map(item => item.amountNett)
-                          .reduce((a, b) => a + b, 0)
-                          .toFixed(2) / orderList.length
-                      ).toFixed(2)}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                  <View
-                    style={{
-                      backgroundColor: color.primary,
-                      borderRadius: 5,
-                      padding: 2,
-                      width: 50,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      // height: 40,
-                    }}>
-                    <Text
-                      style={{
-                        fontSize: 20,
-                        fontFamily: fonts.bold,
-                        color: color.white,
-                      }}>
-                      RM
-                    </Text>
-                  </View>
-                  <View style={styles.boxMiddle}>
-                    <Text style={styles.textFamily}> Net Sales </Text>
-                  </View>
-                  <View style={styles.boxNumber}>
-                    <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
-                      {orderList
-                        .filter(item => item.payment_status === '1')
-                        .map(item => item.amountNett)
-                        .reduce((a, b) => a + b, 0)
-                        .toFixed(2)
-                        .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
-                    </Text>
-                  </View>
-                </View>
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <View style={{flexDirection: 'row', flex: 1}}>
+          <Drawer navigation={navigation} />
+          <View
+            style={{
+              //   backgroundColor: color.white,
+              flex: 1,
+              flexDirection: 'row',
+              margin: 20,
+              borderRadius: 5,
+              // marginBottom:0
+            }}>
+            <View style={{flex: 1, flexDirection: 'column'}}>
+              <View style={{marginTop: 10}}>
+                <Text style={{fontFamily: fonts.semibold, fontSize: 20}}>
+                  Transactions
+                </Text>
               </View>
-            </View>
 
-            <View
-              style={{
-                flex: 1,
-                marginTop: 20,
-                flexDirection: 'row',
-                // height: 525,
-                // backgroundColor: color.white,
-              }}>
               <View
                 style={{
+                  marginTop: 20,
+                  justifyContent: 'center',
+                  //   alignItems: 'center',
+                  //   flex: 1,
+                  height: '20%',
+
+                  // width: '50%',
+                  marginLeft: '10%',
+                  marginRight: '10%',
+                  borderRadius: 5,
                   backgroundColor: color.white,
-                  flex: 3,
-                  marginRight: 20,
-                  flexDirection: 'column',
                 }}>
                 <View
                   style={{
                     flexDirection: 'row',
-                    justifyContent: 'center',
                     alignItems: 'center',
+                    justifyContent: 'space-evenly',
+                  }}>
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <View
+                      style={{
+                        backgroundColor: color.primary,
+                        borderRadius: 5,
+                        padding: 2,
+                      }}>
+                      <Icon
+                        name={'dollar-sign'}
+                        type="feather"
+                        size={24}
+                        color={color.white}
+                        // style={{position: 'absolute', margin: 100}}
+                      />
+                    </View>
+
+                    <View style={styles.boxMiddle}>
+                      <Text style={styles.textFamily}> Order </Text>
+                    </View>
+                    <View style={styles.boxNumber}>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                        {orderList.length}
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <View
+                      style={{
+                        backgroundColor: color.primary,
+                        borderRadius: 5,
+                        padding: 2,
+                        width: 50,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        // height: 40,
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          fontFamily: fonts.bold,
+                          color: color.white,
+                        }}>
+                        RM
+                      </Text>
+                    </View>
+                    <View style={styles.boxMiddle}>
+                      <Text style={styles.textFamily}> Refunds </Text>
+                    </View>
+                    <View style={styles.boxNumber}>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                        {
+                          orderList.filter(item => item.payment_status === '5')
+                            .length
+                        }
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <View
+                      style={{
+                        backgroundColor: color.primary,
+                        borderRadius: 5,
+                        padding: 2,
+                        width: 50,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        // height: 40,
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          fontFamily: fonts.bold,
+                          color: color.white,
+                        }}>
+                        RM
+                      </Text>
+                    </View>
+                    <View style={styles.boxMiddle}>
+                      <Text style={{...styles.textFamily, alignSelf: 'center'}}>
+                        Average Order Value
+                      </Text>
+                    </View>
+                    <View style={styles.boxNumber}>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                        {(
+                          orderList
+                            .filter(item => item.payment_status === '1')
+                            .map(item => item.amountNett)
+                            .reduce((a, b) => a + b, 0)
+                            .toFixed(2) / orderList.length
+                        ).toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <View
+                      style={{
+                        backgroundColor: color.primary,
+                        borderRadius: 5,
+                        padding: 2,
+                        width: 50,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        // height: 40,
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: 20,
+                          fontFamily: fonts.bold,
+                          color: color.white,
+                        }}>
+                        RM
+                      </Text>
+                    </View>
+                    <View style={styles.boxMiddle}>
+                      <Text style={styles.textFamily}> Net Sales </Text>
+                    </View>
+                    <View style={styles.boxNumber}>
+                      <Text style={{fontFamily: fonts.semibold, fontSize: 25}}>
+                        {orderList
+                          .filter(item => item.payment_status === '1')
+                          .map(item => item.amountNett)
+                          .reduce((a, b) => a + b, 0)
+                          .toFixed(2)
+                          .replace(/\d(?=(\d{3})+\.)/g, '$&,')}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  flex: 1,
+                  marginTop: 20,
+                  flexDirection: 'row',
+                  // height: 525,
+                  // backgroundColor: color.white,
+                }}>
+                <View
+                  style={{
+                    backgroundColor: color.white,
+                    flex: 3,
+                    marginRight: 20,
+                    flexDirection: 'column',
                   }}>
                   <View
                     style={{
-                      ...styles.inputSearch,
-                      flex: 1,
-                      // marginLeft: 40,
-                      // backgroundColor: color.black,
-                      marginTop: 20,
-                      marginRight: 20,
-                      marginLeft: 20,
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}>
-                    <Icon
-                      name={'search'}
-                      type="feather"
-                      size={24}
-                      // style={{position: 'absolute', margin: 100}}
-                    />
                     <View
                       style={{
+                        ...styles.inputSearch,
                         flex: 1,
-                        paddingRight: 10,
+                        // marginLeft: 40,
+                        // backgroundColor: color.black,
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginLeft: 20,
                       }}>
-                      <TextInput
-                        style={styles.textInput}
-                        placeholder="Search"
-                        placeholderTextColor={color.textGray}
-                        onChangeText={text => _search(text)}
-                        // defaultValue={staffNo}
+                      <Icon
+                        name={'search'}
+                        type="feather"
+                        size={24}
+                        // style={{position: 'absolute', margin: 100}}
+                      />
+                      <View
+                        style={{
+                          flex: 1,
+                          paddingRight: 10,
+                        }}>
+                        <TextInput
+                          style={styles.textInput}
+                          placeholder="Search"
+                          placeholderTextColor={color.textGray}
+                          onChangeText={text => _search(text)}
+                          // defaultValue={staffNo}
+                        />
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      style={{
+                        marginTop: 20,
+                        height: 40,
+                        backgroundColor: color.white,
+                        marginRight: 20,
+                        width: 60,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        borderColor: color.primary,
+                      }}
+                      onPress={() => {
+                        setModalFilter(true);
+                      }}>
+                      <Icon name={'filter'} type="feather" size={24} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <Modal
+                    id={1}
+                    animationType="fade"
+                    visible={modalFilter}
+                    style={{...styles.modalView}}>
+                    <View
+                      style={{
+                        alignItems: 'flex-start',
+                        padding: 20,
+                        paddingBottom: 0,
+                      }}>
+                      <Icon
+                        name={'x'}
+                        type="feather"
+                        size={24}
+                        onPress={() => {
+                          setModalFilter(!modalFilter);
+                        }}
+                        // style={{position: 'absolute', margin: 100}}
                       />
                     </View>
-                  </View>
+
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        marginBottom: 20,
+                        // justifyContent: 'center',
+                        // justifyContent: 'flex-start',
+
+                        // backgroundColor: 'black',
+                      }}>
+                      <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
+                        Choose Filter By
+                      </Text>
+                    </View>
+
+                    <View
+                      style={{
+                        // margin: 20,
+                        marginLeft: 0,
+                        marginRight: 0,
+                        marginLeft: '10%',
+                        marginRight: '10%',
+                        marginBottom: 20,
+                        //   borderRadius: 5,
+                        //   backgroundColor: color.white,
+                      }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          // justifyContent: 'space-evenly',
+                        }}>
+                        <View style={{flexDirection: 'row'}}>
+                          <TouchableOpacity
+                            style={{
+                              ...styles.boxMiddle,
+                              backgroundColor:
+                                clickDate == true ? color.white : color.primary,
+                              height: 35,
+                              borderRadius: 5,
+                              borderWidth: 1,
+                              borderColor: color.primary,
+                              width: 60,
+                            }}
+                            onPress={() => {
+                              setClickDate(false);
+                              setDateDisplay('');
+                              setDateDisplayEnd('');
+                            }}>
+                            <Text
+                              style={{
+                                ...styles.textFamily,
+                                color: clickDate == true ? null : color.white,
+                              }}>
+                              {' '}
+                              All{' '}
+                            </Text>
+                          </TouchableOpacity>
+
+                          <View style={{justifyContent: 'center'}}>
+                            <TouchableOpacity
+                              style={{
+                                ...styles.boxMiddle,
+                                backgroundColor:
+                                  clickDate == true
+                                    ? color.primary
+                                    : color.white,
+                                height: 35,
+                                marginLeft: 20,
+                                borderRadius: 5,
+                                borderColor: color.primary,
+                                borderWidth: 1,
+                                width: 120,
+                              }}
+                              onPress={() => {
+                                setClickDate(true);
+                                // setDateTransaction('');
+                                setDateDisplay(dateTransaction);
+                                setDateDisplayEnd(dateTransactionEnd);
+                                setDateTransaction(new Date());
+                                setDateTransactionEnd(new Date());
+                                // setDateTransaction(new Date());
+                                // alert(dateTransaction);
+                                // console.log('dd', dateTransaction);
+                              }}>
+                              <Text
+                                style={{
+                                  ...styles.textFamily,
+                                  color: clickDate == true ? color.white : null,
+                                }}>
+                                {' '}
+                                Select Date{' '}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+
+                        {clickDate == true ? (
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              flex: 1,
+                              // backgroundColor: 'pink',
+                            }}>
+                            <View
+                              style={{
+                                // ...styles.inputDate,
+                                // backgroundColor: color.primary,
+                                justifyContent: 'center',
+                                marginLeft: 20,
+                                alignItems: 'center',
+                                height: 35,
+                                flex: 1,
+                                // padding:0
+                              }}>
+                              <DateTimePicker
+                                testID="dateTimePicker"
+                                value={dateTransaction}
+                                mode={displayMode}
+                                // is24Hour={true}
+                                // minimumDate={new Date()}
+                                style={{
+                                  // marginLeft: 110,
+                                  paddingLeft: 0,
+                                  width: 150,
+                                }}
+                                onChange={_onChangeDate}
+                              />
+                            </View>
+                            <View
+                              style={{
+                                marginLeft: 20,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                flex: 0.2,
+                                // backgroundColor: 'green',
+                                flexDirection: 'row',
+                                marginLeft: 27,
+                              }}>
+                              <Icon name={'minus'} type="feather" size={24} />
+                            </View>
+                            <View
+                              style={{
+                                // ...styles.inputDate,
+                                // backgroundColor: color.primary,
+                                justifyContent: 'center',
+                                // marginLeft: 20,
+                                alignItems: 'center',
+                                height: 35,
+                                flex: 1,
+                                // padding:0
+                              }}>
+                              <DateTimePicker
+                                testID="dateTimePicker"
+                                value={dateTransactionEnd}
+                                mode={displayMode}
+                                // is24Hour={true}
+                                // minimumDate={new Date()}
+                                style={{
+                                  // marginLeft: 110,
+                                  paddingLeft: 0,
+                                  width: 150,
+                                }}
+                                onChange={_onChangeDateEnd}
+                              />
+                            </View>
+                          </View>
+                        ) : null}
+                      </View>
+                    </View>
+
+                    <View
+                      style={{
+                        height: 160,
+                        flex: 1,
+                      }}>
+                      <View
+                        style={{
+                          marginLeft: '10%',
+                          marginRight: '10%',
+                          height: 'auto',
+                          // justifyContent:'space-around'
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          // backgroundColor: color.white,
+                        }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            width: '100%',
+                            height: 'auto',
+                            backgroundColor: color.white,
+                          }}>
+                          <View
+                            style={{
+                              padding: 20,
+                              width: '100%',
+                              height: '100%',
+                              paddingBottom: 0,
+                            }}>
+                            <View style={{marginBottom: 5}}>
+                              <Text style={styles.textFamily}>
+                                Payment Method
+                              </Text>
+                            </View>
+
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                width: '100%',
+                                flexWrap: 'wrap',
+                              }}>
+                              <TouchableOpacity
+                                style={{
+                                  // backgroundColor: color.background,
+                                  width: 'auto',
+                                  margin: 10,
+                                  height: 30,
+                                  borderRadius: 5,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  padding: 5,
+                                  borderWidth: 1,
+                                  borderColor: color.primary,
+                                  backgroundColor:
+                                    filterPaymentMethod.length == 0
+                                      ? color.primary
+                                      : color.white,
+                                  width: 50,
+                                }}
+                                onPress={() => {
+                                  _filterPaymentMethod('all');
+                                }}>
+                                <Text
+                                  style={{
+                                    ...styles.textFamily,
+                                    color:
+                                      filterPaymentMethod.length == 0
+                                        ? color.white
+                                        : null,
+                                  }}>
+                                  All
+                                </Text>
+                              </TouchableOpacity>
+                              {paymentMethodList.map((data, index) => {
+                                return (
+                                  <TouchableOpacity
+                                    key={index}
+                                    style={{
+                                      // backgroundColor: color.background,
+                                      width: 'auto',
+                                      height: 30,
+                                      borderRadius: 5,
+                                      // marginLeft: 10,
+                                      margin: 10,
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                      padding: 5,
+                                      borderWidth: 1,
+                                      borderColor: color.primary,
+                                      backgroundColor: filterPaymentMethod.find(
+                                        item =>
+                                          item.payment_method ===
+                                          data.payment_val,
+                                      )
+                                        ? color.primary
+                                        : color.white,
+                                    }}
+                                    onPress={() => {
+                                      _filterPaymentMethod(data.payment_val);
+                                    }}>
+                                    <Text
+                                      style={{
+                                        ...styles.textFamily,
+                                        color: filterPaymentMethod.find(
+                                          item =>
+                                            item.payment_method ===
+                                            data.payment_val,
+                                        )
+                                          ? color.white
+                                          : null,
+                                      }}>
+                                      {data.payment_method}
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            width: '100%',
+                          }}>
+                          <View
+                            style={{
+                              padding: 20,
+                              width: '100%',
+                              height: '100%',
+                              // paddingBottom: 10,
+                              backgroundColor: color.white,
+                            }}>
+                            <View style={{marginBottom: 5}}>
+                              <Text style={styles.textFamily}>Status</Text>
+                            </View>
+
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                width: '100%',
+                                flexWrap: 'wrap',
+                              }}>
+                              <TouchableOpacity
+                                style={{
+                                  // backgroundColor: color.background,
+                                  width: 'auto',
+                                  margin: 10,
+                                  height: 30,
+                                  borderRadius: 5,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  padding: 5,
+                                  borderWidth: 1,
+                                  borderColor: color.primary,
+                                  backgroundColor:
+                                    filterPaymentStatus.length == 0
+                                      ? color.primary
+                                      : color.white,
+                                  width: 50,
+                                }}
+                                onPress={() => {
+                                  _filterPaymentStatus('all');
+                                }}>
+                                <Text
+                                  style={{
+                                    ...styles.textFamily,
+                                    color:
+                                      filterPaymentStatus.length == 0
+                                        ? color.white
+                                        : null,
+                                  }}>
+                                  All
+                                </Text>
+                              </TouchableOpacity>
+
+                              {paymentStatusList.map((data, index) => {
+                                return (
+                                  <TouchableOpacity
+                                    key={index}
+                                    style={{
+                                      // backgroundColor: color.background,
+                                      width: 'auto',
+                                      margin: 10,
+                                      height: 30,
+                                      borderRadius: 5,
+                                      justifyContent: 'center',
+                                      alignItems: 'center',
+                                      padding: 5,
+                                      borderWidth: 1,
+                                      borderColor: color.primary,
+                                      backgroundColor: filterPaymentStatus.find(
+                                        item => item.payment_status === data.id,
+                                      )
+                                        ? color.primary
+                                        : color.white,
+                                    }}
+                                    onPress={() => {
+                                      _filterPaymentStatus(data.id);
+                                    }}>
+                                    <Text
+                                      style={{
+                                        ...styles.textFamily,
+                                        color: filterPaymentStatus.find(
+                                          item =>
+                                            item.payment_status === data.id,
+                                        )
+                                          ? color.white
+                                          : null,
+                                      }}>
+                                      {data.name}
+                                    </Text>
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
+                          </View>
+                        </View>
+
+                        <TouchableOpacity
+                          style={{
+                            justifyContent: 'center',
+                            // height: 160,
+                            alignItems: 'center',
+                            width: '100%',
+                            // flex: 1,
+                            backgroundColor: color.primary,
+                            height: 40,
+                            borderRadius: 5,
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                            marginTop: 20,
+                          }}
+                          onPress={() => {
+                            _confirmFilter('confirm');
+                          }}>
+                          <Text
+                            style={{...styles.textFamily, color: color.white}}>
+                            Confirm
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+
+                  <ScrollView style={{height: 350}}>
+                    {orderList.map((data, index) => {
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={{
+                            flexDirection: 'row',
+                            height: 80,
+                            backgroundColor:
+                              orderId == data.invoice_no
+                                ? color.primary
+                                : color.white,
+                            marginTop: 10,
+                            justifyContent: 'space-between',
+                            // opacity: orderId == data.invoice_no ? 0 : 1
+                          }}
+                          // opacity={orderId == data.invoice_no ? 0.0 : 1}
+                          onPress={() => {
+                            _pressOrder(data.invoice_no);
+                          }}>
+                          <View
+                            style={{
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              paddingLeft: 20,
+                              // margin:5,
+                            }}>
+                            <View>
+                              <Text
+                                style={{
+                                  ...styles.textFamily,
+                                  marginBottom: 5,
+                                  color:
+                                    orderId == data.invoice_no
+                                      ? color.white
+                                      : null,
+                                }}>
+                                {data.invoice_no}
+                              </Text>
+                            </View>
+                            <View>
+                              <Text
+                                style={{
+                                  ...styles.textFamily,
+                                  color:
+                                    orderId == data.invoice_no
+                                      ? color.white
+                                      : null,
+                                }}>
+                                {moment(data.payment_datetime).format(
+                                  'h:mm A DD-MM-YYYY',
+                                )}
+                              </Text>
+                            </View>
+                          </View>
+
+                          <View
+                            style={{
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              marginRight: 20,
+                              //   backgroundColor: 'red',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              width: 140,
+                            }}>
+                            <View>
+                              <Text
+                                style={{
+                                  ...styles.textFamily,
+                                  marginBottom: 5,
+                                  color:
+                                    orderId == data.invoice_no
+                                      ? color.white
+                                      : null,
+                                }}>
+                                {data.payment_method == 1
+                                  ? 'Cash'
+                                  : data.payment_method == 3
+                                  ? 'Card'
+                                  : data.payment_method == 2
+                                  ? 'FPX'
+                                  : null}
+                              </Text>
+                            </View>
+                            <View>
+                              <Text
+                                style={{
+                                  ...styles.textFamily,
+                                  color:
+                                    orderId == data.invoice_no
+                                      ? color.white
+                                      : null,
+                                }}>
+                                {data.order_total_amount.toFixed(2)}
+                              </Text>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+
                   <TouchableOpacity
                     style={{
-                      marginTop: 20,
-                      height: 40,
                       backgroundColor: color.white,
-                      marginRight: 20,
-                      width: 60,
-                      alignItems: 'center',
+                      height: 40,
                       justifyContent: 'center',
+                      alignItems: 'center',
+                      // paddingTop: 10,
+                      marginLeft: 20,
+                      marginTop: 20,
+                      marginRight: 20,
                       borderRadius: 5,
                       borderWidth: 1,
                       borderColor: color.primary,
                     }}
                     onPress={() => {
-                      setModalFilter(true);
+                      _generateReport();
                     }}>
-                    <Icon name={'filter'} type="feather" size={24} />
+                    <Text style={styles.textFamily}>Download Report</Text>
                   </TouchableOpacity>
                 </View>
 
-                <Modal
-                  id={1}
-                  animationType="fade"
-                  visible={modalFilter}
-                  style={{...styles.modalView}}>
-                  <View
-                    style={{
-                      alignItems: 'flex-start',
-                      padding: 20,
-                      paddingBottom: 0,
-                    }}>
-                    <Icon
-                      name={'x'}
-                      type="feather"
-                      size={24}
-                      onPress={() => {
-                        setModalFilter(!modalFilter);
-                      }}
-                      // style={{position: 'absolute', margin: 100}}
-                    />
-                  </View>
-
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      marginBottom: 20,
-                      // justifyContent: 'center',
-                      // justifyContent: 'flex-start',
-
-                      // backgroundColor: 'black',
-                    }}>
-                    <Text style={{fontSize: 16, fontFamily: fonts.medium}}>
-                      Choose Filter By
-                    </Text>
-                  </View>
-
-                  <View
-                    style={{
-                      // margin: 20,
-                      marginLeft: 0,
-                      marginRight: 0,
-                      marginLeft: '10%',
-                      marginRight: '10%',
-                      marginBottom: 20,
-                      //   borderRadius: 5,
-                      //   backgroundColor: color.white,
-                    }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        // justifyContent: 'space-evenly',
-                      }}>
-                      <View style={{flexDirection: 'row'}}>
-                        <TouchableOpacity
+                {details == true ? (
+                  <View style={{backgroundColor: color.white, flex: 2.5}}>
+                    <View style={{flexDirection: 'row'}}>
+                      <View
+                        style={{paddingLeft: 20, marginTop: 20, width: '55%'}}>
+                        <Text
                           style={{
-                            ...styles.boxMiddle,
-                            backgroundColor:
-                              clickDate == true ? color.white : color.primary,
-                            height: 35,
-                            borderRadius: 5,
-                            borderWidth: 1,
-                            borderColor: color.primary,
-                            width: 60,
-                          }}
-                          onPress={() => {
-                            setClickDate(false);
-                            setDateDisplay('');
-                            setDateDisplayEnd('');
+                            ...styles.textFamily,
+                            marginBottom: 10,
+                            fontFamily: fonts.semibold,
+                            fontSize: 14,
+                          }}>
+                          {getDetails.order_no}
+                        </Text>
+                        <Text
+                          style={{
+                            ...styles.textFamily,
+                            marginBottom: 10,
+                            fontSize: 14,
+                          }}>
+                          {moment(getDetails.payment_datetime).format(
+                            'h:mm A DD-MM-YYYY',
+                          )}
+                        </Text>
+
+                        <View
+                          style={{
+                            flexDirection: 'row',
                           }}>
                           <Text
                             style={{
                               ...styles.textFamily,
-                              color: clickDate == true ? null : color.white,
+                              marginBottom: 10,
+                              fontSize: 14,
                             }}>
-                            {' '}
-                            All{' '}
+                            {getDetails.payment_method == 1
+                              ? 'Cash'
+                              : getDetails.payment_method == 3
+                              ? 'Card (' + getDetails.card_invoice_no + ')'
+                              : getDetails.payment_method == 2
+                              ? 'FPX (' + getDetails.fpx_transaction_id + ')'
+                              : null}
                           </Text>
-                        </TouchableOpacity>
-
-                        <View style={{justifyContent: 'center'}}>
-                          <TouchableOpacity
-                            style={{
-                              ...styles.boxMiddle,
-                              backgroundColor:
-                                clickDate == true ? color.primary : color.white,
-                              height: 35,
-                              marginLeft: 20,
-                              borderRadius: 5,
-                              borderColor: color.primary,
-                              borderWidth: 1,
-                              width: 120,
-                            }}
-                            onPress={() => {
-                              setClickDate(true);
-                              // setDateTransaction('');
-                              setDateDisplay(dateTransaction);
-                              setDateDisplayEnd(dateTransactionEnd);
-                              setDateTransaction(new Date());
-                              setDateTransactionEnd(new Date());
-                              // setDateTransaction(new Date());
-                              // alert(dateTransaction);
-                              // console.log('dd', dateTransaction);
-                            }}>
-                            <Text
-                              style={{
-                                ...styles.textFamily,
-                                color: clickDate == true ? color.white : null,
-                              }}>
-                              {' '}
-                              Select Date{' '}
-                            </Text>
-                          </TouchableOpacity>
                         </View>
-                      </View>
 
-                      {clickDate == true ? (
                         <View
                           style={{
                             flexDirection: 'row',
-                            flex: 1,
-                            // backgroundColor: 'pink',
+                            justifyContent: 'space-between',
                           }}>
-                          <View
+                          <Text
                             style={{
-                              // ...styles.inputDate,
-                              // backgroundColor: color.primary,
-                              justifyContent: 'center',
-                              marginLeft: 20,
-                              alignItems: 'center',
-                              height: 35,
-                              flex: 1,
-                              // padding:0
+                              ...styles.textFamily,
+                              marginBottom: 10,
+                              marginRight: 0,
+                              fontSize: 14,
                             }}>
-                            <DateTimePicker
-                              testID="dateTimePicker"
-                              value={dateTransaction}
-                              mode={displayMode}
-                              // is24Hour={true}
-                              // minimumDate={new Date()}
-                              style={{
-                                // marginLeft: 110,
-                                paddingLeft: 0,
-                                width: 150,
-                              }}
-                              onChange={_onChangeDate}
-                            />
-                          </View>
-                          <View
+                            Tax
+                          </Text>
+                          <Text
                             style={{
-                              marginLeft: 20,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              flex: 0.2,
-                              // backgroundColor: 'green',
-                              flexDirection: 'row',
-                              marginLeft: 27,
+                              ...styles.textFamily,
+                              marginBottom: 10,
+                              fontSize: 14,
                             }}>
-                            <Icon name={'minus'} type="feather" size={24} />
-                          </View>
-                          <View
-                            style={{
-                              // ...styles.inputDate,
-                              // backgroundColor: color.primary,
-                              justifyContent: 'center',
-                              // marginLeft: 20,
-                              alignItems: 'center',
-                              height: 35,
-                              flex: 1,
-                              // padding:0
-                            }}>
-                            <DateTimePicker
-                              testID="dateTimePicker"
-                              value={dateTransactionEnd}
-                              mode={displayMode}
-                              // is24Hour={true}
-                              // minimumDate={new Date()}
-                              style={{
-                                // marginLeft: 110,
-                                paddingLeft: 0,
-                                width: 150,
-                              }}
-                              onChange={_onChangeDateEnd}
-                            />
-                          </View>
+                            RM {getDetails.tax.toFixed(2)}
+                          </Text>
                         </View>
-                      ) : null}
-                    </View>
-                  </View>
 
-                  <View
-                    style={{
-                      height: 160,
-                      flex: 1,
-                    }}>
-                    <View
-                      style={{
-                        marginLeft: '10%',
-                        marginRight: '10%',
-                        height: 'auto',
-                        // justifyContent:'space-around'
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        // backgroundColor: color.white,
-                      }}>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          width: '100%',
-                          height: 'auto',
-                          backgroundColor: color.white,
-                        }}>
                         <View
                           style={{
-                            padding: 20,
-                            width: '100%',
-                            height: '100%',
-                            paddingBottom: 0,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
                           }}>
-                          <View style={{marginBottom: 5}}>
-                            <Text style={styles.textFamily}>
-                              Payment Method
-                            </Text>
-                          </View>
-
-                          <View
+                          <Text
                             style={{
-                              flexDirection: 'row',
-                              width: '100%',
-                              flexWrap: 'wrap',
+                              ...styles.textFamily,
+                              marginBottom: 10,
+                              fontSize: 14,
                             }}>
-                            <TouchableOpacity
-                              style={{
-                                // backgroundColor: color.background,
-                                width: 'auto',
-                                margin: 10,
-                                height: 30,
-                                borderRadius: 5,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                padding: 5,
-                                borderWidth: 1,
-                                borderColor: color.primary,
-                                backgroundColor:
-                                  filterPaymentMethod.length == 0
-                                    ? color.primary
-                                    : color.white,
-                                width: 50,
-                              }}
-                              onPress={() => {
-                                _filterPaymentMethod('all');
-                              }}>
-                              <Text
-                                style={{
-                                  ...styles.textFamily,
-                                  color:
-                                    filterPaymentMethod.length == 0
-                                      ? color.white
-                                      : null,
-                                }}>
-                                All
-                              </Text>
-                            </TouchableOpacity>
-                            {paymentMethodList.map((data, index) => {
-                              return (
-                                <TouchableOpacity
-                                  key={index}
-                                  style={{
-                                    // backgroundColor: color.background,
-                                    width: 'auto',
-                                    height: 30,
-                                    borderRadius: 5,
-                                    // marginLeft: 10,
-                                    margin: 10,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    padding: 5,
-                                    borderWidth: 1,
-                                    borderColor: color.primary,
-                                    backgroundColor: filterPaymentMethod.find(
-                                      item =>
-                                        item.payment_method ===
-                                        data.payment_val,
-                                    )
-                                      ? color.primary
-                                      : color.white,
-                                  }}
-                                  onPress={() => {
-                                    _filterPaymentMethod(data.payment_val);
-                                  }}>
-                                  <Text
-                                    style={{
-                                      ...styles.textFamily,
-                                      color: filterPaymentMethod.find(
-                                        item =>
-                                          item.payment_method ===
-                                          data.payment_val,
-                                      )
-                                        ? color.white
-                                        : null,
-                                    }}>
-                                    {data.payment_method}
-                                  </Text>
-                                </TouchableOpacity>
-                              );
-                            })}
-                          </View>
+                            Discount
+                          </Text>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              marginBottom: 10,
+                              fontSize: 14,
+                            }}>
+                            RM {getDetails.discount.toFixed(2)}
+                          </Text>
                         </View>
                       </View>
-
                       <View
                         style={{
-                          flexDirection: 'row',
-                          width: '100%',
-                        }}>
-                        <View
-                          style={{
-                            padding: 20,
-                            width: '100%',
-                            height: '100%',
-                            // paddingBottom: 10,
-                            backgroundColor: color.white,
-                          }}>
-                          <View style={{marginBottom: 5}}>
-                            <Text style={styles.textFamily}>Status</Text>
-                          </View>
-
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              width: '100%',
-                              flexWrap: 'wrap',
-                            }}>
-                            <TouchableOpacity
-                              style={{
-                                // backgroundColor: color.background,
-                                width: 'auto',
-                                margin: 10,
-                                height: 30,
-                                borderRadius: 5,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                padding: 5,
-                                borderWidth: 1,
-                                borderColor: color.primary,
-                                backgroundColor:
-                                  filterPaymentStatus.length == 0
-                                    ? color.primary
-                                    : color.white,
-                                width: 50,
-                              }}
-                              onPress={() => {
-                                _filterPaymentStatus('all');
-                              }}>
-                              <Text
-                                style={{
-                                  ...styles.textFamily,
-                                  color:
-                                    filterPaymentStatus.length == 0
-                                      ? color.white
-                                      : null,
-                                }}>
-                                All
-                              </Text>
-                            </TouchableOpacity>
-
-                            {paymentStatusList.map((data, index) => {
-                              return (
-                                <TouchableOpacity
-                                  key={index}
-                                  style={{
-                                    // backgroundColor: color.background,
-                                    width: 'auto',
-                                    margin: 10,
-                                    height: 30,
-                                    borderRadius: 5,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    padding: 5,
-                                    borderWidth: 1,
-                                    borderColor: color.primary,
-                                    backgroundColor: filterPaymentStatus.find(
-                                      item => item.payment_status === data.id,
-                                    )
-                                      ? color.primary
-                                      : color.white,
-                                  }}
-                                  onPress={() => {
-                                    _filterPaymentStatus(data.id);
-                                  }}>
-                                  <Text
-                                    style={{
-                                      ...styles.textFamily,
-                                      color: filterPaymentStatus.find(
-                                        item => item.payment_status === data.id,
-                                      )
-                                        ? color.white
-                                        : null,
-                                    }}>
-                                    {data.name}
-                                  </Text>
-                                </TouchableOpacity>
-                              );
-                            })}
-                          </View>
-                        </View>
-                      </View>
-
-                      <TouchableOpacity
-                        style={{
-                          justifyContent: 'center',
-                          // height: 160,
-                          alignItems: 'center',
-                          width: '100%',
-                          // flex: 1,
-                          backgroundColor: color.primary,
-                          height: 40,
-                          borderRadius: 5,
-                          marginLeft: 'auto',
-                          marginRight: 'auto',
+                          // justifyContent: 'center',
+                          // alignItems: 'center',
+                          // flexDirection:'row',
                           marginTop: 20,
-                        }}
-                        onPress={() => {
-                          _confirmFilter('confirm');
+                          alignItems: 'flex-end',
+                          // backgroundColor:'pink',
+                          paddingRight: 20,
+                          flex: 1,
+                          // width: '50%',
                         }}>
                         <Text
-                          style={{...styles.textFamily, color: color.white}}>
-                          Confirm
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </Modal>
-
-                <ScrollView style={{height: 350}}>
-                  {orderList.map((data, index) => {
-                    return (
-                      <TouchableOpacity
-                        key={index}
-                        style={{
-                          flexDirection: 'row',
-                          height: 80,
-                          backgroundColor:
-                            orderId == data.invoice_no
-                              ? color.primary
-                              : color.white,
-                          marginTop: 10,
-                          justifyContent: 'space-between',
-                          // opacity: orderId == data.invoice_no ? 0 : 1
-                        }}
-                        // opacity={orderId == data.invoice_no ? 0.0 : 1}
-                        onPress={() => {
-                          _pressOrder(data.invoice_no);
-                        }}>
-                        <View
                           style={{
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            paddingLeft: 20,
-                            // margin:5,
+                            marginBottom: 10,
+                            fontFamily: fonts.semibold,
+                            fontSize: 30,
                           }}>
-                          <View>
-                            <Text
-                              style={{
-                                ...styles.textFamily,
-                                marginBottom: 5,
-                                color:
-                                  orderId == data.invoice_no
-                                    ? color.white
-                                    : null,
-                              }}>
-                              {data.invoice_no}
-                            </Text>
-                          </View>
-                          <View>
-                            <Text
-                              style={{
-                                ...styles.textFamily,
-                                color:
-                                  orderId == data.invoice_no
-                                    ? color.white
-                                    : null,
-                              }}>
-                              {moment(data.payment_datetime).format(
-                                'h:mm A DD-MM-YYYY',
-                              )}
-                            </Text>
-                          </View>
-                        </View>
-
+                          RM{' '}
+                          {getDetails.order_total_amount
+                            .toFixed(2)
+                            .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
+                        </Text>
                         <View
                           style={{
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            marginRight: 20,
-                            //   backgroundColor: 'red',
+                            backgroundColor:
+                              getDetails.payment_status == '1'
+                                ? color.success
+                                : getDetails.payment_status == '3'
+                                ? color.danger
+                                : getDetails.payment_status == '4'
+                                ? color.danger
+                                : getDetails.payment_status == '5'
+                                ? color.danger
+                                : null,
+                            width: 100,
+                            height: 30,
                             justifyContent: 'center',
                             alignItems: 'center',
-                            width: 140,
+                            borderRadius: 5,
                           }}>
-                          <View>
-                            <Text
-                              style={{
-                                ...styles.textFamily,
-                                marginBottom: 5,
-                                color:
-                                  orderId == data.invoice_no
-                                    ? color.white
-                                    : null,
-                              }}>
-                              {data.payment_method == 1
-                                ? 'Cash'
-                                : data.payment_method == 3
-                                ? 'Card'
-                                : data.payment_method == 2
-                                ? 'FPX'
-                                : null}
-                            </Text>
-                          </View>
-                          <View>
-                            <Text
-                              style={{
-                                ...styles.textFamily,
-                                color:
-                                  orderId == data.invoice_no
-                                    ? color.white
-                                    : null,
-                              }}>
-                              {data.order_total_amount.toFixed(2)}
-                            </Text>
-                          </View>
+                          <Text
+                            style={{
+                              ...styles.textFamily,
+                              color: color.white,
+                              fontSize: 16,
+                              fontFamily: fonts.semibold,
+                            }}>
+                            {getDetails.payment_status == '1'
+                              ? 'Success'
+                              : getDetails.payment_status == '3'
+                              ? 'Failed'
+                              : getDetails.payment_status == '4'
+                              ? 'Unknown'
+                              : getDetails.payment_status == '5'
+                              ? 'Refund'
+                              : null}
+                          </Text>
                         </View>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
 
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: color.white,
-                    height: 40,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    // paddingTop: 10,
-                    marginLeft: 20,
-                    marginTop: 20,
-                    marginRight: 20,
-                    borderRadius: 5,
-                    borderWidth: 1,
-                    borderColor: color.primary,
-                  }}
-                  onPress={() => {
-                    _generateReport();
-                  }}>
-                  <Text style={styles.textFamily}>Download Report</Text>
-                </TouchableOpacity>
-              </View>
-
-              {details == true ? (
-                <View style={{backgroundColor: color.white, flex: 2.5}}>
-                  <View style={{flexDirection: 'row'}}>
-                    <View
-                      style={{paddingLeft: 20, marginTop: 20, width: '55%'}}>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          marginBottom: 10,
-                          fontFamily: fonts.semibold,
-                          fontSize: 14,
-                        }}>
-                        {getDetails.order_no}
-                      </Text>
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          marginBottom: 10,
-                          fontSize: 14,
-                        }}>
-                        {moment(getDetails.payment_datetime).format(
-                          'h:mm A DD-MM-YYYY',
-                        )}
-                      </Text>
-
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                        }}>
                         <Text
                           style={{
                             ...styles.textFamily,
-                            marginBottom: 10,
+                            marginTop: 33,
                             fontSize: 14,
                           }}>
-                          {getDetails.payment_method == 1
-                            ? 'Cash'
-                            : getDetails.payment_method == 3
-                            ? 'Card (' + getDetails.card_invoice_no + ')'
-                            : getDetails.payment_method == 2
-                            ? 'FPX (' + getDetails.fpx_transaction_id + ')'
-                            : null}
-                        </Text>
-                      </View>
-
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                        }}>
-                        <Text
-                          style={{
-                            ...styles.textFamily,
-                            marginBottom: 10,
-                            marginRight: 0,
-                            fontSize: 14,
-                          }}>
-                          Tax
-                        </Text>
-                        <Text
-                          style={{
-                            ...styles.textFamily,
-                            marginBottom: 10,
-                            fontSize: 14,
-                          }}>
-                          RM {getDetails.tax.toFixed(2)}
-                        </Text>
-                      </View>
-
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                        }}>
-                        <Text
-                          style={{
-                            ...styles.textFamily,
-                            marginBottom: 10,
-                            fontSize: 14,
-                          }}>
-                          Discount
-                        </Text>
-                        <Text
-                          style={{
-                            ...styles.textFamily,
-                            marginBottom: 10,
-                            fontSize: 14,
-                          }}>
-                          RM {getDetails.discount.toFixed(2)}
+                          {getDetails.staff_name}
                         </Text>
                       </View>
                     </View>
+
                     <View
                       style={{
-                        // justifyContent: 'center',
-                        // alignItems: 'center',
-                        // flexDirection:'row',
-                        marginTop: 20,
-                        alignItems: 'flex-end',
-                        // backgroundColor:'pink',
-                        paddingRight: 20,
-                        flex: 1,
-                        // width: '50%',
+                        flexDirection: 'row',
+                        justifyContent: 'space-evenly',
                       }}>
-                      <Text
-                        style={{
-                          marginBottom: 10,
-                          fontFamily: fonts.semibold,
-                          fontSize: 30,
-                        }}>
-                        RM{' '}
-                        {getDetails.order_total_amount
-                          .toFixed(2)
-                          .replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
-                      </Text>
-                      <View
-                        style={{
-                          backgroundColor:
-                            getDetails.payment_status == '1'
-                              ? color.success
-                              : getDetails.payment_status == '3'
-                              ? color.danger
-                              : getDetails.payment_status == '4'
-                              ? color.danger
-                              : getDetails.payment_status == '5'
-                              ? color.danger
-                              : null,
-                          width: 100,
-                          height: 30,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderRadius: 5,
-                        }}>
-                        <Text
+                      {getDetails.payment_method == 1 &&
+                      getDetails.payment_status == 1 ? (
+                        <TouchableOpacity
                           style={{
-                            ...styles.textFamily,
-                            color: color.white,
-                            fontSize: 16,
-                            fontFamily: fonts.semibold,
+                            flex: 1,
+                            backgroundColor: color.white,
+                            height: 40,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderRadius: 5,
+                            borderColor: color.primary,
+                            borderWidth: 1,
+                            marginLeft: 20,
+                            marginRight: 20,
+                          }}
+                          onPress={() => {
+                            _refundProcess(getDetails.order_no);
                           }}>
-                          {getDetails.payment_status == '1'
-                            ? 'Success'
-                            : getDetails.payment_status == '3'
-                            ? 'Failed'
-                            : getDetails.payment_status == '4'
-                            ? 'Unknown'
-                            : getDetails.payment_status == '5'
-                            ? 'Refund'
-                            : null}
-                        </Text>
-                      </View>
+                          <Text style={{...styles.textFamily}}>Refund</Text>
+                        </TouchableOpacity>
+                      ) : null}
 
-                      <Text
-                        style={{
-                          ...styles.textFamily,
-                          marginTop: 33,
-                          fontSize: 14,
-                        }}>
-                        {getDetails.staff_name}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-evenly',
-                    }}>
-                    {getDetails.payment_method == 1 &&
-                    getDetails.payment_status == 1 ? (
-                      <TouchableOpacity
-                        style={{
-                          flex: 1,
-                          backgroundColor: color.white,
-                          height: 40,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          borderRadius: 5,
-                          borderColor: color.primary,
-                          borderWidth: 1,
-                          marginLeft: 20,
-                          marginRight: 20,
-                        }}
-                        onPress={() => {
-                          _refundProcess(getDetails.order_no);
-                        }}>
-                        <Text style={{...styles.textFamily}}>Refund</Text>
-                      </TouchableOpacity>
-                    ) : null}
-
-                    {/* <View
+                      {/* <View
                     style={{
                       backgroundColor: color.primary,
                       flex: 1,
@@ -1492,70 +1523,70 @@ const Transactions = ({navigation, route}) => {
                       Cancel Transaction
                     </Text>
                   </View> */}
-                  </View>
+                    </View>
 
-                  <ScrollView>
-                    {getDetailsByOrder.map((data, index) => {
-                      let menuParsed = JSON.parse(data.menu_order_detail);
-                      return (
-                        <View
-                          key={index}
-                          style={{
-                            marginTop: 5,
-                            flexDirection: 'row',
-                            height: 'auto',
-                            alignItems: 'center',
-                            backgroundColor: 'white',
-                            //   marginLeft: 20,
-                            //   marginRight: 20,
-                          }}>
+                    <ScrollView>
+                      {getDetailsByOrder.map((data, index) => {
+                        let menuParsed = JSON.parse(data.menu_order_detail);
+                        return (
                           <View
+                            key={index}
                             style={{
-                              //   paddingLeft: 20,
-                              marginLeft: 20,
                               marginTop: 5,
-                              marginBottom: 5,
-                              flex: 0.3,
-                              // width:'1%',
-                              height: 70,
-                              justifyContent: 'center',
+                              flexDirection: 'row',
+                              height: 'auto',
                               alignItems: 'center',
-                              backgroundColor: color.background,
-                              borderRadius: 5,
+                              backgroundColor: 'white',
+                              //   marginLeft: 20,
+                              //   marginRight: 20,
                             }}>
-                            <Image
+                            <View
                               style={{
-                                width: '100%',
-                                height: '80%',
+                                //   paddingLeft: 20,
+                                marginLeft: 20,
+                                marginTop: 5,
+                                marginBottom: 5,
+                                flex: 0.3,
+                                // width:'1%',
+                                height: 70,
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                // backgroundColor:'black'
-                              }}
-                              source={{
-                                uri: menuParsed.menu_image,
-                              }}
-                            />
-                          </View>
-                          <View
-                            style={{
-                              flex: 1,
-                              flexDirection: 'column',
-                              height: 70,
-                              justifyContent: 'space-between',
-                              // backgroundColor: 'black',
-                              marginLeft: 5,
-                            }}>
-                            <View>
-                              <View style={{marginBottom: 10}}>
-                                <Text
-                                  style={{
-                                    fontFamily: fonts.medium,
-                                    fontSize: 13,
-                                  }}>
-                                  {menuParsed.menu_name}
-                                </Text>
-                              </View>
-                              {/* <View style={{marginTop: 10}}>
+                                backgroundColor: color.background,
+                                borderRadius: 5,
+                              }}>
+                              <Image
+                                style={{
+                                  width: '100%',
+                                  height: '80%',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  // backgroundColor:'black'
+                                }}
+                                source={{
+                                  uri: menuParsed.menu_image,
+                                }}
+                              />
+                            </View>
+                            <View
+                              style={{
+                                flex: 1,
+                                flexDirection: 'column',
+                                height: 70,
+                                justifyContent: 'space-between',
+                                // backgroundColor: 'black',
+                                marginLeft: 5,
+                              }}>
+                              <View>
+                                <View style={{marginBottom: 10}}>
+                                  <Text
+                                    style={{
+                                      fontFamily: fonts.medium,
+                                      fontSize: 13,
+                                    }}>
+                                    {menuParsed.menu_name}
+                                  </Text>
+                                </View>
+                                {/* <View style={{marginTop: 10}}>
                          <Text
                            style={{
                              fontFamily: fonts.regular,
@@ -1565,88 +1596,89 @@ const Transactions = ({navigation, route}) => {
                            Nasi Putih, Blackpepper,
                          </Text>
                        </View> */}
-                              <View style={{flexDirection: 'row'}}>
-                                {menuParsed.menu_variant.length > 0
-                                  ? menuParsed.menu_variant.map(
-                                      (variant, key) => {
-                                        return (
-                                          <Text
-                                            style={{
-                                              fontFamily: fonts.medium,
-                                              fontSize: 12,
-                                              color: color.textGray,
-                                            }}>
-                                            {menuParsed.menu_variant.length ==
-                                            key + 1
-                                              ? variant.name
-                                              : variant.name + ', '}
-                                          </Text>
-                                        );
-                                      },
-                                    )
-                                  : null}
+                                <View style={{flexDirection: 'row'}}>
+                                  {menuParsed.menu_variant.length > 0
+                                    ? menuParsed.menu_variant.map(
+                                        (variant, key) => {
+                                          return (
+                                            <Text
+                                              style={{
+                                                fontFamily: fonts.medium,
+                                                fontSize: 12,
+                                                color: color.textGray,
+                                              }}>
+                                              {menuParsed.menu_variant.length ==
+                                              key + 1
+                                                ? variant.name
+                                                : variant.name + ', '}
+                                            </Text>
+                                          );
+                                        },
+                                      )
+                                    : null}
+                                </View>
+                              </View>
+
+                              <View>
+                                <Text style={styles.textInputPriceAddToCart}>
+                                  RM {menuParsed.menu_price.toFixed(2)}
+                                </Text>
                               </View>
                             </View>
-
-                            <View>
-                              <Text style={styles.textInputPriceAddToCart}>
-                                RM {menuParsed.menu_price.toFixed(2)}
-                              </Text>
-                            </View>
-                          </View>
-                          <View
-                            style={{
-                              flex: 0.6,
-                              height: 70,
-                              // flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              // backgroundColor: 'red',
-                              marginRight: 10,
-                            }}>
                             <View
                               style={{
-                                flexDirection: 'column',
+                                flex: 0.6,
+                                height: 70,
+                                // flexDirection: 'column',
                                 alignItems: 'center',
-                                height: 50,
-                                justifyContent: 'flex-end',
-                                // backgroundColor:'blue'
+                                justifyContent: 'center',
+                                // backgroundColor: 'red',
+                                marginRight: 10,
                               }}>
-                              <Text> X {menuParsed.menu_quantity}</Text>
-                              <Text> ( {data.order_typeName} )</Text>
+                              <View
+                                style={{
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  height: 50,
+                                  justifyContent: 'flex-end',
+                                  // backgroundColor:'blue'
+                                }}>
+                                <Text> X {menuParsed.menu_quantity}</Text>
+                                <Text> ( {data.order_typeName} )</Text>
+                              </View>
                             </View>
                           </View>
-                        </View>
-                      );
-                    })}
-                  </ScrollView>
+                        );
+                      })}
+                    </ScrollView>
+                    <View
+                      style={{
+                        backgroundColor: color.primary,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginLeft: 20,
+                        marginRight: 20,
+                        borderRadius: 5,
+                      }}>
+                      <Text style={{...styles.textFamily, color: color.white}}>
+                        Print Receipt
+                      </Text>
+                    </View>
+                  </View>
+                ) : (
                   <View
                     style={{
-                      backgroundColor: color.primary,
-                      height: 40,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      marginLeft: 20,
-                      marginRight: 20,
-                      borderRadius: 5,
-                    }}>
-                    <Text style={{...styles.textFamily, color: color.white}}>
-                      Print Receipt
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                <View
-                  style={{
-                    //   backgroundColor: 'yellow',
-                    flex: 2.5,
-                    opacity: 0,
-                  }}></View>
-              )}
+                      //   backgroundColor: 'yellow',
+                      flex: 2.5,
+                      opacity: 0,
+                    }}></View>
+                )}
+              </View>
             </View>
           </View>
         </View>
-      </View>
+      )}
     </SafeAreaView>
   );
 };
