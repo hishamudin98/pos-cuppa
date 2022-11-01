@@ -576,9 +576,9 @@ const Checkout = ({navigation, route}) => {
             style={[styles.boxPaymentSelect, {backgroundColor: color.primary}]}>
             <View>
               <View style={{marginBottom: 15}}>
-                <Icon name={'cash-outline'} type="ionicon" size={28} />
+                <Icon name={'cash-outline'} type="ionicon" size={28} color={color.white}/>
               </View>
-              <Text style={styles.textFamily}>Cash</Text>
+              <Text style={{...styles.textFamily, color:color.white}}>Cash</Text>
             </View>
           </View>
 
@@ -1108,9 +1108,9 @@ const Checkout = ({navigation, route}) => {
             style={[styles.boxPaymentSelect, {backgroundColor: color.primary}]}>
             <View>
               <View style={{marginBottom: 15}}>
-                <Icon name={'card-outline'} type="ionicon" size={28} />
+                <Icon name={'card-outline'} type="ionicon" size={28} color={color.white}/>
               </View>
-              <Text style={styles.textFamily}>Credit/Debit Card</Text>
+              <Text style={{...styles.textFamily, color:color.white}}>Credit/Debit Card</Text>
             </View>
           </View>
 
@@ -1505,7 +1505,7 @@ const Checkout = ({navigation, route}) => {
                       {selectTable}
                     </Text>
                   </View>
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     style={{
                       backgroundColor: color.primary,
                       height: 40,
@@ -1524,7 +1524,7 @@ const Checkout = ({navigation, route}) => {
                       }}>
                       Split Bill
                     </Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
 
                 {/* {ORDER CART} */}
