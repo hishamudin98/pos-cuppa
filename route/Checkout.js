@@ -466,15 +466,15 @@ const Checkout = ({navigation, route}) => {
                   routes: [{name: 'TypeOrder'}],
                 });
 
-                await axios
-                  .post(url + '/pos/printReceipt', {
-                    order_no: orderNoParsed,
-                    receipt: 'N',
-                    counter: counterPOS,
-                  })
-                  .then(async function (resp) {
-                    // console.log('Print Receipt', resp);
-                  });
+                // await axios
+                //   .post(url + '/pos/printReceipt', {
+                //     order_no: orderNoParsed,
+                //     receipt: 'N',
+                //     counter: counterPOS,
+                //   })
+                //   .then(async function (resp) {
+                //     // console.log('Print Receipt', resp);
+                //   });
               },
               style: 'cancel',
             },
@@ -486,15 +486,15 @@ const Checkout = ({navigation, route}) => {
                   routes: [{name: 'TypeOrder'}],
                 });
 
-                await axios
-                  .post(url + '/pos/printReceipt', {
-                    order_no: orderNoParsed,
-                    receipt: 'Y',
-                    counter: counterPOS,
-                  })
-                  .then(async function (resp) {
-                    // console.log('Print Receipt', resp);
-                  });
+                // await axios
+                //   .post(url + '/pos/printReceipt', {
+                //     order_no: orderNoParsed,
+                //     receipt: 'Y',
+                //     counter: counterPOS,
+                //   })
+                //   .then(async function (resp) {
+                //     // console.log('Print Receipt', resp);
+                //   });
 
                 // set loading
                 // print receipt
