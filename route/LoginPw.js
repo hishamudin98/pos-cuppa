@@ -210,7 +210,7 @@ const LoginPw = ({navigation, route}) => {
       <StatusBar hidden />
       <ImageBackground
         source={{
-          uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/front.jpg',
+          uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.ngam.my/cuppa-coffee/front.jpg',
         }}
         style={styles.image}>
         <LinearGradient colors={['#000000', '#00000000']} style={styles.lg}>
@@ -219,7 +219,7 @@ const LoginPw = ({navigation, route}) => {
               <Image
                 style={styles.stretch}
                 source={{
-                  uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.heandshe.toyyibfnb.com/logo.png',
+                  uri: 'https://s3.ap-southeast-1.amazonaws.com/cdn.ngam.my/cuppa-coffee/logo.png',
                 }}
               />
             </View>
@@ -546,8 +546,8 @@ const styles = StyleSheet.create({
   },
 
   stretch: {
-    width: 160,
-    height: 160,
+    width: 140,
+    height: 140,
     // left: 50,
     top: 15,
     resizeMode: 'stretch',
