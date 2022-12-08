@@ -4443,7 +4443,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 5,
     marginRight: 15,
-    width: 160,
+    width: 190,
   },
 
   boxMenu: {
