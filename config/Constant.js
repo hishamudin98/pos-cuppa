@@ -29,7 +29,7 @@ export const system_configuration = {
   // REACT_APP_DEV_MODE: 'http://192.168.0.176:3000',
   // REACT_APP_DEV_MODE: 'http://192.168.100.60:3000',
   // REACT_APP_DEV_MODE: 'http://localhost:3000',
-  REACT_APP_DEV_MODE: 'https://stg-heandshe.toyyibfnb.com/api',
+  REACT_APP_DEV_MODE: 'https://stg-cuppa.toyyibfnb.com/api',
   REACT_APP_PROD_MODE: 'https://api-prod.application.com',
 };
 
