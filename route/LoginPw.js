@@ -20,7 +20,7 @@ import {Icon} from 'react-native-elements';
 import LinearGradient from 'react-native-linear-gradient';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import axios from 'axios';
-import {color, fonts, system_configuration} from '../config/Constant';
+import {color, fonts, system_configuration, containerStyle} from '../config/Constant';
 // const image = {uri: './img/mg.png'};
 const image = require('../img/mg.png');
 const imagelogo = require('../img/logomg.jpeg');
@@ -223,18 +223,22 @@ const LoginPw = ({navigation, route}) => {
                 }}
               />
             </View>
-            <View style={styles.container}>
+            <View style={styles.containerStyle}>
               <Text
                 style={{
                   fontFamily: fonts.semibold,
                   color: color.white,
                   fontSize: 16,
-                  marginTop: 20,
+                  marginBottom: (1 / 100) * containerStyle.height,
+                  marginTop: (13 / 100) * containerStyle.height,
+                  // justifyContent: 'center',
+                  // backgroundColor: color.primary,
+                  textAlign: 'center',
                 }}>
                 Password
               </Text>
 
-              <View style={{flexDirection: 'row'}}>
+              <View style={{flexDirection: 'row', justifyContent:'center', }}>
                 <View style={{padding: 10}}>
                   <View style={styles.inputPw}>
                     <TouchableNativeFeedback onPress={Keyboard.dismiss}>
@@ -325,8 +329,8 @@ const LoginPw = ({navigation, route}) => {
       })}
     </View> */}
 
-              <View style={{position: 'absolute'}}>
-                <View style={{flexDirection: 'row', marginTop: 250}}>
+              <View style={{}}>
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <View style={{padding: 10}}>
                     <TouchableOpacity
                       style={styles.btnNumpad}
@@ -372,7 +376,7 @@ const LoginPw = ({navigation, route}) => {
                   </View>
                 </View>
 
-                <View style={{flexDirection: 'row'}}>
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <View style={{flexDirection: 'column'}}>
                     <View style={{flexDirection: 'row'}}>
                       <View style={{padding: 10}}>
@@ -455,7 +459,7 @@ const LoginPw = ({navigation, route}) => {
                   </View>
                 </View>
 
-                <View style={{flexDirection: 'row'}}>
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <View style={{padding: 10, opacity: 0, height: 0}}>
                     <TouchableOpacity style={styles.btnNumpad}>
                       <View style={styles.numpad}>
@@ -496,14 +500,16 @@ const LoginPw = ({navigation, route}) => {
                 </View>
               </View>
 
-              <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
+              <View
+                style={{bottom: 0, marginTop: 3/100 * containerStyle.height}}>
                 <Text
                   style={{
                     fontFamily: fonts.semibold,
                     color: color.white,
                     fontSize: 21,
-                    marginBottom: 10,
-                    marginTop: 20,
+                    textAlign: 'center',
+                    // marginBottom: 10,
+                    // marginTop: 20,
                   }}>
                   {outletName}
                 </Text>
@@ -540,14 +546,18 @@ const styles = StyleSheet.create({
   },
 
   containerLogo: {
+    // flex: 1,
     // paddingTop: 50,
+    backgroundColor: '#fff',
+    // margin:50,
     justifyContent: 'center',
     alignItems: 'center',
+    // height:'10%'
   },
 
   stretch: {
-    width: 140,
-    height: 140,
+     width: (17 / 100) * containerStyle.width,
+    height: (10 / 100) * containerStyle.height,
     // left: 50,
     top: 15,
     resizeMode: 'stretch',
@@ -560,46 +570,44 @@ const styles = StyleSheet.create({
   },
 
   inputView: {
-    backgroundColor: '#FFFFFF',
+     backgroundColor: '#FFFFFF',
     borderRadius: 5,
-    width: '50%',
-    height: 45,
-    marginBottom: 400,
-    // justifyContent: 'center',
+    // width: 1/2 * containerStyle.width,
+    // height: 8/100 * containerStyle.height,
+    marginRight: (30 / 100) * containerStyle.width,
+    marginLeft: (30 / 100) * containerStyle.width,
+    // backgroundColor: '#FFFFFF',
+    // marginBottom: 400,
     // alignItems: 'center',
+    // marginTop: 50,
+    // justifyContent: 'center',
+    textAlign: 'center',
   },
 
   inputPw: {
     backgroundColor: '#FFFFFF',
     borderRadius: 5,
-    width: 80,
-    height: 45,
-    marginBottom: 400,
+    width: 10/100 * containerStyle.width,
+    height: 5/100 * containerStyle.height,
+    // marginBottom: 400,
     alignItems: 'center',
   },
 
   TextInput: {
-    height: 50,
-    flex: 1,
-    padding: 10,
+    // height: 50,
+    // flex: 1,
+    // padding: 10,
     // marginLeft: 20,
     fontSize: 16,
     // justifyContent:'center'
+    fontFamily: fonts.medium,
+    width: (20 / 100) * containerStyle.width,
+    textAlign: 'center',
   },
 
   forgot_button: {
     height: 30,
     marginBottom: 30,
-  },
-
-  loginBtn: {
-    width: '80%',
-    borderRadius: 25,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    backgroundColor: '#FF1493',
   },
 
   numpadWrapper: {
@@ -624,19 +632,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    width: 130,
-    height: 60,
+    width: 15/100 * containerStyle.width,
+    height: 5/100 * containerStyle.height,
     justifyContent: 'center',
   },
 
   btnNumpadCfm: {
     elevation: 8,
     backgroundColor: '#FFF',
-    borderRadius: 10,
+    borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    width: 130,
-    height: 140,
+    width: 15/100 * containerStyle.width,
+    height: 12/100 * containerStyle.height,
     justifyContent: 'center',
   },
 });

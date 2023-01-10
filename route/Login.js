@@ -19,7 +19,12 @@ import {Icon} from 'react-native-elements';
 
 import LinearGradient from 'react-native-linear-gradient';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {color, fonts, system_configuration} from '../config/Constant';
+import {
+  color,
+  fonts,
+  system_configuration,
+  containerStyle,
+} from '../config/Constant';
 
 const url =
   system_configuration.ENVIRONMENT === 'development'
@@ -126,14 +131,17 @@ const Login = ({navigation, route}) => {
               />
             </View>
 
-            <View style={styles.container}>
+            <View style={{...styles.containerStyle}}>
               <Text
                 style={{
                   fontFamily: fonts.semibold,
                   color: color.white,
                   fontSize: 16,
-                  marginBottom: 10,
-                  marginTop: 20,
+                  marginBottom: (1 / 100) * containerStyle.height,
+                  marginTop: (13 / 100) * containerStyle.height,
+                  // justifyContent: 'center',
+                  // backgroundColor: color.primary,
+                  textAlign: 'center',
                 }}>
                 Staff No
               </Text>
@@ -145,7 +153,7 @@ const Login = ({navigation, route}) => {
                     {
                       justifyContent: 'center',
                       alignSelf: 'center',
-                      marginLeft: 0,
+                      // marginLeft: 0,
                     },
                   ]}
                   placeholder="Staff No."
@@ -173,8 +181,8 @@ const Login = ({navigation, route}) => {
       })}
     </View> */}
 
-              <View style={{position: 'absolute'}}>
-                <View style={{flexDirection: 'row', marginTop: 250}}>
+              <View style={{marginTop: (1 / 100) * containerStyle.height}}>
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <View style={{padding: 10}}>
                     <TouchableOpacity
                       style={styles.btnNumpad}
@@ -220,7 +228,7 @@ const Login = ({navigation, route}) => {
                   </View>
                 </View>
 
-                <View style={{flexDirection: 'row'}}>
+                <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                   <View style={{flexDirection: 'column'}}>
                     <View style={{flexDirection: 'row'}}>
                       <View style={{padding: 10}}>
@@ -286,8 +294,8 @@ const Login = ({navigation, route}) => {
                     </View>
                   </View>
 
-                  <View style={{flexDirection: 'column'}}>
-                    <View style={{padding: 10}}>
+                  <View style={{flexDirection: 'column', marginBottom:10}}>
+                    <View style={{paddingTop: 10, paddingLeft:10, paddingRight:10}}>
                       <TouchableOpacity
                         style={styles.btnNumpadCfm}
                         onPress={() => validateLogin()}>
@@ -303,16 +311,22 @@ const Login = ({navigation, route}) => {
                   </View>
                 </View>
 
-                <View style={{flexDirection: 'row'}}>
-                  <View style={{padding: 10, opacity: 0, height: 0}}>
-                    <TouchableOpacity style={styles.btnNumpad}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                  }}>
+                  <View style={{padding: 10}}>
+                    <TouchableOpacity
+                      style={styles.btnNumpad}
+                      onPress={() => inputStaffNo('0')}>
                       <View style={styles.numpad}>
                         <Text style={styles.numpadNumber}>0</Text>
                       </View>
                     </TouchableOpacity>
                   </View>
 
-                  <View style={{padding: 10}}>
+                  <View style={{padding: 10, opacity: 0, height: 0}}>
                     <TouchableOpacity
                       style={styles.btnNumpad}
                       onPress={() => inputStaffNo('0')}>
@@ -324,26 +338,20 @@ const Login = ({navigation, route}) => {
                 </View>
               </View>
 
-              <View style={{position: 'absolute', bottom: 0, marginBottom: 30}}>
+              <View
+                style={{bottom: 0, marginTop: 3/100 * containerStyle.height}}>
                 <Text
                   style={{
                     fontFamily: fonts.semibold,
                     color: color.white,
                     fontSize: 21,
-                    marginBottom: 10,
-                    marginTop: 20,
+                    textAlign: 'center',
+                    // marginBottom: 10,
+                    // marginTop: 20,
                   }}>
                   {outletName}
                 </Text>
               </View>
-
-              {/* <TouchableOpacity>
-      <Text style={styles.forgot_button}>Forgot Password?</Text>
-    </TouchableOpacity>
-
-    <TouchableOpacity style={styles.loginBtn}>
-      <Text style={styles.loginText}>LOGIN</Text>
-    </TouchableOpacity> */}
             </View>
           </SafeAreaView>
         </LinearGradient>
@@ -378,8 +386,8 @@ const styles = StyleSheet.create({
   },
 
   stretch: {
-    width: 140,
-    height: 140,
+    width: (17 / 100) * containerStyle.width,
+    height: (10 / 100) * containerStyle.height,
     // left: 50,
     top: 15,
     resizeMode: 'stretch',
@@ -394,10 +402,16 @@ const styles = StyleSheet.create({
   inputView: {
     backgroundColor: '#FFFFFF',
     borderRadius: 5,
-    width: '50%',
-    height: 45,
-    marginBottom: 400,
+    // width: 1/2 * containerStyle.width,
+    // height: 8/100 * containerStyle.height,
+    marginRight: (30 / 100) * containerStyle.width,
+    marginLeft: (30 / 100) * containerStyle.width,
+    // backgroundColor: '#FFFFFF',
+    // marginBottom: 400,
+    // alignItems: 'center',
+    // marginTop: 50,
     // justifyContent: 'center',
+    textAlign: 'center',
     // alignItems: 'center',
   },
 
@@ -407,27 +421,19 @@ const styles = StyleSheet.create({
   },
 
   TextInput: {
-    height: 50,
-    flex: 1,
-    padding: 10,
-    marginLeft: 20,
+    // height: 50,
+    // flex: 1,
+    // padding: 10,
+    // marginLeft: 20,
     fontSize: 16,
     fontFamily: fonts.medium,
+    width: (20 / 100) * containerStyle.width,
+    textAlign: 'center',
   },
 
   forgot_button: {
     height: 30,
     marginBottom: 30,
-  },
-
-  loginBtn: {
-    width: '80%',
-    borderRadius: 25,
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    backgroundColor: '#FF1493',
   },
 
   numpadWrapper: {
@@ -452,19 +458,21 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    width: 130,
-    height: 60,
+    width: 15/100 * containerStyle.width,
+    height: 5/100 * containerStyle.height,
     justifyContent: 'center',
   },
 
   btnNumpadCfm: {
     elevation: 8,
     backgroundColor: '#FFF',
-    borderRadius: 10,
+    borderRadius: 5,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    width: 130,
-    height: 140,
+    width: 15/100 * containerStyle.width,
+    height: 12/100 * containerStyle.height,
+    // height:"25%",
+
     justifyContent: 'center',
   },
 
