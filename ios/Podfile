@@ -25,6 +25,12 @@ target 'posHeAndShe' do
   pod 'RNFS', :path => '../node_modules/react-native-fs'
 
 
+  pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
+
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
   target 'posHeAndSheTests' do
     inherit! :complete
     # Pods for testing
