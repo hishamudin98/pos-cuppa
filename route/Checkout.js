@@ -18,7 +18,16 @@ import {Icon} from 'react-native-elements';
 import {ScrollView, TouchableOpacity} from 'react-native-gesture-handler';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {color, fonts, system_configuration} from '../config/Constant';
+import {
+  color,
+  fonts,
+  system_configuration,
+  containerStyle,
+} from '../config/Constant';
+import Receipt from './Receipt';
+import {BluetoothEscposPrinter} from 'react-native-bluetooth-escpos-printer';
+import {cuppaLogo} from '../assets/logo/logo';
+import moment from 'moment';
 
 const url =
   system_configuration.ENVIRONMENT === 'development'
@@ -65,6 +74,7 @@ const Checkout = ({navigation, route}) => {
   const [outletDiscount, setOutletDiscount] = useState(0);
 
   const [loading, setLoading] = useState(false);
+  const [answer, setAnswer] = useState('');
 
   useEffect(() => {
     navigation.addListener('focus', function () {
@@ -105,6 +115,336 @@ const Checkout = ({navigation, route}) => {
     setSelectTable(custParsed.table_name);
     setSelectTableId(custParsed.table_id);
     setSelectOrderTypeId(custParsed.order_typeId);
+  };
+
+  const _printReceipt = async () => {
+    let fetchStaff = await AsyncStorage.getItem('STAFF');
+    let staffParsed = JSON.parse(fetchStaff);
+
+    let fetchOrder = await AsyncStorage.getItem('RESP_PAYMENT');
+    let orderParsed = JSON.parse(fetchOrder);
+
+    let menuOrder = JSON.parse(orderParsed.dataOrder[0].order_detail);
+    console.log('menuOrder', menuOrder);
+
+    console.log('orderParsed', orderParsed);
+    // let menu_variant = menuOrder[0].menu_variant;
+
+    // console.log('menu_variant', menu_variant);
+
+    let paymentMethod =
+      orderParsed.dataPayment[0].payment_method == 1
+        ? 'Cash'
+        : orderParsed.dataPayment[0].payment_method == 2
+        ? 'FPX'
+        : orderParsed.dataPayment[0].payment_method == 3
+        ? 'Credit/Debit Card'
+        : 'QR Payment';
+
+    let columnWidths = [4, 19, 10];
+    try {
+      //   await BluetoothEscposPrinter.printText('\r\n\r\n\r\n', {});
+      await BluetoothEscposPrinter.printerAlign(
+        BluetoothEscposPrinter.ALIGN.CENTER,
+      );
+      await BluetoothEscposPrinter.printPic(cuppaLogo, {
+        width: 150,
+        left: 110,
+      });
+      await BluetoothEscposPrinter.printerAlign(
+        BluetoothEscposPrinter.ALIGN.CENTER,
+      );
+      await BluetoothEscposPrinter.printText('\r\n', {});
+
+      await BluetoothEscposPrinter.printText('Cuppa 365 Coffee', {
+        widthtimes: 1,
+      });
+
+      await BluetoothEscposPrinter.printText('\r\n', {});
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['Kolej Universiti Islam'],
+        {},
+      );
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['Antarabangsa Selangor'],
+        {},
+      );
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['KUIS Persiaran Putra,'],
+        {},
+      );
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['Bandar Seri Putra,'],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['43000 Kajang, Selangor'],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['012-3234312'],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        ['(SST ID : B15-2018-1012312)'],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printText('\r\n', {});
+
+      await BluetoothEscposPrinter.printText('INVOICE', {
+        widthtimes: 1,
+      });
+
+      await BluetoothEscposPrinter.printText('\r\n\r\n', {});
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.CENTER],
+        [orderParsed.dataOrder[0].order_customerName],
+        {},
+      );
+
+      //   await BluetoothEscposPrinter.printText('#Hisham', {
+      //     widthtimes: 1,
+      //   });
+
+      //   await BluetoothEscposPrinter.printText('\r\n', {});
+      await BluetoothEscposPrinter.printText('\r\n\r\n', {});
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.LEFT],
+        [
+          'Date : ' +
+            moment(orderParsed.dataPayment[0].transaction_datetime).format(
+              'DD-MM-YYYY HH:mm:ss',
+            ),
+        ],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.LEFT],
+        ['Rec.No: ' + orderParsed.dataPayment[0].transaction_invoiceNo],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.LEFT],
+        ['Cashier : ' + staffParsed.staffName],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.LEFT],
+        ['Counter : ' + orderParsed.dataOrder[0].counter_name],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.LEFT],
+        ['Payment : ' + paymentMethod],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printText('\r\n', {});
+
+      await BluetoothEscposPrinter.printText(
+        '===============================',
+        {},
+      );
+      await BluetoothEscposPrinter.printText('\n\r', {});
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.LEFT],
+        ['Dine In'],
+        {},
+      );
+
+      await menuOrder.map((item, index) => {
+        if (item.orderType == 1) {
+          let isVariant = '';
+          let arrVariant = [];
+          let textVariant = '';
+
+          let menu_variant = item.menu_variant;
+          console.log('menu_variant aa : ', menu_variant.length);
+          if (menu_variant !== undefined) {
+            console.log('menu_variant  bb : ', menu_variant);
+            for (let variant = 0; variant < menu_variant.length; variant++) {
+              if (menu_variant.length > 1) {
+                console.log('menu_variant.length : ', menu_variant.length);
+                menu_variant.length == variant + 1
+                  ? (isVariant = menu_variant[variant].name + ')')
+                  : (isVariant = '(' + menu_variant[variant].name + ', ');
+                arrVariant.push(isVariant);
+              } else {
+                isVariant = '(' + menu_variant[variant].name + ')';
+                arrVariant.push(isVariant);
+              }
+            }
+          }
+
+          for (let i = 0; i < arrVariant.length; i++) {
+            textVariant = textVariant + arrVariant[i];
+          }
+
+          BluetoothEscposPrinter.printColumn(
+            columnWidths,
+            [
+              BluetoothEscposPrinter.ALIGN.LEFT,
+              BluetoothEscposPrinter.ALIGN.LEFT,
+              BluetoothEscposPrinter.ALIGN.RIGHT,
+            ],
+            [
+              item.menu_quantity + 'x',
+              item.menu_name + '  ' + textVariant,
+              (item.menu_quantity * item.menu_price).toFixed(2),
+            ],
+            {},
+          );
+        }
+      });
+
+      let takeaway = await menuOrder.filter(item => item.orderType == 2);
+
+      if (takeaway.length > 0) {
+        await BluetoothEscposPrinter.printColumn(
+          [32],
+          [BluetoothEscposPrinter.ALIGN.LEFT],
+          ['Take Away'],
+          {},
+        );
+
+        await menuOrder.map((item, index) => {
+          if (item.orderType == 2) {
+            let isVariant = '';
+            let arrVariant = [];
+            let textVariant = '';
+
+            let menu_variant = item.menu_variant;
+            console.log('menu_variant aa : ', menu_variant.length);
+            if (menu_variant !== undefined) {
+              console.log('menu_variant  bb : ', menu_variant);
+              for (let variant = 0; variant < menu_variant.length; variant++) {
+                if (menu_variant.length > 1) {
+                  console.log('menu_variant.length : ', menu_variant.length);
+                  menu_variant.length == variant + 1
+                    ? (isVariant = menu_variant[variant].name + ')')
+                    : (isVariant = '(' + menu_variant[variant].name + ', ');
+                  arrVariant.push(isVariant);
+                } else {
+                  isVariant = '(' + menu_variant[variant].name + ')';
+                  arrVariant.push(isVariant);
+                }
+              }
+            }
+
+            for (let i = 0; i < arrVariant.length; i++) {
+              textVariant = textVariant + arrVariant[i];
+            }
+
+            BluetoothEscposPrinter.printColumn(
+              columnWidths,
+              [
+                BluetoothEscposPrinter.ALIGN.LEFT,
+                BluetoothEscposPrinter.ALIGN.LEFT,
+                BluetoothEscposPrinter.ALIGN.RIGHT,
+              ],
+              [
+                item.menu_quantity + 'x',
+                item.menu_name + '  ' + textVariant,
+                (item.menu_quantity * item.menu_price).toFixed(2),
+              ],
+              {},
+            );
+          }
+        });
+      }
+
+      await BluetoothEscposPrinter.printText(
+        '===============================',
+        {},
+      );
+      await BluetoothEscposPrinter.printText('\n\r', {});
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.RIGHT],
+        [
+          'Subtotal  ' +
+            (
+              Math.round(orderParsed.dataOrder[0].order_amount * 10) / 10
+            ).toFixed(2),
+        ],
+        {},
+      );
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.RIGHT],
+        ['Discount  ' + orderParsed.dataOrder[0].order_discount.toFixed(2)],
+        {},
+      );
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.RIGHT],
+        ['SST 6%  ' + orderParsed.dataOrder[0].order_tax.toFixed(2)],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printText(
+        '===============================',
+        {},
+      );
+      await BluetoothEscposPrinter.printText('\n\r', {});
+
+      await BluetoothEscposPrinter.printColumn(
+        [32],
+        [BluetoothEscposPrinter.ALIGN.RIGHT],
+        [
+          'Total (Rounding)  ' +
+            (
+              Math.round(orderParsed.dataOrder[0].order_totalAmount * 10) / 10
+            ).toFixed(2),
+        ],
+        {},
+      );
+
+      await BluetoothEscposPrinter.printText('\n\r\n\r', {});
+
+      await BluetoothEscposPrinter.printText('THANK YOU', {
+        widthtimes: 1,
+      });
+
+      await BluetoothEscposPrinter.printText('\n\r\n\r', {});
+      await BluetoothEscposPrinter.printText('\r\n\r\n\r\n', {});
+    } catch (e) {
+      alert(e.message || 'ERROR');
+    }
   };
 
   const _fetchOrderNo = async () => {
@@ -397,6 +737,7 @@ const Checkout = ({navigation, route}) => {
     console.log('payment method', paymentMethod);
     console.log('url', url);
     console.log('order', orderParsed);
+    console.log('customerParsed', customerParsed);
 
     if (customerParsed != null) {
       orderTypeId = customerParsed.order_typeId;
@@ -444,6 +785,7 @@ const Checkout = ({navigation, route}) => {
         console.log('Payment', resp);
 
         console.log('order no', resp.data);
+        console.log('staff', staffParsed.staffId);
         // _screenCheckout();
         // fetch order no
         if (resp.data.status == 200) {
@@ -457,6 +799,10 @@ const Checkout = ({navigation, route}) => {
 
           console.log('order no 123', orderNoParsed);
 
+          console.log('order : ', resp.data);
+
+          AsyncStorage.setItem('RESP_PAYMENT', JSON.stringify(resp.data));
+
           Alert.alert('Print Receipt', 'Do you want to print receipt?', [
             {
               text: 'No',
@@ -465,6 +811,11 @@ const Checkout = ({navigation, route}) => {
                   index: 0,
                   routes: [{name: 'TypeOrder'}],
                 });
+
+                setAnswer('No');
+                // <Receipt />;
+
+                await AsyncStorage.removeItem('RESP_PAYMENT');
 
                 // await axios
                 //   .post(url + '/pos/printReceipt', {
@@ -485,6 +836,23 @@ const Checkout = ({navigation, route}) => {
                   index: 0,
                   routes: [{name: 'TypeOrder'}],
                 });
+
+                console.log('order no : ', orderNoParsed);
+
+                await _printReceipt().then(async () => {
+                  console.log('print receipt');
+                  await axios
+                    .post(url + '/pos/printReceipt', {
+                      order_no: orderNoParsed,
+                      receipt: 'N',
+                      counter: counterPOS,
+                    })
+                    .then(async function (resp) {
+                      console.log('Print Receipt', resp);
+                    });
+                });
+
+                await AsyncStorage.removeItem('RESP_PAYMENT');
 
                 // await axios
                 //   .post(url + '/pos/printReceipt', {
@@ -555,8 +923,9 @@ const Checkout = ({navigation, route}) => {
           flexDirection: 'column',
           flex: 6.22,
           // margin:20,
-          marginTop: 20,
+          // marginTop: 20,
           height: '100%',
+          // backgroundColor:'blue'
           // marginTop: 0,
 
           //   justifyContent: 'center',
@@ -568,17 +937,24 @@ const Checkout = ({navigation, route}) => {
             //   alignItems: 'center',
             justifyContent: 'space-between',
             // marginTop: 0,
-            height: '30%',
+            height: '25%',
             marginBottom: 0,
-            // backgroundColor:'green'
+            // backgroundColor: 'green',
           }}>
           <View
             style={[styles.boxPaymentSelect, {backgroundColor: color.primary}]}>
             <View>
               <View style={{marginBottom: 15}}>
-                <Icon name={'cash-outline'} type="ionicon" size={28} color={color.white}/>
+                <Icon
+                  name={'cash-outline'}
+                  type="ionicon"
+                  size={28}
+                  color={color.white}
+                />
               </View>
-              <Text style={{...styles.textFamily, color:color.white}}>Cash</Text>
+              <Text style={{...styles.textFamily, color: color.white}}>
+                Cash
+              </Text>
             </View>
           </View>
 
@@ -606,30 +982,55 @@ const Checkout = ({navigation, route}) => {
 
             <View
               style={{
-                marginTop: 10,
-                marginLeft: 20,
-                justifyContent: 'center',
-                alignItems: 'center',
-                flexDirection: 'column',
-                // backgroundColor: color.primary,
+                flexDirection: 'row',
+                // backgroundColor: 'red',
                 marginRight: 20,
+                justifyContent: 'center',
+                marginTop: 15,
               }}>
-              <Text style={{...styles.textFamily, fontFamily: fonts.semibold}}>
-                Balance :{' '}
-              </Text>
-              <Text
+              <View
                 style={{
-                  // ...styles.textFamily,
-                  // fontFamily: fonts.bold,
-                  // fontSize: 23,
-                  fontFamily: fonts.bold,
-                  fontSize: 35,
+                  // marginTop: 10,
+                  // marginLeft: 20,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  // flexDirection: 'column',
+                  // backgroundColor: color.primary,
+                  // marginRight: 20,
                 }}>
-                RM{' '}
-                {(cashValue - totalAmountOrder.toFixed(2))
-                  .toFixed(2)
-                  .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              </Text>
+                <Text
+                  style={{...styles.textFamily, fontFamily: fonts.semibold}}>
+                  Balance :{' '}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  // marginTop: 10,
+                  // marginLeft: 20,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  // flexDirection: 'column',
+                  // backgroundColor: color.primary,
+                  // marginRight: 20,
+                }}>
+                <Text
+                  style={{
+                    // ...styles.textFamily,
+                    // fontFamily: fonts.bold,
+                    // fontSize: 23,
+                    fontFamily: fonts.bold,
+                    fontSize: 24,
+                  }}>
+                  RM{' '}
+                  {(
+                    cashValue -
+                    (Math.round(totalAmountOrder * 10) / 10).toFixed(2)
+                  )
+                    .toFixed(2)
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
@@ -688,14 +1089,14 @@ const Checkout = ({navigation, route}) => {
               },
             ]}
             onPress={() => {
-              setCashValue(totalAmountOrder.toFixed(2));
+              setCashValue((Math.round(totalAmountOrder * 10) / 10).toFixed(2));
             }}>
             <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: '35%',
+                width: (20 / 100) * containerStyle.width,
                 // backgroundColor:'pink'
               }}>
               <Text style={{...styles.textFamily, color: color.white}}>
@@ -720,6 +1121,24 @@ const Checkout = ({navigation, route}) => {
               {height: 40, marginTop: 0, marginRight: 0},
             ]}
             onPress={() => {
+              setCashValue((Math.round(totalAmountOrder * 10) / 10).toFixed(2));
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                // backgroundColor: 'black',
+              }}>
+              <Text style={styles.textFamily}>
+                {(Math.round(totalAmountOrder * 10) / 10).toFixed(2)}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.boxNumber]}
+            onPress={() => {
               setCashValue(Math.ceil(totalAmountOrder).toFixed(2));
             }}>
             <View
@@ -734,13 +1153,10 @@ const Checkout = ({navigation, route}) => {
               </Text>
             </View>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.boxNumber]}
             onPress={() => {
-              setCashValue(
-                (Math.round((totalAmountOrder + 5) / 10) * 10).toFixed(2),
-              );
+              setCashValue((Math.round(totalAmountOrder / 10) * 10).toFixed(2));
             }}>
             <View
               style={{
@@ -749,12 +1165,12 @@ const Checkout = ({navigation, route}) => {
                 alignItems: 'center',
               }}>
               <Text style={styles.textFamily}>
-                {(Math.round((totalAmountOrder + 5) / 10) * 10).toFixed(2)}
+                {(Math.round(totalAmountOrder / 10) * 10).toFixed(2)}
               </Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.boxNumber]}
+            style={[styles.boxNumber, {marginRight: 20}]}
             onPress={() => {
               setCashValue(
                 (Math.round((totalAmountOrder + 10) / 10) * 10).toFixed(2),
@@ -768,24 +1184,6 @@ const Checkout = ({navigation, route}) => {
               }}>
               <Text style={styles.textFamily}>
                 {(Math.round((totalAmountOrder + 10) / 10) * 10).toFixed(2)}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.boxNumber, {marginRight: 20}]}
-            onPress={() => {
-              setCashValue(
-                (Math.round((totalAmountOrder + 20) / 10) * 10).toFixed(2),
-              );
-            }}>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text style={styles.textFamily}>
-                {(Math.round((totalAmountOrder + 20) / 10) * 10).toFixed(2)}
               </Text>
             </View>
           </TouchableOpacity>
@@ -862,143 +1260,140 @@ const Checkout = ({navigation, route}) => {
 
         {/* {ROW NUMBER 2} */}
 
-        <View style={{flexDirection: 'row'}}>
-          <View style={{flexDirection: 'column'}}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-evenly',
-              }}>
-              <TouchableOpacity
-                style={[
-                  styles.boxNumber,
-                  {height: 40, marginTop: 0, marginRight: 0},
-                ]}
-                onPress={() => {
-                  _cashInput('4');
-                }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    // backgroundColor: 'black',
-                  }}>
-                  <Text style={styles.textFamily}>4</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.boxNumber]}
-                onPress={() => {
-                  _cashInput('5');
-                }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text style={styles.textFamily}>5</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.boxNumber]}
-                onPress={() => {
-                  _cashInput('6');
-                }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text style={styles.textFamily}>6</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            {/* {ROW NUMBER 3} */}
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-evenly',
-              }}>
-              <TouchableOpacity
-                style={[
-                  styles.boxNumber,
-                  {height: 40, marginTop: 0, marginRight: 0},
-                ]}
-                onPress={() => {
-                  _cashInput('7');
-                }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    // backgroundColor: 'black',
-                  }}>
-                  <Text style={styles.textFamily}>7</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.boxNumber]}
-                onPress={() => {
-                  _cashInput('8');
-                }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text style={styles.textFamily}>8</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.boxNumber]}
-                onPress={() => {
-                  _cashInput('9');
-                }}>
-                <View
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}>
-                  <Text style={styles.textFamily}>9</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              // alignItems:'center',
-              // flex: 1,
-              alignSelf: 'center',
-              alignContent: 'center',
-              marginLeft: 'auto',
-              marginRight: 'auto',
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',
+          }}>
+          <TouchableOpacity
+            style={[
+              styles.boxNumber,
+              {height: 40, marginTop: 0, marginRight: 0},
+            ]}
+            onPress={() => {
+              _cashInput('4');
             }}>
-            <TouchableOpacity style={[styles.boxNumber2, {height: 100}]}>
-              <View
-                style={{
-                  // flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Icon
-                  name={'arrow-forward-circle-outline'}
-                  type="ionicon"
-                  size={24}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                // backgroundColor: 'black',
+              }}>
+              <Text style={styles.textFamily}>4</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.boxNumber]}
+            onPress={() => {
+              _cashInput('5');
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={styles.textFamily}>5</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.boxNumber]}
+            onPress={() => {
+              _cashInput('6');
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={styles.textFamily}>6</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.boxNumber, {marginRight: 20, opacity: 0, height: 0}]}
+            onPress={() => {
+              _cashInput('backspace');
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Icon name={'backspace-outline'} type="ionicon" size={24} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',
+          }}>
+          <TouchableOpacity
+            style={[
+              styles.boxNumber,
+              {height: 40, marginTop: 0, marginRight: 0},
+            ]}
+            onPress={() => {
+              _cashInput('7');
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                // backgroundColor: 'black',
+              }}>
+              <Text style={styles.textFamily}>7</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.boxNumber]}
+            onPress={() => {
+              _cashInput('8');
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={styles.textFamily}>8</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.boxNumber]}
+            onPress={() => {
+              _cashInput('9');
+            }}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={styles.textFamily}>9</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.boxNumber,
+              {marginRight: 20, opacity: 0, height: 0},
+            ]}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Icon name={'backspace-outline'} type="ionicon" size={24} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* {ROW NUMBER} */}
@@ -1087,7 +1482,7 @@ const Checkout = ({navigation, route}) => {
           flexDirection: 'column',
           flex: 6.22,
           // margin:20,
-          marginTop: 20,
+          // marginTop: 20,
           height: '100%',
           // marginTop: 0,
 
@@ -1100,7 +1495,7 @@ const Checkout = ({navigation, route}) => {
             //   alignItems: 'center',
             justifyContent: 'space-between',
             // marginTop: 0,
-            height: '30%',
+            height: '25%',
             marginBottom: 0,
             // backgroundColor:'green'
           }}>
@@ -1108,9 +1503,16 @@ const Checkout = ({navigation, route}) => {
             style={[styles.boxPaymentSelect, {backgroundColor: color.primary}]}>
             <View>
               <View style={{marginBottom: 15}}>
-                <Icon name={'card-outline'} type="ionicon" size={28} color={color.white}/>
+                <Icon
+                  name={'card-outline'}
+                  type="ionicon"
+                  size={28}
+                  color={color.white}
+                />
               </View>
-              <Text style={{...styles.textFamily, color:color.white}}>Credit/Debit Card</Text>
+              <Text style={{...styles.textFamily, color: color.white}}>
+                Credit/Debit Card
+              </Text>
             </View>
           </View>
 
@@ -1905,10 +2307,10 @@ const Checkout = ({navigation, route}) => {
                     : (0).toFixed(2)}
                 </Text>
               </View> */}
-                <View style={styles.textCalculation}>
+                {/* <View style={styles.textCalculation}>
                   <Text style={styles.textCart}>Infaq</Text>
                   <Text style={styles.textCart}>0.00</Text>
-                </View>
+                </View> */}
               </View>
             </View>
           </View>
@@ -1917,7 +2319,8 @@ const Checkout = ({navigation, route}) => {
             <View
               style={{
                 flexDirection: 'column',
-                flex: 2.4,
+                height: (1 / 10) * containerStyle.height,
+                // flex: 2.4,
               }}>
               <View
                 style={{
@@ -1929,21 +2332,23 @@ const Checkout = ({navigation, route}) => {
                 <View
                   style={{
                     flexDirection: 'row',
-                    //   backgroundColor: 'green',
-                    //   height: '90%',
+                    // backgroundColor: 'green',
+                    // height: '60%',
                     // alignItems: 'center',
                     //   justifyContent:'space-between'
                   }}>
                   <View
                     style={{
-                      // justifyContent: 'center',
+                      justifyContent: 'center',
                       // alignItems: 'center',
                       flex: 1,
-                      margin: 20,
+                      // margin: 20,
+                      marginTop: 20,
                       // backgroundColor: 'pink',
                       // height: '100%',
                     }}>
-                    <View style={{alignItems: 'center', paddingTop: 50}}>
+                    <View
+                      style={{alignItems: 'center', justifyContent: 'center'}}>
                       <Text style={{fontFamily: fonts.semibold, fontSize: 16}}>
                         Total Amount
                       </Text>
@@ -1952,19 +2357,19 @@ const Checkout = ({navigation, route}) => {
                       style={{
                         justifyContent: 'center',
                         // alignItems: 'center',
-                        flex: 1,
+                        // flex: 1,
                         flexDirection: 'row',
                         // marginBottom : 40
                       }}>
-                      <Text style={{fontFamily: fonts.bold, fontSize: 35}}>
+                      <Text style={{fontFamily: fonts.bold, fontSize: 28}}>
                         RM{' '}
                         {totalAmountOrderDisplay !== null
-                          ? totalAmountOrderDisplay
+                          ? (Math.round(totalAmountOrder * 10) / 10).toFixed(2)
                           : (0).toFixed(2)}
                       </Text>
                     </View>
                   </View>
-                  <View
+                  {/* <View
                     style={{
                       height: '80%',
                       width: 1,
@@ -2031,7 +2436,7 @@ const Checkout = ({navigation, route}) => {
                         <Text style={styles.textFamily}>Custom Amount</Text>
                       </View>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
                 <View
                   style={{
@@ -2071,7 +2476,7 @@ const Checkout = ({navigation, route}) => {
                     flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: '33%',
+                    height: '27%',
                     // backgroundColor: 'red',
                   }}>
                   <TouchableOpacity
@@ -2126,7 +2531,7 @@ const Checkout = ({navigation, route}) => {
                     flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: '33%',
+                    height: '27%',
                     // backgroundColor: 'red',
                   }}>
                   <View style={styles.boxPayment}>
@@ -2176,7 +2581,7 @@ const Checkout = ({navigation, route}) => {
                     flexDirection: 'row',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: '33%',
+                    height: '27%',
                     // backgroundColor: 'red',
                   }}>
                   <View style={styles.boxPayment}>
@@ -2479,8 +2884,9 @@ const styles = StyleSheet.create({
 
   boxPayment: {
     backgroundColor: color.background,
-    margin: 20,
-    width: 167,
+    margin: 10,
+    // marginTop: 10,
+    width: (28 / 100) * containerStyle.width,
     justifyContent: 'center',
     alignItems: 'center',
     height: '80%',
@@ -2494,9 +2900,9 @@ const styles = StyleSheet.create({
   boxPaymentSelect: {
     backgroundColor: color.background,
     // margin: 20,
-    // marginTop: 10,
+    marginTop: 10,
     marginLeft: 20,
-    width: 167,
+    width: (28 / 100) * containerStyle.width,
     justifyContent: 'center',
     alignItems: 'center',
     height: '80%',
@@ -2523,8 +2929,8 @@ const styles = StyleSheet.create({
 
   boxNumber: {
     backgroundColor: color.background,
-    margin: 20,
-    width: 130,
+    margin: 10,
+    width: (20 / 100) * containerStyle.width,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
