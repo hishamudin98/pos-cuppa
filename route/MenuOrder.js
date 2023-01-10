@@ -14,7 +14,12 @@ import {
 
 import {Picker} from '@react-native-picker/picker';
 import {Icon} from 'react-native-elements';
-import {fonts, color, system_configuration} from '../config/Constant';
+import {
+  fonts,
+  color,
+  system_configuration,
+  containerStyle,
+} from '../config/Constant';
 import {DrawerActions} from '@react-navigation/native';
 
 import LinearGradient from 'react-native-linear-gradient';
@@ -889,8 +894,11 @@ const MenuOrder = ({navigation, route}) => {
     if (selectDineInOrTakeAway == 1 || selectDineInOrTakeAway == 0) {
       if (menuVariant.length > 0) {
         if (menuVariantSelected.length == 0) {
-          alert('Please select variant');
-          setModalVisible(true);
+          // alert('Please select variant');
+          // Alert('Please select variant');
+          Alert.alert('Alert', 'Please select variant', [
+            {text: 'OK', onPress: () => setModalVisible(true)},
+          ]);
           return;
         }
         console.log('variantselected', variantSelected);
@@ -901,8 +909,12 @@ const MenuOrder = ({navigation, route}) => {
 
         if (menuVariant.length > 1) {
           if (emptyVariantSelect2 == '{}') {
-            alert('Please select variant');
-            setModalVisible(true);
+            // alert('Please select variant');
+            // setModalVisible(true);
+
+            Alert.alert('Alert', 'Please select variant', [
+              {text: 'OK', onPress: () => setModalVisible(true)},
+            ]);
 
             return;
           } else {
@@ -1964,6 +1976,8 @@ const MenuOrder = ({navigation, route}) => {
               <ScrollView
                 style={{
                   marginTop: 20,
+                  zIndex: 50,
+                  // marginHorizontal:20,
                   // marginLeft: 20,
                 }}
                 // horizontal={true}
@@ -2076,25 +2090,27 @@ const MenuOrder = ({navigation, route}) => {
                 //   setModalVisible(!modalVisible);
                 // }}
                 style={{
-                  justifyContent: 'flex-start',
-                  flex: 1,
+                  // backgroundColor: 'red',
+                  // justifyContent: 'flex-start',
+                  // flex: 1,
                   // alignContent:'center',
+                  borderWidth: 0.5,
                   // margin: 100,
-                  width: 800,
+                  width: 1 * containerStyle.width,
                   // height:'50%',
                   marginLeft: 'auto',
                   marginBottom:
                     menuVariant.length > 0
                       ? 'auto'
                       : plusTakeway == true
-                      ? 160
-                      : 190,
+                      ? (5 / 100) * containerStyle.height
+                      : (5 / 100) * containerStyle.height,
                   marginTop:
                     menuVariant.length > 0
                       ? 'auto'
                       : plusTakeway == true
-                      ? 180
-                      : 190,
+                      ? (5 / 100) * containerStyle.height
+                      : (5 / 100) * containerStyle.height,
                   marginRight: 'auto',
                   // backgroundColor: 'pink',
                   // margin: 50,
@@ -2215,9 +2231,13 @@ const MenuOrder = ({navigation, route}) => {
                         ...styles.modalVariant,
                         justifyContent: 'space-between',
                       }}>
-                      <Text style={{fontFamily: fonts.semibold, fontSize: 24}}>
-                        {menuName}
-                      </Text>
+                      <View style={{ width:30/100 *containerStyle.width}}>
+                        <Text
+                          style={{fontFamily: fonts.semibold, fontSize: 24}}>
+                          {menuName}
+                        </Text>
+                      </View>
+
                       <Text style={{fontFamily: fonts.semibold, fontSize: 24}}>
                         RM {menuPrice.toFixed(2)}
                       </Text>
@@ -3483,10 +3503,10 @@ const MenuOrder = ({navigation, route}) => {
             <View
               style={{
                 flexDirection: 'column',
-                height: '68.5%',
-                // backgroundColor:'green'
+                height: (44 / 100) * containerStyle.height,
+                // backgroundColor: 'green',
               }}>
-              <View style={{height: '100%', marginBottom: 10}}>
+              <View style={{height: '100%'}}>
                 {/* {ROW FIRST} */}
                 <View
                   style={{
@@ -3648,6 +3668,7 @@ const MenuOrder = ({navigation, route}) => {
                             flexDirection: 'row',
                             height: 'auto',
                             alignItems: 'center',
+                            // backgroundColor: 'blue',
                           }}>
                           <View
                             style={{
@@ -3658,7 +3679,7 @@ const MenuOrder = ({navigation, route}) => {
                               marginBottom: 5,
                               flex: 0.3,
                               // width:'1%',
-                              height: 70,
+                              height: 60,
                               justifyContent: 'center',
                               alignItems: 'center',
                             }}>
@@ -3945,7 +3966,7 @@ const MenuOrder = ({navigation, route}) => {
                                   marginBottom: 5,
                                   flex: 0.3,
                                   // width:'1%',
-                                  height: 70,
+                                  height: 60,
                                   justifyContent: 'center',
                                   alignItems: 'center',
                                 }}>
@@ -4128,8 +4149,8 @@ const MenuOrder = ({navigation, route}) => {
 
               <View
                 style={{
-                  // marginTop:10,
-                  // justifyContent: 'flex-end',
+                  // marginTop:100,
+                  justifyContent: 'flex-end',
                   flexDirection: 'column',
                   // backgroundColor: 'pink',
                   height: 'auto',
@@ -4140,6 +4161,7 @@ const MenuOrder = ({navigation, route}) => {
                 {/* {calculation section} */}
                 <View
                   style={{
+                    marginTop: 5,
                     marginLeft: 10,
                     marginRight: 10,
                     backgroundColor: color.background,
@@ -4150,7 +4172,8 @@ const MenuOrder = ({navigation, route}) => {
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
-                      margin: 5,
+                      // margin: 5,
+                      // backgroundColor:'red'
                     }}>
                     <Text style={styles.textCart}>Subtotal</Text>
                     <Text style={styles.textCart}>
@@ -4161,8 +4184,9 @@ const MenuOrder = ({navigation, route}) => {
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
-                      margin: 5,
+                      // margin: 5,
                       alignItems: 'center',
+                      // backgroundColor:'red'
                     }}
                     onPress={() => {
                       _showModal('discount');
@@ -4240,7 +4264,7 @@ const MenuOrder = ({navigation, route}) => {
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
-                      margin: 5,
+                      // margin: 5,
                     }}>
                     <Text style={styles.textCart}>Tax 6%</Text>
                     <Text style={styles.textCart}>
@@ -4255,7 +4279,7 @@ const MenuOrder = ({navigation, route}) => {
                   }}>
                   <Text style={styles.textCart}>Service Charges 10%</Text>
                   <Text style={styles.textCart}>0.00</Text>
-                </View> */}
+                  </View> */}
 
                   {/* <View
                   style={{
@@ -4271,14 +4295,14 @@ const MenuOrder = ({navigation, route}) => {
                     justifyContent: 'center',
                   }}>
                   <Text style={styles.textCart}>Add Voucher Code</Text>
-                </View> */}
+                  </View> */}
 
                   <View
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
-                      margin: 5,
-                      marginTop: 15,
+                      // margin: 5,
+                      // marginTop: 15,
                     }}>
                     <Text style={{fontFamily: fonts.semibold, fontSize: 18}}>
                       Total
@@ -4291,7 +4315,7 @@ const MenuOrder = ({navigation, route}) => {
                     </Text>
                   </View>
                 </View>
-                <View>
+                <View style={{}}>
                   <TouchableOpacity
                     style={{
                       flexDirection: 'row',
@@ -4319,7 +4343,7 @@ const MenuOrder = ({navigation, route}) => {
                       Proceed
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
@@ -4337,7 +4361,7 @@ const MenuOrder = ({navigation, route}) => {
                     <Text style={{fontFamily: fonts.medium, fontSize: 16}}>
                       Back
                     </Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
               </View>
             </View>
@@ -4450,7 +4474,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     margin: 'auto',
     // height: 200,
-    width: 204,
+    width: (30 / 100) * containerStyle.width,
     borderRadius: 5,
     height: 235,
     marginRight: 20,
@@ -4593,12 +4617,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignContent: 'center',
     // margin: 100,
-    width: 800,
+    width: 1 * containerStyle.width,
     // height:'50%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    marginTop: 250,
-    marginBottom: 320,
+    marginTop: (5 / 100) * containerStyle.height,
+    marginBottom: (5 / 100) * containerStyle.height,
     // backgroundColor: 'pink',
     // margin: 50,
     backgroundColor: color.background,
@@ -4618,7 +4642,8 @@ const styles = StyleSheet.create({
   },
 
   modalVariant: {
-    padding: 10,
+    // padding: 10,
+    paddingTop:10,
     // backgroundColor: 'black',
     width: '100%',
     alignItems: 'center',
