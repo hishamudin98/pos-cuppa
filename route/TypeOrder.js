@@ -19,7 +19,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import {ScrollView} from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {fonts, color, system_configuration} from '../config/Constant';
+import {
+  fonts,
+  color,
+  system_configuration,
+  containerStyle,
+} from '../config/Constant';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Drawer from '../component/Drawer';
@@ -93,7 +98,7 @@ const TypeOrder = ({navigation, route}) => {
     }, 1000);
   };
 
-  const _getTable = async (id) => {
+  const _getTable = async id => {
     console.log('selectOrderTypeId : ', id);
     console.log('counterPOS : ', counterPOS);
     await axios
@@ -228,6 +233,7 @@ const TypeOrder = ({navigation, route}) => {
               />
             </View>
           </TouchableOpacity>
+
           <View style={[styles.inputView, {flex: 1}]}>
             <TextInput
               style={styles.TextInput}
@@ -250,6 +256,7 @@ const TypeOrder = ({navigation, route}) => {
               // defaultValue={staffNo}
             />
           </View>
+
           {/* <View style={{flex:0.1}}/> */}
           {i + 1 == count ? (
             <TouchableOpacity
@@ -387,7 +394,7 @@ const TypeOrder = ({navigation, route}) => {
         contentContainerStyle={{
           flexWrap: 'wrap',
           flexDirection: 'row',
-          // backgroundColor:'black'
+          // backgroundColor:'black',
           justifyContent: 'center',
           // flex: 1,
         }}>
@@ -622,7 +629,7 @@ const TypeOrder = ({navigation, route}) => {
             <View style={{flex: 1}}>
               <View style={{flex: 1, flexDirection: 'column'}}>
                 <View style={{flex: 1}}>
-                  <View style={{flex: 1, flexDirection: 'column', padding: 20}}>
+                  {/* <View style={{flex: 1, flexDirection: 'column', padding: 20}}>
                     <View>
                       <Text style={{fontSize: 20, fontFamily: fonts.semibold}}>
                         Welcome, {staffName}
@@ -634,14 +641,19 @@ const TypeOrder = ({navigation, route}) => {
                         Discover whatever you need easily
                       </Text>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
 
-                <View style={{flex: 2}}>
+                <View
+                  style={{
+                    // flex: 2,
+                    // backgroundColor: 'blue',
+                    // justifyContent: 'center',
+                  }}>
                   <ScrollView>
                     <View
                       style={{
-                        flex: 1,
+                        // flex: 1,
                         flexDirection: 'column',
                         // justifyContent: 'center',
                         // padding: 20,
@@ -649,18 +661,20 @@ const TypeOrder = ({navigation, route}) => {
                         alignItems: 'center',
                       }}>
                       <View
-                        style={{
-                          // flex: 1,
-                          flexDirection: 'row',
-                          // padding: 20,
-                          // paddingLeft: '15%',
-                          // justifyContent: 'space-around',
-                          marginTop: 20,
-                          // marginLeft: '15%',
-                          width: '70%',
-                          // backgroundColor: color.background,
-                        }}>
-                        <View
+                        style={
+                          {
+                            // flex: 1,
+                            // flexDirection: 'row',
+                            // padding: 20,
+                            // paddingLeft: '15%',
+                            // justifyContent: 'space-around',
+                            // marginTop: 20,
+                            // marginLeft: '15%',
+                            // width: '70%',
+                            // backgroundColor: color.background,
+                          }
+                        }>
+                        {/* <View
                           style={[
                             styles.Icon,
                             {
@@ -671,46 +685,41 @@ const TypeOrder = ({navigation, route}) => {
                             },
                           ]}>
                           <Icon name={'plus-minus'} type="feather" size={30} />
+                        </View> */}
+                        <View style={{flexDirection: 'row'}}>
+                          <View
+                            style={[
+                              styles.inputView,
+                              {
+                                // flex: 1,
+                                borderWidth: 1,
+                                borderColor: color.danger,
+                                // flexDirection: 'row',
+                                // alignItems: 'center',
+                                marginRight: 1.5/100 * containerStyle.width,
+                              },
+                            ]}>
+                            <TextInput
+                              style={[styles.TextInput, { }]}
+                              placeholder="Customer Name"
+                              placeholderTextColor={color.textGray}
+                              onChangeText={text => setCustomerName(text)}
+                              defaultValue={customerName}
+                            />
+                          </View>
+
+                          {/* <View style={{flex: 0.1}} /> */}
+                          <View style={[styles.inputView, {marginLeft: 15}]}>
+                            <TextInput
+                              style={styles.TextInput}
+                              placeholder="Contact No."
+                              placeholderTextColor={color.textGray}
+                              onChangeText={text => setCustomerPhone(text)}
+                              defaultValue={customerPhone}
+                            />
+                          </View>
                         </View>
 
-                        <View
-                          style={[
-                            styles.inputView,
-                            {
-                              flex: 1,
-                              borderWidth: 1,
-                              borderColor: color.danger,
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                            },
-                          ]}>
-                          <TextInput
-                            style={[styles.TextInput]}
-                            placeholder="Enter Customer Name"
-                            placeholderTextColor={color.textGray}
-                            onChangeText={text => setCustomerName(text)}
-                            defaultValue={customerName}
-                          />
-                          {/* <View style={{marginRight: 10}}>
-      <Icon
-        name={'alert-circle'}
-        type="feather"
-        size={24}
-        color={color.textGray}
-      />
-    </View> */}
-                        </View>
-
-                        {/* <View style={{flex: 0.1}} /> */}
-                        <View style={[styles.inputView, {flex: 1}]}>
-                          <TextInput
-                            style={styles.TextInput}
-                            placeholder="Enter Contact No."
-                            placeholderTextColor={color.textGray}
-                            onChangeText={text => setCustomerPhone(text)}
-                            defaultValue={customerPhone}
-                          />
-                        </View>
                         {/* <View style={{flex:0.1}}/> */}
 
                         {/* {count == 0 ? (
@@ -761,7 +770,7 @@ const TypeOrder = ({navigation, route}) => {
                       justifyContent: 'space-evenly',
                       // backgroundColor:'black'
                     }}>
-                    <View style={{flex: 1}}>
+                    <View style={{}}>
                       <ScrollView>
                         <View
                           style={{
@@ -770,9 +779,10 @@ const TypeOrder = ({navigation, route}) => {
                             // flex: 0.3,
                             flexDirection: 'column',
                             // justifyContent: 'flex-end',
-                            alignItems: 'center',
                             // backgroundColor: 'pink',
                             // right:0,
+                            marginTop: 20,
+                            
                           }}>
                           {orderType.map((data, key) => {
                             if (data.status == 1) {
@@ -891,10 +901,10 @@ const styles = StyleSheet.create({
   inputView: {
     backgroundColor: color.white,
     borderRadius: 5,
-    width: '30%',
-    height: 40,
-    paddingLeft: 10,
-    marginRight: 20,
+    width: (50 / 100) * containerStyle.width,
+    height: (5 / 100) * containerStyle.height,
+    // paddingLeft: 10,
+    // marginRight: 20,
     // backgroundColor:"black"
     // marginBottom: 400,
     // justifyContent: 'center',
@@ -918,9 +928,9 @@ const styles = StyleSheet.create({
   Box: {
     backgroundColor: color.white,
     borderRadius: 5,
-    width: '80%',
-    height: 60,
-    margin: 15,
+    width: 40/100 * containerStyle.width,
+    height: 5/100 * containerStyle.height,
+    margin: 1.5/100 * containerStyle.width,
     // paddingLeft: 10,
     // backgroundColor:"black"
     // marginBottom: 400,
@@ -929,7 +939,7 @@ const styles = StyleSheet.create({
   },
 
   TextInput: {
-    height: 50,
+    // height: 50,
     flex: 1,
     padding: 10,
     // marginLeft: 20,
@@ -957,7 +967,7 @@ const styles = StyleSheet.create({
   BoxTable: {
     backgroundColor: color.white,
     borderRadius: 5,
-    width: '27%',
+    width: 30/100 * containerStyle.width,
     height: 150,
     margin: 15,
     // marginLeft:1,
