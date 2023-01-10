@@ -25,6 +25,7 @@ import Checkout from './route/Checkout';
 import Transactions from './route/Transactions';
 import Shift from './route/Shift';
 import OrderPending from './route/OrderPending';
+import TestPrint from './route/TestPrint';
 
 import LinearGradient from 'react-native-linear-gradient';
 import QrScan from './route/qrScan';
@@ -114,6 +115,20 @@ const App = () => {
     );
   };
 
+  const _Setting = () => {
+    return (
+      <Stack.Navigator screenOptions={{headerShown: false}}>
+        <Stack.Screen name="TestPrint" component={TestPrint} options={{gestureEnabled: false}} />
+
+        {/* <Stack.Screen
+          name="OrderPending"
+          component={OrderPending}
+          options={{gestureEnabled: false}}
+        /> */}
+      </Stack.Navigator>
+    );
+  };
+
   const _DrawerScreen = () => {
     return (
       <Drawer.Navigator
@@ -122,6 +137,7 @@ const App = () => {
         <Drawer.Screen name="Transaction" component={_TransactionScreen} />
         <Drawer.Screen name="Shift" component={_ShiftScreen} />
         <Drawer.Screen name="Order Pending" component={_OrderPendingScreen} />
+        <Drawer.Screen name="Settings" component={_Setting} />
         <Drawer.Screen name="Logout" component={Logout} />
       </Drawer.Navigator>
     );
